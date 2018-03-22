@@ -1,0 +1,40 @@
+{
+  "help": {
+    "description": "Displays command information",
+    "arguments": [
+      {
+        "name": "Command",
+        "type": "String",
+        "optional": true,
+        "infinite": false
+      }
+    ],
+    "cooldown": 60,
+    "permission": 0
+  },
+  "mute": {
+    "description": "Mutes a guild user",
+    "arguments": [
+      {
+        "name": "User",
+        "type": "UserMention",
+        "optional": false,
+        "infinite": false
+      },
+      {
+        "name": "Mins",
+        "type": "Integer",
+        "optional": false,
+        "infinite": false
+      },
+      {
+        "name": "Reason",
+        "type": "String",
+        "optional": true,
+        "infinite": true
+      }
+    ],
+    "cooldown": 0,
+    "permission": 1
+  }
+}
