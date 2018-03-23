@@ -32,8 +32,6 @@ type Command func(session *discordgo.Session, message *discordgo.MessageCreate, 
 
 type Commands map[string]Command
 
-//var CommandsData map[string]*CommandData
-var Token string
 var QuestCommands = Commands{
 	"help": Help,
 	"mute": Mute,
@@ -47,11 +45,22 @@ var RegexVerifiers = map[string]string{
 	"ChannelMention": "<#[0-9]{18}>",
 }
 
+var Token string
+
 const (
 	prefix      = "q:"
 	commandFile = "Commands.json"
 )
 
+func (cd CommandData) CalcForcedArgs() int {
+	var i int
+	for _, v := range cd.ArgumentsData {
+		if !v.Optional {
+			i += 1
+		}
+	}
+	return i
+}
 func ready(s *discordgo.Session, _ *discordgo.Ready) {
 	s.UpdateStatus(0, "q:")
 }
@@ -69,9 +78,18 @@ func ExecuteCommand(s *discordgo.Session, m *discordgo.MessageCreate, args []str
 	for i, v := range args {
 		fmt.Println(i, v)
 	}
-	cmd, ok := QuestCommands[args[0]]
+	cmdName := args[0]
+	cmd, ok := QuestCommands[cmdName]
 	if !ok {
 		s.ChannelMessageSend(m.ChannelID, "Invalid command")
+		return
+	}
+	cmdInfo, ok := CommandsData[cmdName]
+	if !ok {
+		return
+	}
+	if cmdInfo.CalcForcedArgs() > 0 && len(args) == 1 {
+		Help(s, m, []string{"help", cmdName})
 		return
 	}
 	cmd(s, m, args)
@@ -91,7 +109,7 @@ func Help(s *discordgo.Session, m *discordgo.MessageCreate, args []string) {
 				false,
 			},
 		}
-		_, err := s.ChannelMessageSendEmbed(m.ChannelID, QuestEmbed("Help", "Command information", fields))
+		_, err := s.ChannelMessageSendEmbed(m.ChannelID, QuestEmbed("Help", "", fields))
 		if err != nil {
 			log.Fatalln(err)
 		}
@@ -99,7 +117,11 @@ func Help(s *discordgo.Session, m *discordgo.MessageCreate, args []string) {
 		cmdName := args[1]
 		cmdInfo, ok := CommandsData[cmdName]
 		if !ok {
-			s.ChannelMessageSendEmbed(m.ChannelID, QuestEmbed("Command Not Found!", fmt.Sprintf("The command %s does not exist.\nUse the help command for more info.", cmdName), nil))
+			sss := fmt.Sprintf("The command %s does not exist.\nUse the help command for more info.", cmdName)
+			_, err := s.ChannelMessageSendEmbed(m.ChannelID, QuestEmbed("Command Not Found!", sss, nil))
+			if err != nil {
+				log.Println(err)
+			}
 			return
 		}
 		var usage string
@@ -113,12 +135,14 @@ func Help(s *discordgo.Session, m *discordgo.MessageCreate, args []string) {
 		}
 		fields := []*discordgo.MessageEmbedField{
 			{
-				"Usage",
-				"```" + usage + "```",
-				false,
+				Name:  "Usage",
+				Value: "```" + usage + "```",
 			},
 		}
-		s.ChannelMessageSendEmbed(m.ChannelID, QuestEmbed(strings.ToTitle(cmdName), cmdInfo.Description, fields))
+		_, err := s.ChannelMessageSendEmbed(m.ChannelID, QuestEmbed(strings.ToTitle(cmdName), `\`+cmdInfo.Description, fields))
+		if err != nil {
+			log.Println(err)
+		}
 	}
 }
 
@@ -166,24 +190,23 @@ func Mute(s *discordgo.Session, m *discordgo.MessageCreate, args []string) {
 }
 
 func QuestEmbed(title string, description string, fields []*discordgo.MessageEmbedField) *discordgo.MessageEmbed {
-	return &discordgo.MessageEmbed{
-		URL:         "",
-		Type:        "rich",
-		Title:       title,
-		Description: description,
-		Timestamp:   ConvertTimeToTimestamp(time.Now()),
-		Color:       0x00ffff,
+	emb := &discordgo.MessageEmbed{
+		Type:      "rich",
+		Title:     title,
+		Timestamp: ConvertTimeToTimestamp(time.Now()),
+		Color:     0x00ffff,
 		Footer: &discordgo.MessageEmbedFooter{
 			Text: "Quest Bot",
 		},
-		Image:     nil,
-		Thumbnail: nil,
-		Video:     nil,
-		Provider:  nil,
-		Author:    nil,
-		Fields:    fields,
+		Fields: fields,
 	}
+	if description != "" {
+		emb.Description = description
+	}
+	return emb
 }
+
+func QuestErrorEmbed() {}
 
 func ConvertTimeToTimestamp(t time.Time) string {
 	return t.Format("2006-01-02T15:04:05+00:00")

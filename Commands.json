@@ -36,5 +36,31 @@
     ],
     "cooldown": 0,
     "permission": 1
+  },
+  "unmute": {
+    "description": "Unmutes a guild user",
+    "arguments": [
+      {
+        "name": "User",
+        "type": "UserMention",
+        "optional": false,
+        "infinite": false
+      }
+    ],
+    "cooldown": 0,
+    "permission": 1
+  },
+  "purge": {
+    "description": "Deletes a given number of messages",
+    "arguments": [
+      {
+        "name": "Messages",
+        "type": "Integer",
+        "optional": false,
+        "infinite": false
+      }
+    ],
+    "cooldown": 0,
+    "permission": 1
   }
 }
