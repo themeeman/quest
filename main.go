@@ -12,31 +12,16 @@ import (
 	"time"
 	"strconv"
 	"encoding/json"
+	commands "discordcommands"
 )
 
-type ArgumentData struct {
-	Name     string `json:"name"`
-	Type     string `json:"type"`
-	Optional bool   `json:"optional"`
-	Infinite bool   `json:"infinite"`
+var QuestCommands = commands.HandlerMap{
+	"help":   Help,
+	"mute":   Mute,
+	"unmute": Unmute,
+	"purge":  Purge,
 }
-
-type CommandData struct {
-	Description   string         `json:"description"`
-	ArgumentsData []ArgumentData `json:"arguments"`
-	Cooldown      int            `json:"cooldown"`
-	Permission    int            `json:"permission"`
-}
-
-type Command func(session *discordgo.Session, message *discordgo.MessageCreate, args []string)
-
-type Commands map[string]Command
-
-var QuestCommands = Commands{
-	"help": Help,
-	"mute": Mute,
-}
-var CommandsData map[string]CommandData
+var CommandsData commands.DataMap
 var RegexVerifiers = map[string]string{
 	"String":         ".",
 	"Integer":        "[0-9]",
@@ -52,15 +37,6 @@ const (
 	commandFile = "Commands.json"
 )
 
-func (cd CommandData) CalcForcedArgs() int {
-	var i int
-	for _, v := range cd.ArgumentsData {
-		if !v.Optional {
-			i += 1
-		}
-	}
-	return i
-}
 func ready(s *discordgo.Session, _ *discordgo.Ready) {
 	s.UpdateStatus(0, "q:")
 }
@@ -69,64 +45,43 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	fmt.Println(m.Content)
 	if strings.HasPrefix(m.Content, prefix) {
 		cmd := strings.TrimPrefix(m.Content, prefix)
-		args := strings.Split(cmd, " ")
-		ExecuteCommand(s, m, args)
+		args := strings.Fields(cmd)
+		ctx := commands.CommandContext{
+			HandlerMap: &QuestCommands,
+			DataMap:    &CommandsData,
+		}
+		err := commands.ExecuteCommand(s, m, args, ctx, RegexVerifiers)
+		if err != nil {
+			s.ChannelMessageSendEmbed(m.ChannelID, commands.ErrorEmbed(err))
+		}
 	}
 }
 
-func ExecuteCommand(s *discordgo.Session, m *discordgo.MessageCreate, args []string) {
-	for i, v := range args {
-		fmt.Println(i, v)
-	}
-	cmdName := args[0]
-	cmd, ok := QuestCommands[cmdName]
-	if !ok {
-		s.ChannelMessageSend(m.ChannelID, "Invalid command")
-		return
-	}
-	cmdInfo, ok := CommandsData[cmdName]
-	if !ok {
-		return
-	}
-	if cmdInfo.CalcForcedArgs() > 0 && len(args) == 1 {
-		Help(s, m, []string{"help", cmdName})
-		return
-	}
-	cmd(s, m, args)
-
-}
-
-func Help(s *discordgo.Session, m *discordgo.MessageCreate, args []string) {
+func Help(s *discordgo.Session, m *discordgo.MessageCreate, args []string, ctx commands.CommandContext) commands.BotError {
+	var data = *ctx.DataMap
 	if len(args) == 1 {
 		var value string
-		for name, v := range CommandsData {
+		for name, v := range data {
 			value += fmt.Sprintf("**%v - ** %v\n", name, v.Description)
 		}
 		fields := []*discordgo.MessageEmbedField{
 			{
-				"Commands",
-				value,
-				false,
+				Name:  "Commands",
+				Value: value,
 			},
 		}
-		_, err := s.ChannelMessageSendEmbed(m.ChannelID, QuestEmbed("Help", "", fields))
-		if err != nil {
-			log.Fatalln(err)
-		}
+		s.ChannelMessageSendEmbed(m.ChannelID, QuestEmbed("Help", "", fields))
 	} else {
 		cmdName := args[1]
-		cmdInfo, ok := CommandsData[cmdName]
+		cmdInfo, ok := data[cmdName]
 		if !ok {
-			sss := fmt.Sprintf("The command %s does not exist.\nUse the help command for more info.", cmdName)
-			_, err := s.ChannelMessageSendEmbed(m.ChannelID, QuestEmbed("Command Not Found!", sss, nil))
-			if err != nil {
-				log.Println(err)
+			return commands.UnknownCommandError{
+				Command: cmdName,
 			}
-			return
 		}
 		var usage string
 		usage = prefix + cmdName + " "
-		for _, v := range cmdInfo.ArgumentsData {
+		for _, v := range cmdInfo.Arguments {
 			if v.Optional {
 				usage += fmt.Sprintf("<%s> ", v.Name)
 			} else {
@@ -139,54 +94,80 @@ func Help(s *discordgo.Session, m *discordgo.MessageCreate, args []string) {
 				Value: "```" + usage + "```",
 			},
 		}
-		_, err := s.ChannelMessageSendEmbed(m.ChannelID, QuestEmbed(strings.ToTitle(cmdName), `\`+cmdInfo.Description, fields))
-		if err != nil {
-			log.Println(err)
-		}
+		s.ChannelMessageSendEmbed(m.ChannelID, QuestEmbed(strings.ToTitle(cmdName), cmdInfo.Description, fields))
 	}
+	return nil
 }
 
-func Mute(s *discordgo.Session, m *discordgo.MessageCreate, args []string) {
+func Mute(s *discordgo.Session, m *discordgo.MessageCreate, args []string, _ commands.CommandContext) commands.BotError {
 	if len(args) >= 3 {
-		ch, err := s.State.Channel(m.ChannelID)
-		if err != nil {
-			log.Println("Could not find channel to mute")
-			return
+		ch, _ := s.State.Channel(m.ChannelID)
+		guild, _ := s.Guild(ch.GuildID)
+		dur, _ := strconv.Atoi(args[2])
+		fmt.Println(m.Mentions)
+		var user *discordgo.User
+		if len(m.Mentions) == 0 {
+			user = new(discordgo.User)
+		} else {
+			user = m.Mentions[0]
 		}
-		guild, err := s.Guild(ch.GuildID)
-		if err != nil {
-			log.Println("Could not find guild")
-			return
-		}
-		dur, err := strconv.Atoi(args[2])
-		if err != nil {
-			s.ChannelMessageSend(m.ChannelID, "Expected integer, got something else")
-			return
-		}
-		if len(m.Mentions) != 1 {
-			s.ChannelMessageSend(m.ChannelID, "Nope")
-			return
-		}
-		user := m.Mentions[0]
 		for _, u := range guild.Members {
 			for _, r := range u.Roles {
-				if r == "413273250131345409" {
-					s.ChannelMessageSend(m.ChannelID, "Could not mute user, they are already muted!")
-					return
+				if r == "413273250131345409" && u.User.ID == user.ID {
+					return commands.MutedError{
+						Username:      user.Username,
+						Discriminator: user.Discriminator,
+					}
 				}
 			}
 		}
-		err = s.GuildMemberRoleAdd(ch.GuildID, user.ID, "413273250131345409")
-		if err != nil {
-			s.ChannelMessageSend(m.ChannelID, "User not found or something")
-			return
+		if dur < 0 {
+			return commands.TimeError{
+				Duration: dur,
+			}
 		}
-		s.ChannelMessageSend(m.ChannelID, fmt.Sprintf("Successfully muted %s!", user.Username))
+		err := s.GuildMemberRoleAdd(ch.GuildID, user.ID, "413273250131345409")
+		if err != nil {
+			if strings.Contains(err.Error(), "HTTP 403 Forbidden") {
+				return commands.PermissionsError{}
+			} else {
+				return commands.UserNotFoundError{}
+			}
+		}
 		go func() {
 			time.Sleep(time.Second * time.Duration(dur))
 			s.GuildMemberRoleRemove(ch.GuildID, m.Mentions[0].ID, "413273250131345409")
 		}()
+		s.ChannelMessageSendEmbed(m.ChannelID, QuestEmbed("Success!", fmt.Sprintf("Successfully muted %s#%s!", user.Username, user.Discriminator), nil))
 	}
+	return nil
+}
+
+func Unmute(s *discordgo.Session, m *discordgo.MessageCreate, args []string, _ commands.CommandContext) commands.BotError {
+	ch, err := s.Channel(m.ChannelID)
+	if err != nil {
+		return nil
+	}
+	err = s.GuildMemberRoleRemove(ch.GuildID, m.Mentions[0].ID, "413273250131345409")
+	if err != nil {
+		return nil
+	}
+	return nil
+}
+
+func Purge(s *discordgo.Session, m *discordgo.MessageCreate, args []string, _ commands.CommandContext) commands.BotError {
+	i, _ := strconv.Atoi(args[1])
+	msgs, err := s.ChannelMessages(m.ChannelID, i, "", "", "")
+	if err != nil {
+		return nil
+	}
+	ids := make([]string, i)
+	for i, v := range msgs {
+		ids[i] = v.ID
+		fmt.Println(v.Content)
+	}
+	//s.ChannelMessagesBulkDelete(m.ChannelID, ids)
+	return nil
 }
 
 func QuestEmbed(title string, description string, fields []*discordgo.MessageEmbedField) *discordgo.MessageEmbed {
@@ -206,31 +187,30 @@ func QuestEmbed(title string, description string, fields []*discordgo.MessageEmb
 	return emb
 }
 
-func QuestErrorEmbed() {}
-
 func ConvertTimeToTimestamp(t time.Time) string {
 	return t.Format("2006-01-02T15:04:05+00:00")
 }
 
 func init() {
-	f, err := os.Open(commandFile)
-	if err != nil {
-		log.Fatalln("Error opening command file", err)
-	}
-	stat, err := f.Stat()
-	if err != nil {
-		log.Fatalln("Error making file stats", err)
-	}
-	data := make([]byte, stat.Size())
-	_, err = f.Read(data)
-	if err != nil {
-		log.Fatalln("Error reading command file", err)
-	}
-	err = json.Unmarshal(data, &CommandsData)
-	if err != nil {
-		log.Fatalln("Error unmarshalling command json", err)
-	}
-
+	func(){
+		f, err := os.Open(commandFile)
+		if err != nil {
+			log.Fatalln("Error opening command file", err)
+		}
+		stat, err := f.Stat()
+		if err != nil {
+			log.Fatalln("Error making file stats", err)
+		}
+		data := make([]byte, stat.Size())
+		_, err = f.Read(data)
+		if err != nil {
+			log.Fatalln("Error reading command file", err)
+		}
+		err = json.Unmarshal(data, &CommandsData)
+		if err != nil {
+			log.Fatalln("Error unmarshalling command json", err)
+		}
+	}()
 	flag.StringVar(&Token, "t", "", "Bot Token")
 	flag.Parse()
 }

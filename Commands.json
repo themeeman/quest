@@ -54,7 +54,7 @@
     "description": "Deletes a given number of messages",
     "arguments": [
       {
-        "name": "Messages",
+        "name": "Amount",
         "type": "Integer",
         "optional": false,
         "infinite": false
