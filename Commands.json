@@ -22,7 +22,7 @@
         "infinite": false
       },
       {
-        "name": "Mins",
+        "name": "Minutes",
         "type": "Integer",
         "optional": false,
         "infinite": false
@@ -45,6 +45,12 @@
         "type": "UserMention",
         "optional": false,
         "infinite": false
+      },
+      {
+        "name": "Reason",
+        "type": "String",
+        "optional": true,
+        "infinite": true
       }
     ],
     "cooldown": 0,
@@ -62,5 +68,51 @@
     ],
     "cooldown": 0,
     "permission": 1
+  },
+  "types": {
+    "description": "View all built in types",
+    "arguments": [],
+    "cooldown": 0,
+    "permission": 1
+  },
+  "conv": {
+    "description": "Converts a float",
+    "arguments": [
+      {
+        "name": "Number",
+        "type": "Float",
+        "optional": false,
+        "infinite": false
+      }
+    ],
+    "cooldown": 0,
+    "permission": 1
+  },
+  "commit": {},
+  "addexp": {
+    "description": "Adds experience to yourself",
+    "arguments": [
+      {
+        "name": "Value",
+        "type": "Integer",
+        "optional": false,
+        "infinite": false
+      },
+      {
+        "name": "User",
+        "type": "UserMention",
+        "optional": true,
+        "infinite": false
+      }
+    ]
+  },
+  "setmuterole": {
+    "description": "Sets the role given when the mute command is used",
+    "arguments": [
+      {
+        "name": "Role",
+        "type": "RoleMention"
+      }
+    ]
   }
 }
