@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-func Mute(session *discordgo.Session, message *discordgo.MessageCreate, args map[string]string, context commands.Bot) commands.BotError {
+func Mute(session *discordgo.Session, message *discordgo.MessageCreate, args map[string]string, bot commands.Bot) commands.BotError {
 	if len(args) >= 2 {
 		ch, _ := session.State.Channel(message.ChannelID)
 		dur, _ := strconv.Atoi(args["Minutes"])
@@ -21,7 +21,7 @@ func Mute(session *discordgo.Session, message *discordgo.MessageCreate, args map
 			user = message.Mentions[0]
 		}
 		member, _ := session.State.Member(ch.GuildID, user.ID)
-		_, g, _, _ := commands.FindGuildByID(context.Guilds, ch.GuildID)
+		_, g, _, _ := commands.FindGuildByID(bot.Guilds, ch.GuildID)
 		for _, r := range member.Roles {
 			if r == g.MuteRole.String {
 				return commands.MutedError{
@@ -55,9 +55,9 @@ func Mute(session *discordgo.Session, message *discordgo.MessageCreate, args map
 			session.GuildMemberRoleRemove(ch.GuildID, user.ID, g.MuteRole.String)
 		}()
 		if args["Reason"] == "" {
-			session.ChannelMessageSendEmbed(message.ChannelID, context.Embed("Success!", fmt.Sprintf("Successfully muted %s#%s!", user.Username, user.Discriminator), nil))
+			session.ChannelMessageSendEmbed(message.ChannelID, bot.Embed("Success!", fmt.Sprintf("Successfully muted %s#%s!", user.Username, user.Discriminator), nil))
 		} else {
-			session.ChannelMessageSendEmbed(message.ChannelID, context.Embed("Success!", fmt.Sprintf("Successfully muted %s#%s! Reason: %s", user.Username, user.Discriminator, args["Reason"]), nil))
+			session.ChannelMessageSendEmbed(message.ChannelID, bot.Embed("Success!", fmt.Sprintf("Successfully muted %s#%s! Reason: %s", user.Username, user.Discriminator, args["Reason"]), nil))
 		}
 	}
 	return nil

@@ -7,7 +7,7 @@ import (
 	"fmt"
 )
 
-func Unmute(session *discordgo.Session, message *discordgo.MessageCreate, args map[string]string, context commands.Bot) commands.BotError {
+func Unmute(session *discordgo.Session, message *discordgo.MessageCreate, args map[string]string, bot commands.Bot) commands.BotError {
 	ch, _ := session.State.Channel(message.ChannelID)
 	var user *discordgo.User
 	if len(message.Mentions) == 0 {
@@ -37,9 +37,9 @@ func Unmute(session *discordgo.Session, message *discordgo.MessageCreate, args m
 		}
 	}
 	if args["Reason"] == "" {
-		session.ChannelMessageSendEmbed(message.ChannelID, context.Embed("Success!", fmt.Sprintf("Successfully unmuted %session#%session!", user.Username, user.Discriminator), nil))
+		session.ChannelMessageSendEmbed(message.ChannelID, bot.Embed("Success!", fmt.Sprintf("Successfully unmuted %session#%session!", user.Username, user.Discriminator), nil))
 	} else {
-		session.ChannelMessageSendEmbed(message.ChannelID, context.Embed("Success!", fmt.Sprintf("Successfully unmuted %session#%session! Reason: %session", user.Username, user.Discriminator, args["Reason"]), nil))
+		session.ChannelMessageSendEmbed(message.ChannelID, bot.Embed("Success!", fmt.Sprintf("Successfully unmuted %session#%session! Reason: %session", user.Username, user.Discriminator, args["Reason"]), nil))
 	}
 	return nil
 }

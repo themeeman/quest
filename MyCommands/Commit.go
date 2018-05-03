@@ -6,11 +6,11 @@ import (
 	"fmt"
 )
 
-func Commit(session *discordgo.Session, message *discordgo.MessageCreate, _ map[string]string, context commands.Bot) commands.BotError {
+func Commit(session *discordgo.Session, message *discordgo.MessageCreate, _ map[string]string, bot commands.Bot) commands.BotError {
 	if message.Author.ID != "164759167561629696" {
 		return commands.PermissionsError{}
 	}
-	err := commands.PostAllGuildData(context.DB, context.Guilds)
+	err := commands.PostAllGuildData(bot.DB, bot.Guilds)
 	if err != nil {
 		fmt.Println(err)
 		return nil

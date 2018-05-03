@@ -8,8 +8,8 @@ import (
 	"strings"
 )
 
-func Help(session *discordgo.Session, message *discordgo.MessageCreate, args map[string]string, context commands.Bot) commands.BotError {
-	var data = *context.CommandMap
+func Help(session *discordgo.Session, message *discordgo.MessageCreate, args map[string]string, bot commands.Bot) commands.BotError {
+	var data = *bot.CommandMap
 	if args["Command"] == "" {
 		var buf bytes.Buffer
 		for name, v := range data {
@@ -21,7 +21,7 @@ func Help(session *discordgo.Session, message *discordgo.MessageCreate, args map
 				Value: buf.String(),
 			},
 		}
-		session.ChannelMessageSendEmbed(message.ChannelID, context.Embed("Help", "", fields))
+		session.ChannelMessageSendEmbed(message.ChannelID, bot.Embed("Help", "", fields))
 	} else {
 		cmdName := args["Command"]
 		cmdInfo, ok := data[cmdName]
@@ -31,7 +31,7 @@ func Help(session *discordgo.Session, message *discordgo.MessageCreate, args map
 			}
 		}
 		var buffer bytes.Buffer
-		buffer.WriteString(context.Prefix + cmdName)
+		buffer.WriteString(bot.Prefix + cmdName)
 		for _, v := range cmdInfo.Arguments {
 			if v.Optional {
 				buffer.WriteString(fmt.Sprintf(" <%s>", v.Name))
@@ -45,7 +45,7 @@ func Help(session *discordgo.Session, message *discordgo.MessageCreate, args map
 				Value: "```" + buffer.String() + "```",
 			},
 		}
-		session.ChannelMessageSendEmbed(message.ChannelID, context.Embed(strings.ToTitle(cmdName), cmdInfo.Description, fields))
+		session.ChannelMessageSendEmbed(message.ChannelID, bot.Embed(strings.ToTitle(cmdName), cmdInfo.Description, fields))
 	}
 	return nil
 }

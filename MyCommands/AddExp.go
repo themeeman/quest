@@ -7,9 +7,9 @@ import (
 	"fmt"
 )
 
-func AddExp(session *discordgo.Session, message *discordgo.MessageCreate, args map[string]string, context commands.Bot) commands.BotError {
+func AddExp(session *discordgo.Session, message *discordgo.MessageCreate, args map[string]string, bot commands.Bot) commands.BotError {
 	c, _ := session.Channel(message.ChannelID)
-	newGuilds, guild, index, ok := commands.FindGuildByID(context.Guilds, c.GuildID)
+	newGuilds, guild, index, ok := commands.FindGuildByID(bot.Guilds, c.GuildID)
 	fmt.Println(newGuilds, guild, index, ok)
 	var id string
 	if args["User"] == "" {
