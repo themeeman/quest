@@ -46,6 +46,10 @@ func Mute(session *discordgo.Session, message *discordgo.MessageCreate, args map
 				return commands.UserNotFoundError{}
 			}
 		}
+		_, m, _, _ := commands.FindMemberByID(g.Members, message.Author.ID)
+		m.Mute.Time = time.Now()
+		m.Mute.Valid = true
+		m.MuteTime = dur
 		go func() {
 			time.Sleep(time.Second * time.Duration(dur))
 			session.GuildMemberRoleRemove(ch.GuildID, user.ID, g.MuteRole.String)
