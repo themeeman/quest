@@ -27,6 +27,7 @@ var QuestCommands = commands.HandlerMap{
 	"commit":      command.Commit,
 	"addexp":      command.AddExp,
 	"setmuterole": command.SetMuteRole,
+	"me":          command.Me,
 }
 var CommandsData commands.CommandMap
 var RegexVerifiers = map[string]string{}
@@ -34,6 +35,8 @@ var RegexVerifiers = map[string]string{}
 var Token string
 var db *sqlx.DB
 var guilds []*commands.Guild
+
+var ctx commands.Bot
 
 const (
 	prefix      = "q:"
@@ -50,39 +53,42 @@ func ready(s *discordgo.Session, _ *discordgo.Ready) {
 	for _, v := range guilds {
 		fmt.Println(v)
 	}
-	err = commands.PostAllGuildData(db, guilds)
-	if err != nil {
-		log.Println(err)
-	}
 	s.UpdateStatus(0, "q:help")
+	ctx = commands.Bot{
+		HandlerMap: QuestCommands,
+		CommandMap: CommandsData,
+		Regex:      RegexVerifiers,
+		Prefix:     prefix,
+		Guilds:     guilds,
+		DB:         db,
+		Embed:      questEmbed,
+	}
 }
 
 func messageCreate(session *discordgo.Session, message *discordgo.MessageCreate) {
 	fmt.Println(message.Content)
-	if strings.HasPrefix(message.Content, prefix) {
-		ctx := commands.Bot{
-			HandlerMap: &QuestCommands,
-			CommandMap: &CommandsData,
-			Regex:      RegexVerifiers,
-			Prefix:     prefix,
-			Guilds:     guilds,
-			DB:         db,
-			Embed:      questEmbed,
+	if !message.Author.Bot {
+		if strings.HasPrefix(message.Content, prefix) {
+			err := commands.ExecuteCommand(session, message, ctx)
+			if err != nil {
+				session.ChannelMessageSendEmbed(message.ChannelID, commands.ErrorEmbed(err))
+			}
 		}
-		fmt.Println(guilds)
-		err := commands.ExecuteCommand(session, message, ctx)
-		if err != nil {
-			session.ChannelMessageSendEmbed(message.ChannelID, commands.ErrorEmbed(err))
-		}
+		fmt.Println("-----------------------")
 	}
-	fmt.Println("-----------------------")
+}
+
+func guildCreate(_ *discordgo.Session, event *discordgo.GuildCreate) {
+	if err := commands.CreateEmptyGuildTable(db, event.Guild.ID); err != nil {
+		fmt.Println(err)
+	}
 }
 
 func questEmbed(title string, description string, fields []*discordgo.MessageEmbedField) *discordgo.MessageEmbed {
 	emb := &discordgo.MessageEmbed{
 		Type:      "rich",
 		Title:     title,
-		Timestamp: commands.ConvertTimeToTimestamp(time.Now()),
+		Timestamp: commands.TimeToTimestamp(time.Now()),
 		Color:     0x00ffff,
 		Footer: &discordgo.MessageEmbedFooter{
 			Text: "Quest Bot",
@@ -95,7 +101,7 @@ func questEmbed(title string, description string, fields []*discordgo.MessageEmb
 	return emb
 }
 
-func unmarshalJsonFromFile(filename string, v interface{}) (err error) {
+func unmarshalJson(filename string, v interface{}) (err error) {
 	f, err := os.Open(filename)
 	if err != nil {
 		return
@@ -119,19 +125,19 @@ func unmarshalJsonFromFile(filename string, v interface{}) (err error) {
 
 func init() {
 	var err error
-	err = unmarshalJsonFromFile(commandFile, &CommandsData)
+	err = unmarshalJson(commandFile, &CommandsData)
 	if err != nil {
-		log.Fatalln(err)
+		panic(err)
 	}
-	err = unmarshalJsonFromFile(typesFile, &RegexVerifiers)
+	err = unmarshalJson(typesFile, &RegexVerifiers)
 	if err != nil {
-		log.Fatalln(err)
+		panic(err)
 	}
 	flag.StringVar(&Token, "t", "", "Bot Token")
 	flag.Parse()
 	db, err = commands.InitDB()
 	if err != nil {
-		log.Println(err)
+		panic(err)
 	}
 }
 
@@ -144,15 +150,16 @@ func main() {
 	}
 	dg.AddHandler(ready)
 	dg.AddHandler(messageCreate)
+	dg.AddHandler(guildCreate)
 	err = dg.Open()
 	if err != nil {
 		log.Fatalln("Error opening connection", err)
 		return
 	}
 	defer dg.Close()
-	fmt.Println("Bot is now running.  Press CTRL-C to exit.")
+	fmt.Println("Quest is now running.  Press CTRL-C to exit.")
 	sc := make(chan os.Signal, 1)
 	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, os.Kill)
 	<-sc
-
+	commands.PostAllGuildData(db, guilds)
 }

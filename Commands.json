@@ -5,27 +5,27 @@
       {
         "name": "Command",
         "type": "String",
-        "optional": true,
-        "infinite": false
+        "optional": true
       }
     ],
     "cooldown": 60,
-    "permission": 0
+    "permission": 0,
+    "aliases": ["?", "commands"],
+    "examples": [
+      "q:help",
+      "q:help mute"
+    ]
   },
   "mute": {
     "description": "Mutes a guild user",
     "arguments": [
       {
         "name": "User",
-        "type": "UserMention",
-        "optional": false,
-        "infinite": false
+        "type": "UserMention"
       },
       {
         "name": "Minutes",
-        "type": "Integer",
-        "optional": false,
-        "infinite": false
+        "type": "Integer"
       },
       {
         "name": "Reason",
@@ -35,16 +35,18 @@
       }
     ],
     "cooldown": 0,
-    "permission": 1
+    "permission": 1,
+    "examples": [
+      "q:mute @themeeman#8354 10",
+      "q:mute @TrippyPepper#3457 500 Trolling and posting gay porn"
+    ]
   },
   "unmute": {
     "description": "Unmutes a guild user",
     "arguments": [
       {
         "name": "User",
-        "type": "UserMention",
-        "optional": false,
-        "infinite": false
+        "type": "UserMention"
       },
       {
         "name": "Reason",
@@ -54,20 +56,26 @@
       }
     ],
     "cooldown": 0,
-    "permission": 1
+    "permission": 1,
+    "examples": [
+      "q:unmute @themeeman#8354",
+      "q:unmute @Lumite#5555 Giving the succ to admins"
+    ]
   },
   "purge": {
     "description": "Deletes a given number of messages",
     "arguments": [
       {
         "name": "Amount",
-        "type": "Integer",
-        "optional": false,
-        "infinite": false
+        "type": "Integer"
       }
     ],
     "cooldown": 0,
-    "permission": 1
+    "permission": 1,
+    "aliases": ["prune", "delete"],
+    "examples": [
+      "q:purge 10"
+    ]
   },
   "types": {
     "description": "View all built in types",
@@ -80,13 +88,11 @@
     "arguments": [
       {
         "name": "Number",
-        "type": "Float",
-        "optional": false,
-        "infinite": false
+        "type": "Float"
       }
     ],
     "cooldown": 0,
-    "permission": 1
+    "permission": 0
   },
   "commit": {},
   "addexp": {
@@ -94,16 +100,18 @@
     "arguments": [
       {
         "name": "Value",
-        "type": "Integer",
-        "optional": false,
-        "infinite": false
+        "type": "Signed Integer"
       },
       {
         "name": "User",
         "type": "UserMention",
-        "optional": true,
-        "infinite": false
+        "optional": true
       }
+    ],
+    "permission": 2,
+    "examples": [
+      "q:addexp 1000",
+      "q:addexp 500000 @qwasmo#0952"
     ]
   },
   "setmuterole": {
@@ -113,6 +121,25 @@
         "name": "Role",
         "type": "RoleMention"
       }
+    ],
+    "aliases": ["setmutedrole", "muterole", "setmute"],
+    "permission": 3,
+    "examples": [
+      "q:setmuterole @Muted"
+    ]
+  },
+  "me": {
+    "description": "View member information",
+    "arguments": [
+      {
+        "name": "User",
+        "type": "UserMention",
+        "optional": true
+      }
+    ],
+    "examples": [
+      "q:me",
+      "q:me @themeeman#8354"
     ]
   }
 }
