@@ -4,36 +4,29 @@ import (
 	"github.com/bwmarrin/discordgo"
 	commands "discordcommands"
 	"strconv"
-	"fmt"
+	"strings"
 )
 
 func AddExp(session *discordgo.Session, message *discordgo.MessageCreate, args map[string]string, bot commands.Bot) commands.BotError {
-	c, _ := session.Channel(message.ChannelID)
-	guild, ok := commands.FindGuildByID(bot.Guilds, c.GuildID)
-	fmt.Println(guild, ok)
-	if !ok {
-		bot.Guilds = append(bot.Guilds, guild)
-		guild = bot.Guilds[len(bot.Guilds) - 1]
-	}
+	guild := bot.Guilds.Get(commands.MustGetGuildID(session, message))
 	var id string
 	if args["User"] == "" {
 		id = message.Author.ID
-	} else {
+	} else if len(args["User"]) == 18 {
+		id = args["User"]
+	} else if len(message.Mentions) > 0 {
 		id = message.Mentions[0].ID
+	} else {
+		return commands.UserNotFoundError{}
 	}
-	member, ok := commands.FindMemberByID(guild.Members, id)
-	fmt.Println(member, ok)
-	if !ok {
-		guild.Members = append(guild.Members, member)
+	_, err := session.GuildMember(commands.MustGetGuildID(session, message), id)
+	if err != nil {
+		return commands.UserNotFoundError{}
 	}
-	exp, _ := strconv.Atoi(args["Value"])
-	member.Experience += exp
-	for _, v := range bot.Guilds {
-		fmt.Println(v.ID)
-		for _, m := range v.Members {
-			fmt.Println(*m)
-		}
-	}
-	session.ChannelMessageSend(message.ChannelID, fmt.Sprintf("Total Experience: %d", member.Experience))
+	member := guild.Members.Get(id)
+	exp, _ := strconv.Atoi(strings.Replace(args["Value"], ",", "", -1))
+	member.Experience += int64(exp)
+	commands.GrantRoles(session, message, guild, member)
+	session.MessageReactionAdd(message.ChannelID, message.ID, "☑")
 	return nil
 }

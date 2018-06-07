@@ -9,22 +9,33 @@ import (
 
 func Me(session *discordgo.Session, message *discordgo.MessageCreate, args map[string]string, bot commands.Bot) commands.BotError {
 	var id string
-	if args["User"] != "" {
+	if args["User"] == "" {
+		id = message.Author.ID
+	} else if len(args["User"]) == 18 {
+		id = args["User"]
+	} else if len(message.Mentions) > 0 {
 		id = message.Mentions[0].ID
 	} else {
-		id = message.Author.ID
+		return commands.UserNotFoundError{}
 	}
-	guild, _ := commands.FindGuildByID(bot.Guilds, commands.MustGetGuildID(session, message))
-	member, ok := commands.FindMemberByID(guild.Members, id)
-	fmt.Println(member, ok)
-	if !ok {
-		guild.Members = append(guild.Members, member)
+	guild := bot.Guilds.Get(commands.MustGetGuildID(session, message))
+	m, err := session.GuildMember(guild.ID, id)
+	if err != nil {
+		return commands.UserNotFoundError{}
 	}
-	fmt.Println(guild.Members)
-	session.ChannelMessageSendEmbed(message.ChannelID, bot.Embed("User", "", []*discordgo.MessageEmbedField{
+	member := guild.Members.Get(id)
+	g, _ := session.Guild(commands.MustGetGuildID(session, message))
+	rank := commands.GetPermissionLevel(m, guild, g.OwnerID)
+	s := []string{"Member", "Moderator", "Admin", "Owner"}
+	title := fmt.Sprintf("User %s#%s", m.User.Username, m.User.Discriminator)
+	session.ChannelMessageSendEmbed(message.ChannelID, bot.Embed(title, "", []*discordgo.MessageEmbedField{
 		{
 			Name:  "Experience",
-			Value: strconv.Itoa(member.Experience),
+			Value: strconv.Itoa(int(member.Experience)),
+		},
+		{
+			Name:  "Rank",
+			Value: s[rank],
 		},
 	}))
 	return nil

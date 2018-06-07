@@ -10,15 +10,25 @@ import (
 func Unmute(session *discordgo.Session, message *discordgo.MessageCreate, args map[string]string, bot commands.Bot) commands.BotError {
 	ch, _ := session.State.Channel(message.ChannelID)
 	var user *discordgo.User
-	if len(message.Mentions) == 0 {
-		user = new(discordgo.User)
-	} else {
+	if len(args["User"]) == 18 {
+		var err error
+		user, err = session.User(args["User"])
+		if err != nil {
+			return commands.UserNotFoundError{}
+		}
+	} else if len(message.Mentions) > 0 {
 		user = message.Mentions[0]
+	} else {
+		return commands.UserNotFoundError{}
 	}
 	member, _ := session.State.Member(ch.GuildID, user.ID)
+	g := bot.Guilds.Get(commands.MustGetGuildID(session, message))
 	var found bool
+	if !g.MuteRole.Valid {
+		return commands.MuteRoleError{}
+	}
 	for _, r := range member.Roles {
-		if r == "413273250131345409" {
+		if r == g.MuteRole.String {
 			found = true
 		}
 	}
@@ -31,7 +41,7 @@ func Unmute(session *discordgo.Session, message *discordgo.MessageCreate, args m
 	err := session.GuildMemberRoleRemove(ch.GuildID, user.ID, "413273250131345409")
 	if err != nil {
 		if strings.Contains(err.Error(), "HTTP 403 Forbidden") {
-			return commands.PermissionsError{}
+			return commands.BotPermissionsError{}
 		} else {
 			return commands.UserNotFoundError{}
 		}

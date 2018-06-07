@@ -10,11 +10,12 @@ import (
 )
 
 func Help(session *discordgo.Session, message *discordgo.MessageCreate, args map[string]string, bot commands.Bot) commands.BotError {
-	var data = bot.CommandMap
 	if args["Command"] == "" {
 		var buf bytes.Buffer
-		for name, v := range data {
-			buf.WriteString(fmt.Sprintf("**%s - ** %s\n", name, v.Description))
+		for name, v := range bot.CommandMap {
+			if _, ok := bot.HandlerMap[name]; ok && !v.Hidden {
+				buf.WriteString(fmt.Sprintf("**%s - ** %s\n", name, v.Description))
+			}
 		}
 		fields := []*discordgo.MessageEmbedField{
 			{
@@ -24,8 +25,12 @@ func Help(session *discordgo.Session, message *discordgo.MessageCreate, args map
 		}
 		session.ChannelMessageSendEmbed(message.ChannelID, bot.Embed("Help", "", fields))
 	} else {
-		cmdName := args["Command"]
-		cmdInfo, ok := data[cmdName]
+		cmdInfo, hand, name := commands.GetCommand(bot, args["Command"])
+		if cmdInfo == nil || hand == nil {
+			return commands.UnknownCommandError{
+				Command: name,
+			}
+		}
 		if message.Author.ID == "164759167561629696" {
 			b, err := json.MarshalIndent(cmdInfo, "", " ")
 			if err != nil {
@@ -33,14 +38,8 @@ func Help(session *discordgo.Session, message *discordgo.MessageCreate, args map
 			}
 			session.ChannelMessageSend(message.ChannelID, "```json\n"+string(b)+"```")
 		}
-
-		if !ok {
-			return commands.UnknownCommandError{
-				Command: cmdName,
-			}
-		}
 		var buffer bytes.Buffer
-		buffer.WriteString(bot.Prefix + cmdName)
+		buffer.WriteString(bot.Prefix + name)
 		for _, v := range cmdInfo.Arguments {
 			if v.Optional {
 				buffer.WriteString(fmt.Sprintf(" <%s>", v.Name))
@@ -73,7 +72,7 @@ func Help(session *discordgo.Session, message *discordgo.MessageCreate, args map
 				},
 			}
 		}
-		session.ChannelMessageSendEmbed(message.ChannelID, bot.Embed(strings.Title(cmdName), cmdInfo.Description, fields))
+		session.ChannelMessageSendEmbed(message.ChannelID, bot.Embed(strings.Title(name), cmdInfo.Description, fields))
 	}
 	return nil
 }

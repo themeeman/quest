@@ -15,26 +15,31 @@ import (
 	_ "database/sql"
 	command "../Quest/MyCommands"
 	"github.com/jmoiron/sqlx"
+	"math/rand"
+	"runtime/debug"
 )
 
 var QuestCommands = commands.HandlerMap{
-	"help":        command.Help,
-	"mute":        command.Mute,
-	"unmute":      command.Unmute,
-	"purge":       command.Purge,
-	"types":       command.Types,
-	"conv":        command.Conv,
-	"commit":      command.Commit,
-	"addexp":      command.AddExp,
-	"setmuterole": command.SetMuteRole,
-	"me":          command.Me,
+	"help":     command.Help,
+	"mute":     command.Mute,
+	"unmute":   command.Unmute,
+	"purge":    command.Purge,
+	"types":    command.Types,
+	"commit":   command.Commit,
+	"addexp":   command.AddExp,
+	"setmute":  command.SetMuteRole,
+	"me":       command.Me,
+	"tryparse": command.TryParse,
+	"massrole": command.MassRole,
+	"addrole":  command.AddRole,
+	"roles":    command.Roles,
 }
 var CommandsData commands.CommandMap
 var RegexVerifiers = map[string]string{}
 
 var Token string
 var db *sqlx.DB
-var guilds []*commands.Guild
+var guilds commands.Guilds
 
 var ctx commands.Bot
 
@@ -46,9 +51,9 @@ const (
 
 func ready(s *discordgo.Session, _ *discordgo.Ready) {
 	var err error
-	guilds, err = commands.QueryAllBotData(s, db, 10000)
+	guilds, err = commands.QueryAllData(db)
 	if err != nil {
-		log.Println(err)
+		log.Println("b", err)
 	}
 	for _, v := range guilds {
 		fmt.Println(v)
@@ -57,31 +62,68 @@ func ready(s *discordgo.Session, _ *discordgo.Ready) {
 	ctx = commands.Bot{
 		HandlerMap: QuestCommands,
 		CommandMap: CommandsData,
-		Regex:      RegexVerifiers,
-		Prefix:     prefix,
-		Guilds:     guilds,
-		DB:         db,
-		Embed:      questEmbed,
+		ExpTimes: make(map[struct {
+			Guild  string
+			Member string
+		}]time.Time),
+		Regex:  RegexVerifiers,
+		Prefix: prefix,
+		Guilds: guilds,
+		DB:     db,
+		Embed:  questEmbed,
 	}
 }
 
 func messageCreate(session *discordgo.Session, message *discordgo.MessageCreate) {
+	defer func() {
+		if r := recover(); r != nil {
+			rep := strings.Replace
+			text := fmt.Sprint(r) + "\n" + rep(rep(string(debug.Stack()), "Tom Van Wowe", "Root", -1), "Tom_Van_Wowe", "Root", -1)
+			session.ChannelMessageSend(message.ChannelID, "```"+ `An unexpected panic occured in the execution of that command.
+`+ text+ "```")
+		}
+	}()
 	fmt.Println(message.Content)
 	if !message.Author.Bot {
-		if strings.HasPrefix(message.Content, prefix) {
+		if strings.HasPrefix(strings.ToLower(message.Content), prefix) {
 			err := commands.ExecuteCommand(session, message, ctx)
 			if err != nil {
 				session.ChannelMessageSendEmbed(message.ChannelID, commands.ErrorEmbed(err))
 			}
 		}
+		grantExp(&ctx, session, message)
 		fmt.Println("-----------------------")
 	}
 }
 
 func guildCreate(_ *discordgo.Session, event *discordgo.GuildCreate) {
-	if err := commands.CreateEmptyGuildTable(db, event.Guild.ID); err != nil {
-		fmt.Println(err)
+	commands.CreateAllData(db, event.Guild.ID)
+}
+
+func memberAdd(session *discordgo.Session, event *discordgo.GuildMemberAdd) {
+	guild := ctx.Guilds.Get(event.GuildID)
+	if guild.Autorole.Valid {
+		session.GuildMemberRoleAdd(event.GuildID, event.Member.User.ID, guild.Autorole.String)
 	}
+}
+
+func grantExp(bot *commands.Bot, session *discordgo.Session, message *discordgo.MessageCreate) {
+	s := struct {
+		Guild  string
+		Member string
+	}{
+		Guild:  commands.MustGetGuildID(session, message),
+		Member: message.Author.ID,
+	}
+	t, ok := bot.ExpTimes[s]
+	g := ctx.Guilds.Get(s.Guild)
+	m := g.Members.Get(s.Member)
+	fmt.Println(s.Member)
+	if !ok || uint16(time.Since(t).Seconds()) > g.ExpReload {
+		bot.ExpTimes[s] = time.Now()
+		m.Experience += int64(rand.Intn(10) + 10)
+	}
+	commands.GrantRoles(session, message, g, m)
 }
 
 func questEmbed(title string, description string, fields []*discordgo.MessageEmbedField) *discordgo.MessageEmbed {
@@ -124,6 +166,7 @@ func unmarshalJson(filename string, v interface{}) (err error) {
 }
 
 func init() {
+	rand.Seed(time.Now().UTC().UnixNano())
 	var err error
 	err = unmarshalJson(commandFile, &CommandsData)
 	if err != nil {
@@ -151,6 +194,7 @@ func main() {
 	dg.AddHandler(ready)
 	dg.AddHandler(messageCreate)
 	dg.AddHandler(guildCreate)
+	dg.AddHandler(memberAdd)
 	err = dg.Open()
 	if err != nil {
 		log.Fatalln("Error opening connection", err)
@@ -161,5 +205,5 @@ func main() {
 	sc := make(chan os.Signal, 1)
 	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, os.Kill)
 	<-sc
-	commands.PostAllGuildData(db, guilds)
+	commands.PostAllData(db, guilds)
 }

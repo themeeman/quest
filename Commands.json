@@ -8,8 +8,6 @@
         "optional": true
       }
     ],
-    "cooldown": 60,
-    "permission": 0,
     "aliases": ["?", "commands"],
     "examples": [
       "q:help",
@@ -34,7 +32,6 @@
         "infinite": true
       }
     ],
-    "cooldown": 0,
     "permission": 1,
     "examples": [
       "q:mute @themeeman#8354 10",
@@ -55,7 +52,6 @@
         "infinite": true
       }
     ],
-    "cooldown": 0,
     "permission": 1,
     "examples": [
       "q:unmute @themeeman#8354",
@@ -70,7 +66,6 @@
         "type": "Integer"
       }
     ],
-    "cooldown": 0,
     "permission": 1,
     "aliases": ["prune", "delete"],
     "examples": [
@@ -80,8 +75,7 @@
   "types": {
     "description": "View all built in types",
     "arguments": [],
-    "cooldown": 0,
-    "permission": 1
+    "permission": 2
   },
   "conv": {
     "description": "Converts a float",
@@ -90,17 +84,18 @@
         "name": "Number",
         "type": "Float"
       }
-    ],
-    "cooldown": 0,
-    "permission": 0
+    ]
   },
-  "commit": {},
+  "commit": {
+    "permission": 3,
+    "hidden": true
+  },
   "addexp": {
     "description": "Adds experience to yourself",
     "arguments": [
       {
         "name": "Value",
-        "type": "Signed Integer"
+        "type": "SignedInteger"
       },
       {
         "name": "User",
@@ -108,6 +103,7 @@
         "optional": true
       }
     ],
+    "aliases": ["addxp"],
     "permission": 2,
     "examples": [
       "q:addexp 1000",
@@ -141,5 +137,73 @@
       "q:me",
       "q:me @themeeman#8354"
     ]
+  },
+  "tryparse": {
+    "description": "Attempts to parse a value as a given type",
+    "arguments": [
+      {
+        "name": "Type",
+        "type": "String"
+      },
+      {
+        "name": "Value",
+        "type": "String",
+        "infinite": true
+      }
+    ],
+    "aliases": ["parse", "match", "try"],
+    "examples": [
+      "q:tryparse Integer 10",
+      "q:tryparse UserMention mee1001",
+      "q:tryparse Float eight"
+    ],
+    "permission": 2
+  },
+  "massrole": {
+    "description": "Grants every member in the server a given role or the autorole",
+    "arguments": [
+      {
+        "name": "Role",
+        "type": "RoleMention",
+        "optional": true
+      }
+    ],
+    "examples": [
+      "q:massrole",
+      "q:massrole @Scrubs"
+    ],
+    "permission": 3
+  },
+  "addrole": {
+    "description": "Adds a new role to gain for EXP",
+    "arguments": [
+      {
+        "name": "Role",
+        "type": "RoleMention"
+      },
+      {
+        "name": "Experience",
+        "type": "Integer"
+      }
+    ],
+    "examples": [
+      "q:addrole @Red 1500",
+      "q:addrole 451829582018301928 100000"
+    ],
+    "aliases": ["newrole", "createrole"],
+    "permission": 3
+  },
+  "roles": {
+    "description": "Views all the potential roles to earn for EXP",
+    "arguments": [
+      {
+        "name": "Extra",
+        "type": "String",
+        "optional": true,
+        "infinite": true
+      }
+    ],
+    "examples": ["q:roles"],
+    "aliases": ["ranks", "listroles"]
   }
 }

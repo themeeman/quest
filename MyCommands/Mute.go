@@ -12,41 +12,50 @@ import (
 func Mute(session *discordgo.Session, message *discordgo.MessageCreate, args map[string]string, bot commands.Bot) commands.BotError {
 	if len(args) >= 2 {
 		ch, _ := session.State.Channel(message.ChannelID)
-		dur, _ := strconv.Atoi(args["Minutes"])
 		var user *discordgo.User
-		if len(message.Mentions) == 0 {
-			user = new(discordgo.User)
-		} else {
+		if len(args["User"]) == 18 {
+			var err error
+			user, err = session.User(args["User"])
+			if err != nil {
+				return commands.UserNotFoundError{}
+			}
+		} else if len(message.Mentions) > 0 {
 			user = message.Mentions[0]
+		} else {
+			return commands.UserNotFoundError{}
 		}
 		member, _ := session.State.Member(ch.GuildID, user.ID)
-		g, _ := commands.FindGuildByID(bot.Guilds, ch.GuildID)
+		guild := bot.Guilds.Get(ch.GuildID)
+		if !guild.MuteRole.Valid {
+			return commands.MuteRoleError{}
+		}
 		for _, r := range member.Roles {
-			if r == g.MuteRole.String {
+			if r == guild.MuteRole.String {
 				return commands.MutedError{
 					Username:      user.Username,
 					Discriminator: user.Discriminator,
 				}
 			}
 		}
-		err := session.GuildMemberRoleAdd(ch.GuildID, user.ID, g.MuteRole.String)
+		err := session.GuildMemberRoleAdd(ch.GuildID, user.ID, guild.MuteRole.String)
 		if err != nil {
 			fmt.Println(err)
 			if strings.HasPrefix(err.Error(), "HTTP 403 Forbidden") {
-				return commands.PermissionsError{}
+				return commands.BotPermissionsError{}
 			} else if strings.HasPrefix(err.Error(), "HTTP 400 Bad Request") {
-				return commands.RoleError{ID: g.MuteRole.String}
+				return commands.RoleError{ID: guild.MuteRole.String}
 			} else {
 				return commands.UserNotFoundError{}
 			}
 		}
-		m, _ := commands.FindMemberByID(g.Members, message.Author.ID)
+		dur, _ := strconv.Atoi(strings.Replace(args["Minutes"], ",", "", -1))
+		m := guild.Members.Get(message.Author.ID)
 		m.Mute.Time = time.Now()
 		m.Mute.Valid = true
-		m.MuteTime = dur
+		m.MuteTime = int64(dur)
 		go func() {
-			time.Sleep(time.Second * time.Duration(dur))
-			session.GuildMemberRoleRemove(ch.GuildID, user.ID, g.MuteRole.String)
+			time.Sleep(time.Minute * time.Duration(dur))
+			session.GuildMemberRoleRemove(ch.GuildID, user.ID, guild.MuteRole.String)
 		}()
 		if args["Reason"] == "" {
 			session.ChannelMessageSendEmbed(message.ChannelID, bot.Embed("Success!", fmt.Sprintf("Successfully muted %s#%s!", user.Username, user.Discriminator), nil))

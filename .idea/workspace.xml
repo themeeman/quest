@@ -2,14 +2,20 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="ca4713e1-9a40-4db0-b053-9985908197c4" name="Default" comment="">
-      <change beforePath="" afterPath="$PROJECT_DIR$/MyCommands/Me.go" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/MyCommands/AddRole.go" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/MyCommands/MassRole.go" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/MyCommands/Roles.go" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/MyCommands/TryParse.go" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change beforePath="$PROJECT_DIR$/Commands.json" afterPath="$PROJECT_DIR$/Commands.json" />
       <change beforePath="$PROJECT_DIR$/MyCommands/AddExp.go" afterPath="$PROJECT_DIR$/MyCommands/AddExp.go" />
       <change beforePath="$PROJECT_DIR$/MyCommands/Commit.go" afterPath="$PROJECT_DIR$/MyCommands/Commit.go" />
       <change beforePath="$PROJECT_DIR$/MyCommands/Help.go" afterPath="$PROJECT_DIR$/MyCommands/Help.go" />
+      <change beforePath="$PROJECT_DIR$/MyCommands/Me.go" afterPath="$PROJECT_DIR$/MyCommands/Me.go" />
       <change beforePath="$PROJECT_DIR$/MyCommands/Mute.go" afterPath="$PROJECT_DIR$/MyCommands/Mute.go" />
+      <change beforePath="$PROJECT_DIR$/MyCommands/Purge.go" afterPath="$PROJECT_DIR$/MyCommands/Purge.go" />
       <change beforePath="$PROJECT_DIR$/MyCommands/SetMuteRole.go" afterPath="$PROJECT_DIR$/MyCommands/SetMuteRole.go" />
+      <change beforePath="$PROJECT_DIR$/MyCommands/Unmute.go" afterPath="$PROJECT_DIR$/MyCommands/Unmute.go" />
       <change beforePath="$PROJECT_DIR$/Types.json" afterPath="$PROJECT_DIR$/Types.json" />
       <change beforePath="$PROJECT_DIR$/main.exe" afterPath="$PROJECT_DIR$/main.exe" />
       <change beforePath="$PROJECT_DIR$/main.go" afterPath="$PROJECT_DIR$/main.go" />
@@ -29,44 +35,13 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="main.go" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/main.go">
+      <file leaf-file-name="structures.go" pinned="false" current-in-tab="true">
+        <entry file="file://$USER_HOME$/go/src/discordcommands/structures.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="372">
-              <caret line="151" column="18" lean-forward="false" selection-start-line="151" selection-start-column="18" selection-end-line="151" selection-end-column="18" />
+            <state relative-caret-position="831">
+              <caret line="96" column="12" lean-forward="false" selection-start-line="96" selection-start-column="12" selection-end-line="96" selection-end-column="12" />
               <folding>
-                <element signature="e#14#249#0" expanded="true" />
-                <element signature="e#1000#1023#0" expanded="false" />
-                <element signature="e#2412#2425#0" expanded="false" />
-                <element signature="e#2481#2494#0" expanded="false" />
-                <element signature="e#2568#2581#0" expanded="false" />
-                <element signature="e#2628#2641#0" expanded="false" />
-                <element signature="e#2750#2767#0" expanded="false" />
-                <element signature="e#2832#2849#0" expanded="false" />
-                <element signature="e#3064#3128#0" expanded="false" />
-                <element signature="e#3241#3301#0" expanded="false" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="commands.go" pinned="false" current-in-tab="false">
-        <entry file="file://$USER_HOME$/go/src/discordcommands/commands.go">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="261">
-              <caret line="20" column="11" lean-forward="false" selection-start-line="20" selection-start-column="4" selection-end-line="20" selection-end-column="11" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="Commit.go" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/MyCommands/Commit.go">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="270">
-              <caret line="9" column="33" lean-forward="false" selection-start-line="9" selection-start-column="33" selection-end-line="9" selection-end-column="33" />
-              <folding>
-                <element signature="e#20#115#0" expanded="true" />
+                <element signature="e#25#142#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -75,42 +50,35 @@
       <file leaf-file-name="db.go" pinned="false" current-in-tab="false">
         <entry file="file://$USER_HOME$/go/src/discordcommands/db.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="306">
-              <caret line="25" column="43" lean-forward="false" selection-start-line="25" selection-start-column="43" selection-end-line="25" selection-end-column="43" />
+            <state relative-caret-position="1513">
+              <caret line="94" column="20" lean-forward="false" selection-start-line="94" selection-start-column="20" selection-end-line="94" selection-end-column="20" />
               <folding>
-                <marker date="1527942267718" expanded="true" signature="610:630" ph="SELECT * FRO... guilds" />
-                <marker date="1527942267718" expanded="true" signature="1069:1102" ph="INSERT INTO guilds... " />
+                <element signature="e#25#116#0" expanded="true" />
+                <marker date="1528372525894" expanded="true" signature="1356:1383" ph="SELECT COUNT... guilds" />
+                <marker date="1528372525894" expanded="true" signature="1480:1500" ph="SELECT * FRO... guilds" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Commands.json" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Commands.json">
+      <file leaf-file-name="commands.go" pinned="false" current-in-tab="false">
+        <entry file="file://$USER_HOME$/go/src/discordcommands/commands.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="493">
-              <caret line="138" column="6" lean-forward="false" selection-start-line="138" selection-start-column="6" selection-end-line="138" selection-end-column="6" />
+            <state relative-caret-position="1003">
+              <caret line="65" column="1" lean-forward="false" selection-start-line="65" selection-start-column="1" selection-end-line="65" selection-end-column="1" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Types.json" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Types.json">
+      <file leaf-file-name="permissions.go" pinned="false" current-in-tab="false">
+        <entry file="file://$USER_HOME$/go/src/discordcommands/permissions.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="117">
-              <caret line="3" column="24" lean-forward="false" selection-start-line="3" selection-start-column="24" selection-end-line="3" selection-end-column="24" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="errors.go" pinned="false" current-in-tab="false">
-        <entry file="file://$USER_HOME$/go/src/discordcommands/errors.go">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="831">
-              <caret line="101" column="37" lean-forward="false" selection-start-line="101" selection-start-column="37" selection-end-line="101" selection-end-column="37" />
-              <folding />
+            <state relative-caret-position="476">
+              <caret line="28" column="0" lean-forward="false" selection-start-line="28" selection-start-column="0" selection-end-line="28" selection-end-column="0" />
+              <folding>
+                <element signature="e#25#68#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -121,8 +89,8 @@
     <option name="RECENT_TEMPLATES">
       <list>
         <option value="Go Application" />
-        <option value="Command" />
         <option value="Go File" />
+        <option value="Command" />
       </list>
     </option>
   </component>
@@ -140,6 +108,9 @@
       <find>data</find>
       <find>+</find>
       <find>discord</find>
+      <find>Role</find>
+      <find>[]*commands.</find>
+      <find>CreateAllData</find>
     </findStrings>
     <replaceStrings>
       <replace>CommandMap</replace>
@@ -163,25 +134,32 @@
         <option value="C:/Go/src/discordcommands/commands.go" />
         <option value="$PROJECT_DIR$/types.json" />
         <option value="$PROJECT_DIR$/QuestCommands/hotdog.go" />
-        <option value="$PROJECT_DIR$/MyCommands/Conv.go" />
-        <option value="$PROJECT_DIR$/MyCommands/Purge.go" />
         <option value="$PROJECT_DIR$/MyCommands/Types.go" />
-        <option value="$PROJECT_DIR$/MyCommands/Unmute.go" />
+        <option value="$USER_HOME$/go/src/discordcommands/.idea/permissions.go" />
+        <option value="$PROJECT_DIR$/MyCommands/TryParse.go" />
+        <option value="$PROJECT_DIR$/MyCommands/Purge.go" />
+        <option value="$PROJECT_DIR$/Types.json" />
+        <option value="$PROJECT_DIR$/MyCommands/Help.go" />
+        <option value="$USER_HOME$/go/src/discordcommands/errors.go" />
+        <option value="$USER_HOME$/go/src/discordcommands/.idea/roles.go" />
+        <option value="$USER_HOME$/go/src/discordcommands/roles.go" />
+        <option value="$PROJECT_DIR$/Commands.json" />
+        <option value="$PROJECT_DIR$/old/db.go" />
+        <option value="$PROJECT_DIR$/main.go" />
+        <option value="$PROJECT_DIR$/MyCommands/AddExp.go" />
+        <option value="$PROJECT_DIR$/MyCommands/AddRole.go" />
+        <option value="$PROJECT_DIR$/MyCommands/Commit.go" />
+        <option value="$PROJECT_DIR$/MyCommands/Conv.go" />
+        <option value="$PROJECT_DIR$/MyCommands/MassRole.go" />
         <option value="$PROJECT_DIR$/MyCommands/Me.go" />
         <option value="$PROJECT_DIR$/MyCommands/Mute.go" />
-        <option value="$USER_HOME$/go/src/discordcommands/.idea/permissions.go" />
+        <option value="$PROJECT_DIR$/MyCommands/Roles.go" />
         <option value="$PROJECT_DIR$/MyCommands/SetMuteRole.go" />
-        <option value="$USER_HOME$/go/src/discordcommands/permissions.go" />
-        <option value="$USER_HOME$/go/src/discordcommands/errors.go" />
-        <option value="$PROJECT_DIR$/MyCommands/Help.go" />
-        <option value="$PROJECT_DIR$/MyCommands/AddExp.go" />
-        <option value="$USER_HOME$/go/src/discordcommands/structures.go" />
-        <option value="$USER_HOME$/go/src/discordcommands/db.go" />
-        <option value="$PROJECT_DIR$/main.go" />
-        <option value="$PROJECT_DIR$/MyCommands/Commit.go" />
+        <option value="$PROJECT_DIR$/MyCommands/Unmute.go" />
         <option value="$USER_HOME$/go/src/discordcommands/commands.go" />
-        <option value="$PROJECT_DIR$/Commands.json" />
-        <option value="$PROJECT_DIR$/Types.json" />
+        <option value="$USER_HOME$/go/src/discordcommands/db.go" />
+        <option value="$USER_HOME$/go/src/discordcommands/structures.go" />
+        <option value="$USER_HOME$/go/src/discordcommands/permissions.go" />
       </list>
     </option>
   </component>
@@ -215,8 +193,6 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="Scope" />
-      <pane id="Scratches" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -255,6 +231,8 @@
           <select />
         </subPane>
       </pane>
+      <pane id="Scratches" />
+      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -263,14 +241,16 @@
     <property name="SearchEverywhereHistoryKey" value="&#9;FILE&#9;file://C:/Users/Tom Van Wowe/go/src/discordcommands/commands.go" />
     <property name="GO_FMT" value="false" />
     <property name="settings.editor.selected.configurable" value="preferences.lookFeel" />
+    <property name="run.code.analysis.last.selected.profile" value="pProject Default" />
   </component>
   <component name="RecentsManager">
-    <key name="CopyFile.RECENT_KEYS">
-      <recent name="C:\Users\Tom Van Wowe\go\src\discordcommands" />
-      <recent name="C:\Users\Tom Van Wowe\Documents\Quest\discordcommands\old" />
-    </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="C:\Users\Tom Van Wowe\Documents\Quest" />
+    </key>
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\Tom Van Wowe\Documents\Quest\old" />
+      <recent name="C:\Users\Tom Van Wowe\go\src\discordcommands" />
+      <recent name="C:\Users\Tom Van Wowe\Documents\Quest\discordcommands\old" />
     </key>
   </component>
   <component name="RunDashboard">
@@ -285,6 +265,21 @@
       </list>
     </option>
   </component>
+  <component name="RunManager">
+    <configuration name="go build main.go" type="GoApplicationRunConfiguration" factoryName="Go Application" temporary="true">
+      <module name="Quest" />
+      <working_directory value="$PROJECT_DIR$/" />
+      <go_parameters value="-i" />
+      <kind value="FILE" />
+      <filePath value="$PROJECT_DIR$/main.go" />
+      <directory value="$PROJECT_DIR$/" />
+    </configuration>
+    <recent_temporary>
+      <list size="1">
+        <item index="0" class="java.lang.String" itemvalue="Go Build.go build main.go" />
+      </list>
+    </recent_temporary>
+  </component>
   <component name="ShelveChangesManager" show_recycled="false">
     <option name="remove_strategy" value="false" />
   </component>
@@ -292,13 +287,12 @@
     <frame x="-8" y="-8" width="1696" height="1026" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.11666667" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.07857143" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
-      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.0" sideWeight="0.51428574" order="10" side_tool="true" content_ui="tabs" />
+      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.0" sideWeight="0.51666665" order="10" side_tool="true" content_ui="tabs" />
       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.0" sideWeight="0.4857143" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.0" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
@@ -309,6 +303,7 @@
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.0" sideWeight="0.48333332" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
     </layout>
   </component>
@@ -321,190 +316,20 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Completely Refactored" />
     <MESSAGE value="Changed DB to sqlx" />
-    <option name="LAST_COMMIT_MESSAGE" value="Changed DB to sqlx" />
+    <MESSAGE value="Fully working" />
+    <option name="LAST_COMMIT_MESSAGE" value="Fully working" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
-      <option name="time" value="10" />
+      <option name="time" value="11" />
     </breakpoint-manager>
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$USER_HOME$/go/src/discordcommands/commands.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="612">
-          <caret line="42" column="29" lean-forward="false" selection-start-line="42" selection-start-column="29" selection-end-line="42" selection-end-column="29" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/go/src/discordcommands/permissions.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="68">
-          <caret line="6" column="15" lean-forward="false" selection-start-line="6" selection-start-column="15" selection-end-line="6" selection-end-column="15" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/go/src/discordcommands/structures.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1241">
-          <caret line="79" column="0" lean-forward="false" selection-start-line="79" selection-start-column="0" selection-end-line="79" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/MyCommands/Commit.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="170">
-          <caret line="14" column="24" lean-forward="false" selection-start-line="14" selection-start-column="24" selection-end-line="14" selection-end-column="24" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/main.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="782">
-          <caret line="61" column="24" lean-forward="false" selection-start-line="61" selection-start-column="24" selection-end-line="61" selection-end-column="24" />
-          <folding>
-            <element signature="e#14#249#0" expanded="true" />
-            <element signature="e#1000#1023#0" expanded="false" />
-            <element signature="e#2412#2425#0" expanded="false" />
-            <element signature="e#2481#2494#0" expanded="false" />
-            <element signature="e#2568#2581#0" expanded="false" />
-            <element signature="e#2628#2641#0" expanded="false" />
-            <element signature="e#2750#2767#0" expanded="false" />
-            <element signature="e#2832#2849#0" expanded="false" />
-            <element signature="e#3064#3128#0" expanded="false" />
-            <element signature="e#3241#3301#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/MyCommands/Me.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="442">
-          <caret line="26" column="37" lean-forward="false" selection-start-line="26" selection-start-column="37" selection-end-line="26" selection-end-column="37" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/MyCommands/Help.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="714">
-          <caret line="49" column="9" lean-forward="true" selection-start-line="49" selection-start-column="9" selection-end-line="49" selection-end-column="9" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/go/src/discordcommands/commands.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="612">
-          <caret line="42" column="29" lean-forward="false" selection-start-line="42" selection-start-column="29" selection-end-line="42" selection-end-column="29" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/go/src/discordcommands/permissions.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="68">
-          <caret line="6" column="15" lean-forward="false" selection-start-line="6" selection-start-column="15" selection-end-line="6" selection-end-column="15" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/go/src/discordcommands/structures.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1241">
-          <caret line="79" column="0" lean-forward="false" selection-start-line="79" selection-start-column="0" selection-end-line="79" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/MyCommands/Commit.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="170">
-          <caret line="14" column="24" lean-forward="true" selection-start-line="14" selection-start-column="24" selection-end-line="14" selection-end-column="24" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/main.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1870">
-          <caret line="126" column="0" lean-forward="false" selection-start-line="126" selection-start-column="0" selection-end-line="126" selection-end-column="0" />
-          <folding>
-            <element signature="e#14#249#0" expanded="true" />
-            <element signature="e#1000#1023#0" expanded="false" />
-            <element signature="e#2412#2425#0" expanded="false" />
-            <element signature="e#2481#2494#0" expanded="false" />
-            <element signature="e#2568#2581#0" expanded="false" />
-            <element signature="e#2628#2641#0" expanded="false" />
-            <element signature="e#2750#2767#0" expanded="false" />
-            <element signature="e#2832#2849#0" expanded="false" />
-            <element signature="e#3064#3128#0" expanded="false" />
-            <element signature="e#3241#3301#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/MyCommands/Me.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="357">
-          <caret line="26" column="37" lean-forward="false" selection-start-line="26" selection-start-column="37" selection-end-line="26" selection-end-column="37" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/MyCommands/Help.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="561">
-          <caret line="40" column="13" lean-forward="true" selection-start-line="40" selection-start-column="13" selection-end-line="40" selection-end-column="13" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/go/src/discordcommands/permissions.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="68">
-          <caret line="6" column="15" lean-forward="false" selection-start-line="6" selection-start-column="15" selection-end-line="6" selection-end-column="15" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/MyCommands/Commit.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/go/src/discordcommands/structures.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="51">
-          <caret line="9" column="0" lean-forward="true" selection-start-line="9" selection-start-column="0" selection-end-line="9" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/MyCommands/AddExp.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="459">
-          <caret line="27" column="0" lean-forward="false" selection-start-line="27" selection-start-column="0" selection-end-line="27" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/MyCommands/Me.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="357">
-          <caret line="26" column="37" lean-forward="false" selection-start-line="26" selection-start-column="37" selection-end-line="26" selection-end-column="37" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/main.go">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="663">
           <caret line="54" column="53" lean-forward="false" selection-start-line="54" selection-start-column="53" selection-end-line="54" selection-end-column="53" />
-          <folding>
-            <element signature="e#14#249#0" expanded="true" />
-            <element signature="e#1000#1023#0" expanded="false" />
-            <element signature="e#2412#2425#0" expanded="false" />
-            <element signature="e#2481#2494#0" expanded="false" />
-            <element signature="e#2568#2581#0" expanded="false" />
-            <element signature="e#2628#2641#0" expanded="false" />
-            <element signature="e#2750#2767#0" expanded="false" />
-            <element signature="e#2832#2849#0" expanded="false" />
-            <element signature="e#3064#3128#0" expanded="false" />
-            <element signature="e#3241#3301#0" expanded="false" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -596,32 +421,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="663">
           <caret line="54" column="53" lean-forward="false" selection-start-line="54" selection-start-column="53" selection-end-line="54" selection-end-column="53" />
-          <folding>
-            <element signature="e#14#249#0" expanded="true" />
-            <element signature="e#1000#1023#0" expanded="false" />
-            <element signature="e#2412#2425#0" expanded="false" />
-            <element signature="e#2481#2494#0" expanded="false" />
-            <element signature="e#2568#2581#0" expanded="false" />
-            <element signature="e#2628#2641#0" expanded="false" />
-            <element signature="e#2750#2767#0" expanded="false" />
-            <element signature="e#2832#2849#0" expanded="false" />
-            <element signature="e#3064#3128#0" expanded="false" />
-            <element signature="e#3241#3301#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/MyCommands/Mute.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="680">
-          <caret line="47" column="26" lean-forward="false" selection-start-line="47" selection-start-column="26" selection-end-line="47" selection-end-column="26" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/MyCommands/SetMuteRole.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="187">
-          <caret line="11" column="30" lean-forward="false" selection-start-line="11" selection-start-column="30" selection-end-line="11" selection-end-column="30" />
         </state>
       </provider>
     </entry>
@@ -632,21 +431,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/MyCommands/Me.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="357">
-          <caret line="26" column="37" lean-forward="false" selection-start-line="26" selection-start-column="37" selection-end-line="26" selection-end-column="37" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://C:/Go/src/builtin/builtin.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="287">
-          <caret line="100" column="4" lean-forward="false" selection-start-line="100" selection-start-column="4" selection-end-line="100" selection-end-column="4" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$USER_HOME$/go/src/github.com/bwmarrin/discordgo/structs.go">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="168">
@@ -654,76 +438,237 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$USER_HOME$/go/src/discordcommands/permissions.go">
+    <entry file="file://C:/Go/src/time/zoneinfo.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="198">
-          <caret line="6" column="45" lean-forward="false" selection-start-line="6" selection-start-column="45" selection-end-line="6" selection-end-column="45" />
+        <state relative-caret-position="221">
+          <caret line="16" column="5" lean-forward="false" selection-start-line="16" selection-start-column="5" selection-end-line="16" selection-end-column="5" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/MyCommands/Help.go">
+    <entry file="file://C:/Go/src/time/sleep.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="748">
-          <caret line="51" column="38" lean-forward="false" selection-start-line="51" selection-start-column="38" selection-end-line="51" selection-end-column="38" />
+        <state relative-caret-position="331">
+          <caret line="149" column="5" lean-forward="false" selection-start-line="149" selection-start-column="5" selection-end-line="149" selection-end-column="5" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$USER_HOME$/go/src/discordcommands/structures.go">
+    <entry file="file://C:/Go/src/time/time.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="228">
-          <caret line="93" column="28" lean-forward="false" selection-start-line="93" selection-start-column="28" selection-end-line="93" selection-end-column="28" />
+        <state relative-caret-position="267">
+          <caret line="440" column="5" lean-forward="false" selection-start-line="440" selection-start-column="5" selection-end-line="440" selection-end-column="5" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$USER_HOME$/go/src/discordcommands/db.go">
+    <entry file="file://C:/Go/src/strings/strings.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="306">
-          <caret line="25" column="43" lean-forward="false" selection-start-line="25" selection-start-column="43" selection-end-line="25" selection-end-column="43" />
-          <folding>
-            <marker date="1527942267718" expanded="true" signature="610:630" ph="SELECT * FRO... guilds" />
-            <marker date="1527942267718" expanded="true" signature="1069:1102" ph="INSERT INTO guilds... " />
-          </folding>
+        <state relative-caret-position="181">
+          <caret line="683" column="21" lean-forward="false" selection-start-line="683" selection-start-column="21" selection-end-line="683" selection-end-column="21" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Types.json">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="252">
+          <caret line="6" column="44" lean-forward="false" selection-start-line="6" selection-start-column="44" selection-end-line="6" selection-end-column="44" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/go/src/discordcommands/errors.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="531">
+          <caret line="130" column="78" lean-forward="false" selection-start-line="130" selection-start-column="78" selection-end-line="130" selection-end-column="78" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/go/src/github.com/jmoiron/sqlx/sqlx.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="551">
+          <caret line="493" column="14" lean-forward="false" selection-start-line="493" selection-start-column="14" selection-end-line="493" selection-end-column="14" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://C:/Go/src/builtin/builtin.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="145">
+          <caret line="51" column="5" lean-forward="false" selection-start-line="51" selection-start-column="5" selection-end-line="51" selection-end-column="5" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/go/src/github.com/bwmarrin/discordgo/events.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="378">
+          <caret line="37" column="5" lean-forward="false" selection-start-line="37" selection-start-column="5" selection-end-line="37" selection-end-column="5" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/go/src/github.com/bwmarrin/discordgo/restapi.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="296">
+          <caret line="922" column="18" lean-forward="false" selection-start-line="922" selection-start-column="18" selection-end-line="922" selection-end-column="18" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/go/src/github.com/bwmarrin/discordgo/message.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="360">
+          <caret line="39" column="4" lean-forward="false" selection-start-line="39" selection-start-column="4" selection-end-line="39" selection-end-column="4" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/go/src/discordcommands/.idea/roles.go" />
+    <entry file="file://$USER_HOME$/go/src/discordcommands/roles.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="68">
+          <caret line="9" column="5" lean-forward="false" selection-start-line="9" selection-start-column="5" selection-end-line="9" selection-end-column="5" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/old/db.go" />
+    <entry file="file://$PROJECT_DIR$/Commands.json">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="831">
+          <caret line="204" column="6" lean-forward="false" selection-start-line="204" selection-start-column="6" selection-end-line="204" selection-end-column="6" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/old/old.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/main.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-58">
+          <caret line="36" column="30" lean-forward="false" selection-start-line="36" selection-start-column="30" selection-end-line="36" selection-end-column="30" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/MyCommands/AddExp.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="620">
+          <caret line="25" column="35" lean-forward="false" selection-start-line="25" selection-start-column="35" selection-end-line="25" selection-end-column="35" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/MyCommands/AddRole.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="495">
+          <caret line="19" column="46" lean-forward="true" selection-start-line="19" selection-start-column="46" selection-end-line="19" selection-end-column="46" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/MyCommands/Commit.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="270">
-          <caret line="9" column="33" lean-forward="false" selection-start-line="9" selection-start-column="33" selection-end-line="9" selection-end-column="33" />
+        <state relative-caret-position="217">
+          <caret line="11" column="20" lean-forward="false" selection-start-line="11" selection-start-column="20" selection-end-line="11" selection-end-column="20" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/MyCommands/Conv.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="324">
+          <caret line="20" column="20" lean-forward="true" selection-start-line="20" selection-start-column="20" selection-end-line="20" selection-end-column="20" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/MyCommands/Help.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="241">
+          <caret line="18" column="9" lean-forward="false" selection-start-line="18" selection-start-column="9" selection-end-line="18" selection-end-column="9" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/MyCommands/MassRole.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="150">
+          <caret line="10" column="10" lean-forward="false" selection-start-line="10" selection-start-column="10" selection-end-line="10" selection-end-column="10" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/MyCommands/Me.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="521">
+          <caret line="25" column="35" lean-forward="false" selection-start-line="25" selection-start-column="35" selection-end-line="25" selection-end-column="35" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/MyCommands/Mute.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="169">
+          <caret line="51" column="9" lean-forward="false" selection-start-line="51" selection-start-column="9" selection-end-line="51" selection-end-column="9" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/MyCommands/Purge.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="170">
+          <caret line="16" column="29" lean-forward="false" selection-start-line="16" selection-start-column="29" selection-end-line="16" selection-end-column="29" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/MyCommands/Unmute.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="323">
+          <caret line="24" column="24" lean-forward="false" selection-start-line="24" selection-start-column="24" selection-end-line="24" selection-end-column="24" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/go/src/discordcommands/commands.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1003">
+          <caret line="65" column="1" lean-forward="false" selection-start-line="65" selection-start-column="1" selection-end-line="65" selection-end-column="1" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/go/src/discordcommands/db.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1513">
+          <caret line="94" column="20" lean-forward="false" selection-start-line="94" selection-start-column="20" selection-end-line="94" selection-end-column="20" />
+          <folding>
+            <element signature="e#25#116#0" expanded="true" />
+            <marker date="1528372525894" expanded="true" signature="1356:1383" ph="SELECT COUNT... guilds" />
+            <marker date="1528372525894" expanded="true" signature="1480:1500" ph="SELECT * FRO... guilds" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/go/src/discordcommands/permissions.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="476">
+          <caret line="28" column="0" lean-forward="false" selection-start-line="28" selection-start-column="0" selection-end-line="28" selection-end-column="0" />
+          <folding>
+            <element signature="e#25#68#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/MyCommands/Roles.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="187">
+          <caret line="11" column="9" lean-forward="false" selection-start-line="11" selection-start-column="9" selection-end-line="11" selection-end-column="9" />
           <folding>
             <element signature="e#20#115#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$USER_HOME$/go/src/discordcommands/commands.go">
+    <entry file="file://$PROJECT_DIR$/MyCommands/SetMuteRole.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="261">
-          <caret line="20" column="11" lean-forward="false" selection-start-line="20" selection-start-column="4" selection-end-line="20" selection-end-column="11" />
+        <state relative-caret-position="102">
+          <caret line="9" column="10" lean-forward="false" selection-start-line="9" selection-start-column="10" selection-end-line="9" selection-end-column="10" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Commands.json">
+    <entry file="file://$PROJECT_DIR$/MyCommands/TryParse.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="493">
-          <caret line="138" column="6" lean-forward="false" selection-start-line="138" selection-start-column="6" selection-end-line="138" selection-end-column="6" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/go/src/discordcommands/errors.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="831">
-          <caret line="101" column="37" lean-forward="false" selection-start-line="101" selection-start-column="37" selection-end-line="101" selection-end-column="37" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Types.json">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="117">
-          <caret line="3" column="24" lean-forward="false" selection-start-line="3" selection-start-column="24" selection-end-line="3" selection-end-column="24" />
+        <state relative-caret-position="442">
+          <caret line="31" column="34" lean-forward="false" selection-start-line="31" selection-start-column="34" selection-end-line="31" selection-end-column="34" />
           <folding />
         </state>
       </provider>
@@ -736,29 +681,12 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/MyCommands/AddExp.go">
+    <entry file="file://$USER_HOME$/go/src/discordcommands/structures.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="872">
-          <caret line="36" column="105" lean-forward="false" selection-start-line="36" selection-start-column="105" selection-end-line="36" selection-end-column="105" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/main.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="372">
-          <caret line="151" column="18" lean-forward="false" selection-start-line="151" selection-start-column="18" selection-end-line="151" selection-end-column="18" />
+        <state relative-caret-position="831">
+          <caret line="96" column="12" lean-forward="false" selection-start-line="96" selection-start-column="12" selection-end-line="96" selection-end-column="12" />
           <folding>
-            <element signature="e#14#249#0" expanded="true" />
-            <element signature="e#1000#1023#0" expanded="false" />
-            <element signature="e#2412#2425#0" expanded="false" />
-            <element signature="e#2481#2494#0" expanded="false" />
-            <element signature="e#2568#2581#0" expanded="false" />
-            <element signature="e#2628#2641#0" expanded="false" />
-            <element signature="e#2750#2767#0" expanded="false" />
-            <element signature="e#2832#2849#0" expanded="false" />
-            <element signature="e#3064#3128#0" expanded="false" />
-            <element signature="e#3241#3301#0" expanded="false" />
+            <element signature="e#25#142#0" expanded="true" />
           </folding>
         </state>
       </provider>
