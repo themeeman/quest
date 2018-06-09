@@ -33,6 +33,7 @@ var QuestCommands = commands.HandlerMap{
 	"massrole": command.MassRole,
 	"addrole":  command.AddRole,
 	"roles":    command.Roles,
+	"set": 		command.Set,
 }
 var CommandsData commands.CommandMap
 var RegexVerifiers = map[string]string{}
@@ -41,7 +42,7 @@ var Token string
 var db *sqlx.DB
 var guilds commands.Guilds
 
-var ctx commands.Bot
+var bot commands.Bot
 
 const (
 	prefix      = "q:"
@@ -59,7 +60,7 @@ func ready(s *discordgo.Session, _ *discordgo.Ready) {
 		fmt.Println(v)
 	}
 	s.UpdateStatus(0, "q:help")
-	ctx = commands.Bot{
+	bot = commands.Bot{
 		HandlerMap: QuestCommands,
 		CommandMap: CommandsData,
 		ExpTimes: make(map[struct {
@@ -72,26 +73,26 @@ func ready(s *discordgo.Session, _ *discordgo.Ready) {
 		DB:     db,
 		Embed:  questEmbed,
 	}
+	fmt.Println(commands.GetOptions(&bot))
 }
 
 func messageCreate(session *discordgo.Session, message *discordgo.MessageCreate) {
 	defer func() {
 		if r := recover(); r != nil {
-			rep := strings.Replace
-			text := fmt.Sprint(r) + "\n" + rep(rep(string(debug.Stack()), "Tom Van Wowe", "Root", -1), "Tom_Van_Wowe", "Root", -1)
+			log.Println(debug.Stack())
 			session.ChannelMessageSend(message.ChannelID, "```"+ `An unexpected panic occured in the execution of that command.
-`+ text+ "```")
+`+ fmt.Sprint(r) + "```")
 		}
 	}()
 	fmt.Println(message.Content)
 	if !message.Author.Bot {
 		if strings.HasPrefix(strings.ToLower(message.Content), prefix) {
-			err := commands.ExecuteCommand(session, message, ctx)
+			err := commands.ExecuteCommand(session, message, bot)
 			if err != nil {
 				session.ChannelMessageSendEmbed(message.ChannelID, commands.ErrorEmbed(err))
 			}
 		}
-		grantExp(&ctx, session, message)
+		grantExp(&bot, session, message)
 		fmt.Println("-----------------------")
 	}
 }
@@ -101,7 +102,7 @@ func guildCreate(_ *discordgo.Session, event *discordgo.GuildCreate) {
 }
 
 func memberAdd(session *discordgo.Session, event *discordgo.GuildMemberAdd) {
-	guild := ctx.Guilds.Get(event.GuildID)
+	guild := bot.Guilds.Get(event.GuildID)
 	if guild.Autorole.Valid {
 		session.GuildMemberRoleAdd(event.GuildID, event.Member.User.ID, guild.Autorole.String)
 	}
@@ -116,7 +117,7 @@ func grantExp(bot *commands.Bot, session *discordgo.Session, message *discordgo.
 		Member: message.Author.ID,
 	}
 	t, ok := bot.ExpTimes[s]
-	g := ctx.Guilds.Get(s.Guild)
+	g := bot.Guilds.Get(s.Guild)
 	m := g.Members.Get(s.Member)
 	fmt.Println(s.Member)
 	if !ok || uint16(time.Since(t).Seconds()) > g.ExpReload {

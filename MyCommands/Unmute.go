@@ -22,13 +22,13 @@ func Unmute(session *discordgo.Session, message *discordgo.MessageCreate, args m
 		return commands.UserNotFoundError{}
 	}
 	member, _ := session.State.Member(ch.GuildID, user.ID)
-	g := bot.Guilds.Get(commands.MustGetGuildID(session, message))
+	guild := bot.Guilds.Get(commands.MustGetGuildID(session, message))
 	var found bool
-	if !g.MuteRole.Valid {
+	if !guild.MuteRole.Valid {
 		return commands.MuteRoleError{}
 	}
 	for _, r := range member.Roles {
-		if r == g.MuteRole.String {
+		if r == guild.MuteRole.String {
 			found = true
 		}
 	}
@@ -38,7 +38,7 @@ func Unmute(session *discordgo.Session, message *discordgo.MessageCreate, args m
 			Discriminator: user.Discriminator,
 		}
 	}
-	err := session.GuildMemberRoleRemove(ch.GuildID, user.ID, "413273250131345409")
+	err := session.GuildMemberRoleRemove(ch.GuildID, user.ID, guild.MuteRole.String)
 	if err != nil {
 		if strings.Contains(err.Error(), "HTTP 403 Forbidden") {
 			return commands.BotPermissionsError{}
@@ -46,6 +46,8 @@ func Unmute(session *discordgo.Session, message *discordgo.MessageCreate, args m
 			return commands.UserNotFoundError{}
 		}
 	}
+	m := guild.Get(user.ID)
+	m.MuteExpires.Valid = false
 	if args["Reason"] == "" {
 		session.ChannelMessageSendEmbed(message.ChannelID, bot.Embed("Success!", fmt.Sprintf("Successfully unmuted %session#%session!", user.Username, user.Discriminator), nil))
 	} else {

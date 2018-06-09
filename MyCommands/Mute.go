@@ -50,9 +50,8 @@ func Mute(session *discordgo.Session, message *discordgo.MessageCreate, args map
 		}
 		dur, _ := strconv.Atoi(strings.Replace(args["Minutes"], ",", "", -1))
 		m := guild.Members.Get(message.Author.ID)
-		m.Mute.Time = time.Now()
-		m.Mute.Valid = true
-		m.MuteTime = int64(dur)
+		m.MuteExpires.Time = time.Now().Add(time.Minute * time.Duration(dur))
+		m.MuteExpires.Valid = true
 		go func() {
 			time.Sleep(time.Minute * time.Duration(dur))
 			session.GuildMemberRoleRemove(ch.GuildID, user.ID, guild.MuteRole.String)

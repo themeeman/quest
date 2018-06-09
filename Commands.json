@@ -205,5 +205,23 @@
     ],
     "examples": ["q:roles"],
     "aliases": ["ranks", "listroles"]
+  },
+  "set": {
+    "description": "Set options for the guild",
+    "arguments": [
+      {
+        "name": "Option",
+        "type": "String",
+        "optional": true
+      },
+      {
+        "name": "Value",
+        "type": "String",
+        "optional": true,
+        "infinite": true
+      }
+    ],
+    "examples": ["q:set MuteRole @Muted", "q:set ExpReload 90"],
+    "aliases": ["flag"]
   }
 }

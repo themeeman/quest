@@ -7,12 +7,21 @@ import (
 	"fmt"
 	"strings"
 	"encoding/json"
+	"sort"
 )
 
 func Help(session *discordgo.Session, message *discordgo.MessageCreate, args map[string]string, bot commands.Bot) commands.BotError {
 	if args["Command"] == "" {
 		var buf bytes.Buffer
-		for name, v := range bot.CommandMap {
+		names := make([]string, len(bot.CommandMap))
+		i := 0
+		for name := range bot.CommandMap {
+			names[i] = name
+			i++
+		}
+		sort.Strings(names)
+		for _, name := range names {
+			v := bot.CommandMap[name]
 			if _, ok := bot.HandlerMap[name]; ok && !v.Hidden {
 				buf.WriteString(fmt.Sprintf("**%s - ** %s\n", name, v.Description))
 			}
@@ -71,6 +80,12 @@ func Help(session *discordgo.Session, message *discordgo.MessageCreate, args map
 					Value: "```" + buffer.String() + "```",
 				},
 			}
+		}
+		if len(cmdInfo.Aliases) > 0 {
+			fields = append(fields, &discordgo.MessageEmbedField{
+				Name:  "Aliases",
+				Value: strings.Join(cmdInfo.Aliases, ","),
+			})
 		}
 		session.ChannelMessageSendEmbed(message.ChannelID, bot.Embed(strings.Title(name), cmdInfo.Description, fields))
 	}
