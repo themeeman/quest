@@ -2,14 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="ca4713e1-9a40-4db0-b053-9985908197c4" name="Default" comment="">
-      <change beforePath="" afterPath="$PROJECT_DIR$/MyCommands/Set.go" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change beforePath="$PROJECT_DIR$/Commands.json" afterPath="$PROJECT_DIR$/Commands.json" />
-      <change beforePath="$PROJECT_DIR$/MyCommands/Help.go" afterPath="$PROJECT_DIR$/MyCommands/Help.go" />
-      <change beforePath="$PROJECT_DIR$/MyCommands/Mute.go" afterPath="$PROJECT_DIR$/MyCommands/Mute.go" />
-      <change beforePath="$PROJECT_DIR$/MyCommands/Unmute.go" afterPath="$PROJECT_DIR$/MyCommands/Unmute.go" />
-      <change beforePath="$PROJECT_DIR$/main.exe" afterPath="$PROJECT_DIR$/main.exe" />
-      <change beforePath="$PROJECT_DIR$/main.go" afterPath="$PROJECT_DIR$/main.go" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -52,7 +45,7 @@
       <file leaf-file-name="main.go" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/main.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="714">
+            <state relative-caret-position="1572">
               <caret line="104" column="27" lean-forward="false" selection-start-line="104" selection-start-column="27" selection-end-line="104" selection-end-column="27" />
               <folding />
             </state>
@@ -745,7 +738,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/main.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="714">
+        <state relative-caret-position="1572">
           <caret line="104" column="27" lean-forward="false" selection-start-line="104" selection-start-column="27" selection-end-line="104" selection-end-column="27" />
           <folding />
         </state>
