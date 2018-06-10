@@ -75,7 +75,8 @@
   "types": {
     "description": "View all built in types",
     "arguments": [],
-    "permission": 2
+    "permission": 2,
+    "hidden": true
   },
   "conv": {
     "description": "Converts a float",

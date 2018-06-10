@@ -27,7 +27,6 @@ var QuestCommands = commands.HandlerMap{
 	"types":    quest.Types,
 	"commit":   quest.Commit,
 	"addexp":   quest.AddExp,
-	"setmute":  quest.SetMuteRole,
 	"me":       quest.Me,
 	"tryparse": quest.TryParse,
 	"massrole": quest.MassRole,
@@ -46,8 +45,8 @@ var bot commands.Bot
 
 const (
 	prefix      = "q:"
-	commandFile = "json/Commands.json"
-	typesFile   = "json/Types.json"
+	commandFile = "./json/Commands.json"
+	typesFile   = "./json/Types.json"
 )
 
 func ready(s *discordgo.Session, _ *discordgo.Ready) {
@@ -73,6 +72,17 @@ func ready(s *discordgo.Session, _ *discordgo.Ready) {
 		DB:     db,
 		Embed:  questEmbed,
 	}
+	go func() {
+		for {
+			time.Sleep(time.Minute * 10)
+			err := commands.PostAllData(db, bot.Guilds)
+			if err != nil {
+				log.Println(err)
+			} else {
+				log.Println("Successfully commited all data")
+			}
+		}
+	}()
 	fmt.Println(commands.GetOptions(&bot))
 }
 
@@ -81,7 +91,7 @@ func messageCreate(session *discordgo.Session, message *discordgo.MessageCreate)
 		if r := recover(); r != nil {
 			log.Println(debug.Stack())
 			session.ChannelMessageSend(message.ChannelID, "```"+ `An unexpected panic occured in the execution of that quest.
-`+ fmt.Sprint(r) + "```")
+`+ fmt.Sprint(r)+ "```")
 		}
 	}()
 	fmt.Println(message.Content)
