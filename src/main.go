@@ -13,27 +13,27 @@ import (
 	"encoding/json"
 	commands "discordcommands"
 	_ "database/sql"
-	command "../Quest/MyCommands"
+	quest "./quest"
 	"github.com/jmoiron/sqlx"
 	"math/rand"
 	"runtime/debug"
 )
 
 var QuestCommands = commands.HandlerMap{
-	"help":     command.Help,
-	"mute":     command.Mute,
-	"unmute":   command.Unmute,
-	"purge":    command.Purge,
-	"types":    command.Types,
-	"commit":   command.Commit,
-	"addexp":   command.AddExp,
-	"setmute":  command.SetMuteRole,
-	"me":       command.Me,
-	"tryparse": command.TryParse,
-	"massrole": command.MassRole,
-	"addrole":  command.AddRole,
-	"roles":    command.Roles,
-	"set": 		command.Set,
+	"help":     quest.Help,
+	"mute":     quest.Mute,
+	"unmute":   quest.Unmute,
+	"purge":    quest.Purge,
+	"types":    quest.Types,
+	"commit":   quest.Commit,
+	"addexp":   quest.AddExp,
+	"setmute":  quest.SetMuteRole,
+	"me":       quest.Me,
+	"tryparse": quest.TryParse,
+	"massrole": quest.MassRole,
+	"addrole":  quest.AddRole,
+	"roles":    quest.Roles,
+	"set":      quest.Set,
 }
 var CommandsData commands.CommandMap
 var RegexVerifiers = map[string]string{}
@@ -46,8 +46,8 @@ var bot commands.Bot
 
 const (
 	prefix      = "q:"
-	commandFile = "Commands.json"
-	typesFile   = "Types.json"
+	commandFile = "json/Commands.json"
+	typesFile   = "json/Types.json"
 )
 
 func ready(s *discordgo.Session, _ *discordgo.Ready) {
@@ -80,7 +80,7 @@ func messageCreate(session *discordgo.Session, message *discordgo.MessageCreate)
 	defer func() {
 		if r := recover(); r != nil {
 			log.Println(debug.Stack())
-			session.ChannelMessageSend(message.ChannelID, "```"+ `An unexpected panic occured in the execution of that command.
+			session.ChannelMessageSend(message.ChannelID, "```"+ `An unexpected panic occured in the execution of that quest.
 `+ fmt.Sprint(r) + "```")
 		}
 	}()
