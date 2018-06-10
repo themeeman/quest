@@ -45,8 +45,8 @@ var bot commands.Bot
 
 const (
 	prefix      = "q:"
-	commandFile = "./json/Commands.json"
-	typesFile   = "./json/Types.json"
+	commandFile = `src\json\Commands.json`
+	typesFile   = `src\json\Types.json`
 )
 
 func ready(s *discordgo.Session, _ *discordgo.Ready) {
@@ -179,6 +179,9 @@ func unmarshalJson(filename string, v interface{}) (err error) {
 func init() {
 	rand.Seed(time.Now().UTC().UnixNano())
 	var err error
+	if err != nil {
+		panic(err)
+	}
 	err = unmarshalJson(commandFile, &CommandsData)
 	if err != nil {
 		panic(err)
