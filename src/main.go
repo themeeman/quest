@@ -1,7 +1,6 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 	"github.com/bwmarrin/discordgo"
 	"log"
@@ -11,7 +10,7 @@ import (
 	"strings"
 	"time"
 	"encoding/json"
-	commands "discordcommands"
+	commands "./discordcommands"
 	_ "database/sql"
 	quest "./quest"
 	"github.com/jmoiron/sqlx"
@@ -37,10 +36,17 @@ var QuestCommands = commands.HandlerMap{
 var CommandsData commands.CommandMap
 var RegexVerifiers = map[string]string{}
 
-var Token string
+type app struct {
+	Token string
+	User string
+	Pass string
+	Host string
+	Table string
+}
+
 var db *sqlx.DB
 var guilds commands.Guilds
-
+var ap app
 var bot commands.Bot
 
 const (
@@ -189,9 +195,14 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
-	flag.StringVar(&Token, "t", "", "Bot Token")
-	flag.Parse()
-	db, err = commands.InitDB()
+	err = unmarshalJson(`src\json\app.json`, &ap)
+//	flag.StringVar(&Token, "t", "", "Bot Token")
+//	flag.StringVar(&user, "u", "", "Username")
+//	flag.StringVar(&pass, "p", "", "Password")
+//	flag.StringVar(&host, "h", "", "Hostname")
+//	flag.StringVar(&table, "a", "", "Table")
+//	flag.Parse()
+	db, err = commands.InitDB(ap.User, ap.Pass, ap.Host, ap.Table)
 	if err != nil {
 		panic(err)
 	}
@@ -199,7 +210,7 @@ func init() {
 
 func main() {
 	defer db.Close()
-	dg, err := discordgo.New("Bot " + Token)
+	dg, err := discordgo.New("Bot " + ap.Token)
 	if err != nil {
 		log.Fatalln("Error making discord session", err)
 		return

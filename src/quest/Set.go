@@ -2,7 +2,7 @@ package MyCommands
 
 import (
 	"github.com/bwmarrin/discordgo"
-	commands "discordcommands"
+	commands ".././discordcommands"
 	"regexp"
 	"strings"
 	"strconv"
@@ -137,7 +137,9 @@ func convertType(message *discordgo.MessageCreate, T string, value string) inter
 		a = v * math.Pow10(e)
 		break
 	case "UserMention":
-		if len(message.Mentions) > 0 {
+		if value == "none" {
+			a = sql.NullString{}
+		} else if len(message.Mentions) > 0 {
 			a = sql.NullString{
 				String: message.Mentions[0].ID,
 				Valid:  true,
@@ -150,7 +152,9 @@ func convertType(message *discordgo.MessageCreate, T string, value string) inter
 		}
 		break
 	case "RoleMention":
-		if len(message.MentionRoles) > 0 {
+		if value == "none" {
+			a = sql.NullString{}
+		} else if len(message.MentionRoles) > 0 {
 			a = sql.NullString{
 				String: message.MentionRoles[0],
 				Valid:  true,
@@ -163,7 +167,9 @@ func convertType(message *discordgo.MessageCreate, T string, value string) inter
 		}
 		break
 	case "ChannelMention":
-		if len(value) > 18 {
+		if value == "none" {
+			a = sql.NullString{}
+		} else if len(value) > 18 {
 			a = sql.NullString{
 				String: value[2:20],
 				Valid:  true,
