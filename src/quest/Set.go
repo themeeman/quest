@@ -37,25 +37,23 @@ func Set(session *discordgo.Session, message *discordgo.MessageCreate, args map[
 			Received: 1,
 		}
 	} else {
-		fmt.Println(options)
-		fmt.Println(args["Option"])
-		T, ok := options[args["Option"]]
+		option, ok := options[args["Option"]]
 		if !ok {
 			return commands.OptionError{
-				Option: args["Option"],
+				Option: option.Name,
 			}
 		}
-		pattern, _ := bot.Regex[T]
+		pattern, _ := bot.Regex[option.Type]
 		value := args["Value"]
 		result, _ := regexp.MatchString(pattern, value)
 		if !result {
 			return commands.ParsingError{
 				Value:    value,
 				Position: 2,
-				Expected: T,
+				Expected: option.Type,
 			}
 		}
-		val := convertType(message, T, value)
+		val := convertType(message, option.Type, value)
 		fmt.Println(val)
 		guild := bot.Guilds.Get(commands.MustGetGuildID(session, message))
 		field := reflect.ValueOf(guild).Elem().FieldByName(args["Option"])

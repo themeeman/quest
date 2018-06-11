@@ -83,7 +83,6 @@ func ready(s *discordgo.Session, _ *discordgo.Ready) {
 			}
 		}
 	}()
-	fmt.Println(commands.GetOptions(&bot))
 }
 
 func messageCreate(session *discordgo.Session, message *discordgo.MessageCreate) {
