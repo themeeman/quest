@@ -191,7 +191,7 @@ func init() {
 	var src string
 	flag.StringVar(&src, "a", "", "App Location")
 	flag.Parse()
-	err = unmarshalJson(src, &app)
+	err = unmarshalJson("src/" + src, &app)
 	if err != nil {
 		panic(err)
 	}
