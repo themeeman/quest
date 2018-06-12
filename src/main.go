@@ -36,23 +36,23 @@ var QuestCommands = commands.HandlerMap{
 var CommandsData commands.CommandMap
 var RegexVerifiers = map[string]string{}
 
-type app struct {
-	Token string
-	User string
-	Pass string
-	Host string
-	Table string
+type App struct {
+	Token    string
+	User     string
+	Pass     string
+	Host     string
+	Table    string
+	Commands string
+	Types    string
 }
 
 var db *sqlx.DB
 var guilds commands.Guilds
-var ap app
+var app App
 var bot commands.Bot
 
 const (
 	prefix      = "q:"
-	commandFile = `src\json\Commands.json`
-	typesFile   = `src\json\Types.json`
 )
 
 func ready(s *discordgo.Session, _ *discordgo.Ready) {
@@ -187,22 +187,19 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
-	err = unmarshalJson(commandFile, &CommandsData)
+	err = unmarshalJson(`src\json\app.json`, &app)
 	if err != nil {
 		panic(err)
 	}
-	err = unmarshalJson(typesFile, &RegexVerifiers)
+	err = unmarshalJson(app.Commands, &CommandsData)
 	if err != nil {
 		panic(err)
 	}
-	err = unmarshalJson(`src\json\app.json`, &ap)
-//	flag.StringVar(&Token, "t", "", "Bot Token")
-//	flag.StringVar(&user, "u", "", "Username")
-//	flag.StringVar(&pass, "p", "", "Password")
-//	flag.StringVar(&host, "h", "", "Hostname")
-//	flag.StringVar(&table, "a", "", "Table")
-//	flag.Parse()
-	db, err = commands.InitDB(ap.User, ap.Pass, ap.Host, ap.Table)
+	err = unmarshalJson(app.Types, &RegexVerifiers)
+	if err != nil {
+		panic(err)
+	}
+	db, err = commands.InitDB(app.User, app.Pass, app.Host, app.Table)
 	if err != nil {
 		panic(err)
 	}
@@ -210,7 +207,7 @@ func init() {
 
 func main() {
 	defer db.Close()
-	dg, err := discordgo.New("Bot " + ap.Token)
+	dg, err := discordgo.New("Bot " + app.Token)
 	if err != nil {
 		log.Fatalln("Error making discord session", err)
 		return
