@@ -3,4 +3,4 @@
 
 bin
 run.bat
-src/json/app.json
+app.json
