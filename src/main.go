@@ -16,6 +16,7 @@ import (
 	"github.com/jmoiron/sqlx"
 	"math/rand"
 	"runtime/debug"
+	"flag"
 )
 
 var QuestCommands = commands.HandlerMap{
@@ -187,7 +188,10 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
-	err = unmarshalJson(`src\json\app.json`, &app)
+	var src string
+	flag.StringVar(&src, "a", "", "App Location")
+	flag.Parse()
+	err = unmarshalJson(src, &app)
 	if err != nil {
 		panic(err)
 	}
