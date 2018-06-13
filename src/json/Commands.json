@@ -191,7 +191,7 @@
       "q:addrole 451829582018301928 100000"
     ],
     "aliases": ["newrole", "createrole"],
-    "permission": 3
+    "permission": 2
   },
   "roles": {
     "description": "Views all the potential roles to earn for EXP",

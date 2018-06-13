@@ -115,6 +115,7 @@ func messageCreate(session *discordgo.Session, message *discordgo.MessageCreate)
 
 func guildCreate(_ *discordgo.Session, event *discordgo.GuildCreate) {
 	commands.CreateAllData(db, event.Guild.ID)
+	bot.Guilds.Get(event.Guild.ID)
 }
 
 func memberAdd(session *discordgo.Session, event *discordgo.GuildMemberAdd) {
@@ -135,10 +136,21 @@ func grantExp(bot *commands.Bot, session *discordgo.Session, message *discordgo.
 	t, ok := bot.ExpTimes[s]
 	g := bot.Guilds.Get(s.Guild)
 	m := g.Members.Get(s.Member)
-	fmt.Println(s.Member)
 	if !ok || uint16(time.Since(t).Seconds()) > g.ExpReload {
 		bot.ExpTimes[s] = time.Now()
-		m.Experience += int64(rand.Intn(10) + 10)
+		r := int64(rand.Intn(10) + 10)
+		m.Experience += r
+		fmt.Println(s.Member, r)
+	}
+	a := rand.Intn(1000)
+	fmt.Println(a)
+	if a == 0 {
+		ch, err := session.UserChannelCreate(s.Member)
+		if err == nil {
+			session.ChannelMessageSend(ch.ID, "You won the lottery")
+		}
+		r := int64(rand.Intn(500) + 500)
+		m.Experience += r
 	}
 	commands.GrantRoles(session, message, g, m)
 }
@@ -191,7 +203,7 @@ func init() {
 	var src string
 	flag.StringVar(&src, "a", "", "App Location")
 	flag.Parse()
-	err = unmarshalJson("src/" + src, &app)
+	err = unmarshalJson(src, &app)
 	if err != nil {
 		panic(err)
 	}
