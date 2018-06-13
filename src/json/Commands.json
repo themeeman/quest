@@ -222,6 +222,7 @@
       }
     ],
     "examples": ["q:set MuteRole @Muted", "q:set ExpReload 90"],
-    "aliases": ["flag"]
+    "aliases": ["flag"],
+    "permission": 3
   }
 }
