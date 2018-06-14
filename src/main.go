@@ -53,7 +53,7 @@ var app App
 var bot commands.Bot
 
 const (
-	prefix      = "q:"
+	prefix = "q:"
 )
 
 func ready(s *discordgo.Session, _ *discordgo.Ready) {
@@ -114,8 +114,13 @@ func messageCreate(session *discordgo.Session, message *discordgo.MessageCreate)
 }
 
 func guildCreate(_ *discordgo.Session, event *discordgo.GuildCreate) {
-	commands.CreateAllData(db, event.Guild.ID)
-	bot.Guilds.Get(event.Guild.ID)
+	for {
+		if bot.Guilds != nil {
+			commands.CreateAllData(db, event.Guild.ID)
+			bot.Guilds.Get(event.Guild.ID)
+			break
+		}
+	}
 }
 
 func memberAdd(session *discordgo.Session, event *discordgo.GuildMemberAdd) {
