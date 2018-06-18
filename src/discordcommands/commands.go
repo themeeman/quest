@@ -29,6 +29,7 @@ func GetCommand(bot Bot, name string) (*Command, Handler, string) {
 }
 
 func ExecuteCommand(session *discordgo.Session, message *discordgo.MessageCreate, bot Bot) BotError {
+	t := time.Now()
 	ss := strings.TrimPrefix(message.Content, bot.Prefix)
 	args := strings.Fields(ss)
 	if len(args) == 0 {
@@ -62,6 +63,7 @@ func ExecuteCommand(session *discordgo.Session, message *discordgo.MessageCreate
 	}
 	guild := bot.Guilds.Get(MustGetGuildID(session, message))
 	guild.Members.Get(message.Author.ID)
+	fmt.Println(time.Since(t))
 	return nil
 }
 

@@ -92,7 +92,9 @@ func (guilds Guilds) Get(id string) *Guild {
 	if !ok {
 		guild = &Guild{ID: id}
 		guilds[id] = guild
-		return guild
+	}
+	if guild.Members == nil {
+		guild.Members = make(Members)
 	}
 	return guild
 }

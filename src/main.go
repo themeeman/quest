@@ -20,19 +20,20 @@ import (
 )
 
 var QuestCommands = commands.HandlerMap{
-	"help":     quest.Help,
-	"mute":     quest.Mute,
-	"unmute":   quest.Unmute,
-	"purge":    quest.Purge,
-	"types":    quest.Types,
-	"commit":   quest.Commit,
-	"addexp":   quest.AddExp,
-	"me":       quest.Me,
-	"tryparse": quest.TryParse,
-	"massrole": quest.MassRole,
-	"addrole":  quest.AddRole,
-	"roles":    quest.Roles,
-	"set":      quest.Set,
+	"help":        quest.Help,
+	"mute":        quest.Mute,
+	"unmute":      quest.Unmute,
+	"purge":       quest.Purge,
+	"types":       quest.Types,
+	"commit":      quest.Commit,
+	"addexp":      quest.AddExp,
+	"me":          quest.Me,
+	"tryparse":    quest.TryParse,
+	"massrole":    quest.MassRole,
+	"addrole":     quest.AddRole,
+	"roles":       quest.Roles,
+	"set":         quest.Set,
+	"leaderboard": quest.Leaderboard,
 }
 var CommandsData commands.CommandMap
 var RegexVerifiers = map[string]string{}
@@ -95,7 +96,7 @@ func ready(s *discordgo.Session, _ *discordgo.Ready) {
 func messageCreate(session *discordgo.Session, message *discordgo.MessageCreate) {
 	defer func() {
 		if r := recover(); r != nil {
-			log.Println(debug.Stack())
+			log.Println(string(debug.Stack()))
 			session.ChannelMessageSend(message.ChannelID, "```"+ `An unexpected panic occured in the execution of that quest.
 `+ fmt.Sprint(r)+ "```")
 		}
@@ -140,24 +141,29 @@ func grantExp(bot *commands.Bot, session *discordgo.Session, message *discordgo.
 	}
 	t, ok := bot.ExpTimes[s]
 	g := bot.Guilds.Get(s.Guild)
-	m := g.Members.Get(s.Member)
+	member := g.Members.Get(s.Member)
 	if !ok || uint16(time.Since(t).Seconds()) > g.ExpReload {
 		bot.ExpTimes[s] = time.Now()
 		r := int64(rand.Intn(10) + 10)
-		m.Experience += r
+		member.Experience += r
 		fmt.Println(s.Member, r)
-	}
-	a := rand.Intn(1000)
-	fmt.Println(a)
-	if a == 0 {
-		ch, err := session.UserChannelCreate(s.Member)
-		if err == nil {
-			session.ChannelMessageSend(ch.ID, "You won the lottery")
+
+		a := rand.Intn(100)
+		fmt.Println(a)
+		if a == 0 {
+			ch, err := session.UserChannelCreate(s.Member)
+			u, _ := session.GuildMember(s.Guild, s.Member)
+			r := int64(rand.Intn(500) + 500)
+			if err == nil {
+				session.ChannelMessageSend(ch.ID, fmt.Sprintf(`Looks like SOMEBODY is a lucky winner!
+That's right, **%s#%s**, you won a grand total of %d Experience! You should give yourself a pat on the back, you're a real winner in life!
+🎉🎉🎉🎉🎉🎉🎉`, u.User.Username, u.User.Discriminator, r))
+			}
+			member.Experience += r
 		}
-		r := int64(rand.Intn(500) + 500)
-		m.Experience += r
 	}
-	commands.GrantRoles(session, message, g, m)
+
+	commands.GrantRoles(session, message, g, member)
 }
 
 func questEmbed(title string, description string, fields []*discordgo.MessageEmbedField) *discordgo.MessageEmbed {

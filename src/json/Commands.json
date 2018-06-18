@@ -78,6 +78,7 @@
     "hidden": true
   },
   "conv": {
+    "hidden": true,
     "description": "Converts a float",
     "arguments": [
       {
@@ -224,5 +225,9 @@
     "examples": ["q:set MuteRole @Muted", "q:set ExpReload 90"],
     "aliases": ["flag"],
     "permission": 3
+  },
+  "leaderboard": {
+    "description": "View the leaderboards",
+    "aliases": ["lb", "ld"]
   }
 }
