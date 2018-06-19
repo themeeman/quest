@@ -144,16 +144,30 @@ func grantExp(bot *commands.Bot, session *discordgo.Session, message *discordgo.
 	member := g.Members.Get(s.Member)
 	if !ok || uint16(time.Since(t).Seconds()) > g.ExpReload {
 		bot.ExpTimes[s] = time.Now()
-		r := int64(rand.Intn(10) + 10)
+		var r int64
+		if g.ExpGainLower > g.ExpGainUpper {
+			r = int64(rand.Intn(int(g.ExpGainLower + 1 - g.ExpGainUpper)) + int(g.ExpGainUpper))
+		} else {
+			r = int64(rand.Intn(int(g.ExpGainUpper + 1 - g.ExpGainLower)) + int(g.ExpGainLower))
+		}
 		member.Experience += r
 		fmt.Println(s.Member, r)
-
-		a := rand.Intn(100)
+		var a int
+		if g.LotteryChance == 0 {
+			a = 1
+		} else {
+			a = rand.Intn(int(g.LotteryChance))
+		}
 		fmt.Println(a)
 		if a == 0 {
 			ch, err := session.UserChannelCreate(s.Member)
 			u, _ := session.GuildMember(s.Guild, s.Member)
-			r := int64(rand.Intn(500) + 500)
+			var r int64
+			if g.LotteryLower > g.LotteryUpper {
+				r = int64(rand.Intn(int(g.LotteryLower + 1 - g.LotteryUpper)) + int(g.LotteryUpper))
+			} else {
+				r = int64(rand.Intn(int(g.LotteryUpper + 1 - g.LotteryLower)) + int(g.LotteryLower))
+			}
 			if err == nil {
 				session.ChannelMessageSend(ch.ID, fmt.Sprintf(`Looks like SOMEBODY is a lucky winner!
 That's right, **%s#%s**, you won a grand total of %d Experience! You should give yourself a pat on the back, you're a real winner in life!

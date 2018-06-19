@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 	"github.com/jmoiron/sqlx"
+	"log"
 )
 
 const schema = `CREATE TABLE IF NOT EXISTS guild_%s (
@@ -15,9 +16,9 @@ const schema = `CREATE TABLE IF NOT EXISTS guild_%s (
 )`
 
 const rolesSchema = `CREATE TABLE IF NOT EXISTS roles_%s (
-	experience BIGINT NOT NULL DEFAULT 0,
 	id VARCHAR(18) NOT NULL,
-	PRIMARY KEY (experience)
+	experience BIGINT NOT NULL DEFAULT 0,
+	PRIMARY KEY (id)
 )`
 
 func InitDB(user string, pass string, host string, table string) (*sqlx.DB, error) {
@@ -29,6 +30,12 @@ func QueryAllData(db *sqlx.DB) (Guilds, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer func() {
+		if r := recover(); r != nil {
+			log.Println(r)
+			tx.Rollback()
+		}
+	}()
 	defer tx.Commit()
 	guilds, err := queryGuildData(tx)
 	if err != nil {
@@ -125,6 +132,12 @@ func PostAllData(db *sqlx.DB, guilds Guilds) error {
 	if err != nil {
 		return err
 	}
+	defer func() {
+		if r := recover(); r != nil {
+			log.Println(r)
+			tx.Rollback()
+		}
+	}()
 	defer tx.Commit()
 	err = postGuildData(tx, guilds)
 	if err != nil {
@@ -153,8 +166,9 @@ func PostAllData(db *sqlx.DB, guilds Guilds) error {
 }
 
 func postGuildData(tx *sqlx.Tx, guilds Guilds) error {
-	stmt, err := tx.PrepareNamed("INSERT INTO guilds VALUES (:id, :mute_role, :mod_role, :admin_role, :mod_log, :autorole, :exp_reload)" +
-		"ON DUPLICATE KEY UPDATE mute_role=:mute_role, mod_role=:mod_role, admin_role=:admin_role, mod_log=:mod_log, autorole=:autorole, exp_reload=:exp_reload")
+	stmt, err := tx.PrepareNamed("INSERT INTO guilds VALUES (:id, :mute_role, :mod_role, :admin_role, :mod_log, :autorole, :exp_reload, :exp_gain_upper, :exp_gain_lower, :lottery_chance, :lottery_upper, :lottery_lower) " +
+		"ON DUPLICATE KEY UPDATE mute_role=:mute_role, mod_role=:mod_role, admin_role=:admin_role, mod_log=:mod_log, autorole=:autorole, exp_reload=:exp_reload, " +
+			"exp_gain_upper=:exp_gain_upper, exp_gain_lower=:exp_gain_lower, lottery_chance=:lottery_chance, lottery_upper=:lottery_upper, lottery_lower=:lottery_lower")
 	if err != nil {
 		return err
 	}
@@ -168,11 +182,7 @@ func postGuildData(tx *sqlx.Tx, guilds Guilds) error {
 }
 
 func postMemberData(tx *sqlx.Tx, guilds Guilds, guildID string) error {
-	guild, ok := guilds[guildID]
-	if !ok {
-		guilds[guildID] = &Guild{ID: guildID}
-		return nil
-	}
+	guild := guilds.Get(guildID)
 	q := fmt.Sprintf("INSERT INTO guild_%s VALUES (:user_id, :mute_expires, :experience) "+
 		"ON DUPLICATE KEY UPDATE user_id=:user_id, mute_expires=:mute_expires, experience=:experience", guildID)
 	stmt, err := tx.PrepareNamed(q)
@@ -189,13 +199,9 @@ func postMemberData(tx *sqlx.Tx, guilds Guilds, guildID string) error {
 }
 
 func postRoleData(tx *sqlx.Tx, guilds Guilds, guildID string) error {
-	guild, ok := guilds[guildID]
-	if !ok {
-		guilds[guildID] = &Guild{ID: guildID}
-		return nil
-	}
-	q := fmt.Sprintf("INSERT INTO roles_%s VALUES (:experience, :id) "+
-		"ON DUPLICATE KEY UPDATE experience=:experience, id=:id", guildID)
+	guild := guilds.Get(guildID)
+	q := fmt.Sprintf("INSERT INTO roles_%s VALUES (:id, :experience) "+
+		"ON DUPLICATE KEY UPDATE id=:id, experience=:experience", guildID)
 	stmt, err := tx.PrepareNamed(q)
 	if err != nil {
 		return err

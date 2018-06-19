@@ -72,18 +72,15 @@ func Set(session *discordgo.Session, message *discordgo.MessageCreate, args map[
 
 func repr(val interface{}) string {
 	switch val.(type) {
-	case uint16:
-		return strconv.Itoa(int(val.(uint16)))
-	case string:
-		return val.(string)
 	case sql.NullString:
 		if val.(sql.NullString).Valid {
 			return val.(sql.NullString).String
 		} else {
 			return "None"
 		}
+	default:
+		return fmt.Sprint(val)
 	}
-	return ""
 }
 
 
