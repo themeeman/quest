@@ -6,6 +6,8 @@ bin
 run.bat
 app.json
 run_quest.cmd
+app_develop.json
+app_master.json
 =======
 bin/
 .*
