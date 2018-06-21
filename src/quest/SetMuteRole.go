@@ -2,7 +2,7 @@ package MyCommands
 
 import (
 	"github.com/bwmarrin/discordgo"
-	commands "discordcommands"
+	commands ".././discordcommands"
 )
 
 func SetMuteRole(session *discordgo.Session, message *discordgo.MessageCreate, args map[string]string, bot commands.Bot) commands.BotError {

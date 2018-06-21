@@ -1,7 +1,6 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 	"github.com/bwmarrin/discordgo"
 	"log"
@@ -11,43 +10,51 @@ import (
 	"strings"
 	"time"
 	"encoding/json"
-	commands "discordcommands"
+	commands "./discordcommands"
 	_ "database/sql"
 	quest "./quest"
 	"github.com/jmoiron/sqlx"
 	"math/rand"
 	"runtime/debug"
+	"flag"
 )
 
 var QuestCommands = commands.HandlerMap{
-	"help":     quest.Help,
-	"mute":     quest.Mute,
-	"unmute":   quest.Unmute,
-	"purge":    quest.Purge,
-	"types":    quest.Types,
-	"commit":   quest.Commit,
-	"addexp":   quest.AddExp,
-	"setmute":  quest.SetMuteRole,
-	"me":       quest.Me,
-	"tryparse": quest.TryParse,
-	"massrole": quest.MassRole,
-	"addrole":  quest.AddRole,
-	"roles":    quest.Roles,
-	"set":      quest.Set,
+	"help":        quest.Help,
+	"mute":        quest.Mute,
+	"unmute":      quest.Unmute,
+	"purge":       quest.Purge,
+	"types":       quest.Types,
+	"commit":      quest.Commit,
+	"addexp":      quest.AddExp,
+	"me":          quest.Me,
+	"tryparse":    quest.TryParse,
+	"massrole":    quest.MassRole,
+	"addrole":     quest.AddRole,
+	"roles":       quest.Roles,
+	"set":         quest.Set,
+	"leaderboard": quest.Leaderboard,
 }
 var CommandsData commands.CommandMap
 var RegexVerifiers = map[string]string{}
 
-var Token string
+type App struct {
+	Token    string
+	User     string
+	Pass     string
+	Host     string
+	Table    string
+	Commands string
+	Types    string
+}
+
 var db *sqlx.DB
 var guilds commands.Guilds
-
+var app App
 var bot commands.Bot
 
 const (
-	prefix      = "q:"
-	commandFile = "json/Commands.json"
-	typesFile   = "json/Types.json"
+	prefix = "q:"
 )
 
 func ready(s *discordgo.Session, _ *discordgo.Ready) {
@@ -73,19 +80,36 @@ func ready(s *discordgo.Session, _ *discordgo.Ready) {
 		DB:     db,
 		Embed:  questEmbed,
 	}
-	fmt.Println(commands.GetOptions(&bot))
+	go func() {
+		for {
+			time.Sleep(time.Minute * 10)
+			err := commands.PostAllData(db, bot.Guilds)
+			if err != nil {
+				log.Println(err)
+			} else {
+				log.Println("Successfully commited all data")
+			}
+		}
+	}()
 }
 
 func messageCreate(session *discordgo.Session, message *discordgo.MessageCreate) {
 	defer func() {
 		if r := recover(); r != nil {
-			log.Println(debug.Stack())
+			log.Println(string(debug.Stack()))
 			session.ChannelMessageSend(message.ChannelID, "```"+ `An unexpected panic occured in the execution of that quest.
-`+ fmt.Sprint(r) + "```")
+`+ fmt.Sprint(r)+ "```")
 		}
 	}()
 	fmt.Println(message.Content)
 	if !message.Author.Bot {
+		if strings.ToLower(message.Content) == "good bot" {
+			m, _ := session.ChannelMessageSend(message.ChannelID, "Your compliments mean nothing to me")
+			time.Sleep(5 * time.Second)
+			if m != nil {
+				session.ChannelMessageDelete(message.ChannelID, m.ID)
+			}
+		}
 		if strings.HasPrefix(strings.ToLower(message.Content), prefix) {
 			err := commands.ExecuteCommand(session, message, bot)
 			if err != nil {
@@ -95,10 +119,6 @@ func messageCreate(session *discordgo.Session, message *discordgo.MessageCreate)
 		grantExp(&bot, session, message)
 		fmt.Println("-----------------------")
 	}
-}
-
-func guildCreate(_ *discordgo.Session, event *discordgo.GuildCreate) {
-	commands.CreateAllData(db, event.Guild.ID)
 }
 
 func memberAdd(session *discordgo.Session, event *discordgo.GuildMemberAdd) {
@@ -118,13 +138,43 @@ func grantExp(bot *commands.Bot, session *discordgo.Session, message *discordgo.
 	}
 	t, ok := bot.ExpTimes[s]
 	g := bot.Guilds.Get(s.Guild)
-	m := g.Members.Get(s.Member)
-	fmt.Println(s.Member)
+	member := g.Members.Get(s.Member)
 	if !ok || uint16(time.Since(t).Seconds()) > g.ExpReload {
 		bot.ExpTimes[s] = time.Now()
-		m.Experience += int64(rand.Intn(10) + 10)
+		var r int64
+		if g.ExpGainLower > g.ExpGainUpper {
+			r = int64(rand.Intn(int(g.ExpGainLower + 1 - g.ExpGainUpper)) + int(g.ExpGainUpper))
+		} else {
+			r = int64(rand.Intn(int(g.ExpGainUpper + 1 - g.ExpGainLower)) + int(g.ExpGainLower))
+		}
+		member.Experience += r
+		fmt.Println(s.Member, r)
+		var a int
+		if g.LotteryChance == 0 {
+			a = 1
+		} else {
+			a = rand.Intn(int(g.LotteryChance))
+		}
+		fmt.Println(a)
+		if a == 0 {
+			ch, err := session.UserChannelCreate(s.Member)
+			u, _ := session.GuildMember(s.Guild, s.Member)
+			var r int64
+			if g.LotteryLower > g.LotteryUpper {
+				r = int64(rand.Intn(int(g.LotteryLower + 1 - g.LotteryUpper)) + int(g.LotteryUpper))
+			} else {
+				r = int64(rand.Intn(int(g.LotteryUpper + 1 - g.LotteryLower)) + int(g.LotteryLower))
+			}
+			if err == nil {
+				session.ChannelMessageSend(ch.ID, fmt.Sprintf(`Looks like SOMEBODY is a lucky winner!
+That's right, **%s#%s**, you won a grand total of %d Experience! You should give yourself a pat on the back, you're a real winner in life!
+🎉🎉🎉🎉🎉🎉🎉`, u.User.Username, u.User.Discriminator, r))
+			}
+			member.Experience += r
+		}
 	}
-	commands.GrantRoles(session, message, g, m)
+
+	commands.GrantRoles(session, message, g, member)
 }
 
 func questEmbed(title string, description string, fields []*discordgo.MessageEmbedField) *discordgo.MessageEmbed {
@@ -169,17 +219,25 @@ func unmarshalJson(filename string, v interface{}) (err error) {
 func init() {
 	rand.Seed(time.Now().UTC().UnixNano())
 	var err error
-	err = unmarshalJson(commandFile, &CommandsData)
 	if err != nil {
 		panic(err)
 	}
-	err = unmarshalJson(typesFile, &RegexVerifiers)
-	if err != nil {
-		panic(err)
-	}
-	flag.StringVar(&Token, "t", "", "Bot Token")
+	var src string
+	flag.StringVar(&src, "a", "", "App Location")
 	flag.Parse()
-	db, err = commands.InitDB()
+	err = unmarshalJson(src, &app)
+	if err != nil {
+		panic(err)
+	}
+	err = unmarshalJson(app.Commands, &CommandsData)
+	if err != nil {
+		panic(err)
+	}
+	err = unmarshalJson(app.Types, &RegexVerifiers)
+	if err != nil {
+		panic(err)
+	}
+	db, err = commands.InitDB(app.User, app.Pass, app.Host, app.Table)
 	if err != nil {
 		panic(err)
 	}
@@ -187,14 +245,13 @@ func init() {
 
 func main() {
 	defer db.Close()
-	dg, err := discordgo.New("Bot " + Token)
+	dg, err := discordgo.New("Bot " + app.Token)
 	if err != nil {
 		log.Fatalln("Error making discord session", err)
 		return
 	}
 	dg.AddHandler(ready)
 	dg.AddHandler(messageCreate)
-	dg.AddHandler(guildCreate)
 	dg.AddHandler(memberAdd)
 	err = dg.Open()
 	if err != nil {
@@ -206,5 +263,8 @@ func main() {
 	sc := make(chan os.Signal, 1)
 	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, os.Kill)
 	<-sc
-	commands.PostAllData(db, guilds)
+	err = commands.PostAllData(db, guilds)
+	if err != nil {
+		err = commands.PostAllData(db, guilds)
+	}
 }

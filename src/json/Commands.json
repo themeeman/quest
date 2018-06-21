@@ -74,10 +74,11 @@
   },
   "types": {
     "description": "View all built in types",
-    "arguments": [],
-    "permission": 2
+    "permission": 2,
+    "hidden": true
   },
   "conv": {
+    "hidden": true,
     "description": "Converts a float",
     "arguments": [
       {
@@ -191,7 +192,7 @@
       "q:addrole 451829582018301928 100000"
     ],
     "aliases": ["newrole", "createrole"],
-    "permission": 3
+    "permission": 2
   },
   "roles": {
     "description": "Views all the potential roles to earn for EXP",
@@ -222,6 +223,11 @@
       }
     ],
     "examples": ["q:set MuteRole @Muted", "q:set ExpReload 90"],
-    "aliases": ["flag"]
+    "aliases": ["flag"],
+    "permission": 3
+  },
+  "leaderboard": {
+    "description": "View the leaderboards",
+    "aliases": ["lb", "ld"]
   }
 }

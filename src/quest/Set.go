@@ -2,7 +2,7 @@ package MyCommands
 
 import (
 	"github.com/bwmarrin/discordgo"
-	commands "discordcommands"
+	commands ".././discordcommands"
 	"regexp"
 	"strings"
 	"strconv"
@@ -37,25 +37,23 @@ func Set(session *discordgo.Session, message *discordgo.MessageCreate, args map[
 			Received: 1,
 		}
 	} else {
-		fmt.Println(options)
-		fmt.Println(args["Option"])
-		T, ok := options[args["Option"]]
+		option, ok := options[args["Option"]]
 		if !ok {
 			return commands.OptionError{
-				Option: args["Option"],
+				Option: option.Name,
 			}
 		}
-		pattern, _ := bot.Regex[T]
+		pattern, _ := bot.Regex[option.Type]
 		value := args["Value"]
 		result, _ := regexp.MatchString(pattern, value)
 		if !result {
 			return commands.ParsingError{
 				Value:    value,
 				Position: 2,
-				Expected: T,
+				Expected: option.Type,
 			}
 		}
-		val := convertType(message, T, value)
+		val := convertType(message, option.Type, value)
 		fmt.Println(val)
 		guild := bot.Guilds.Get(commands.MustGetGuildID(session, message))
 		field := reflect.ValueOf(guild).Elem().FieldByName(args["Option"])
@@ -74,18 +72,15 @@ func Set(session *discordgo.Session, message *discordgo.MessageCreate, args map[
 
 func repr(val interface{}) string {
 	switch val.(type) {
-	case uint16:
-		return strconv.Itoa(int(val.(uint16)))
-	case string:
-		return val.(string)
 	case sql.NullString:
 		if val.(sql.NullString).Valid {
 			return val.(sql.NullString).String
 		} else {
 			return "None"
 		}
+	default:
+		return fmt.Sprint(val)
 	}
-	return ""
 }
 
 
@@ -139,7 +134,9 @@ func convertType(message *discordgo.MessageCreate, T string, value string) inter
 		a = v * math.Pow10(e)
 		break
 	case "UserMention":
-		if len(message.Mentions) > 0 {
+		if value == "none" {
+			a = sql.NullString{}
+		} else if len(message.Mentions) > 0 {
 			a = sql.NullString{
 				String: message.Mentions[0].ID,
 				Valid:  true,
@@ -152,7 +149,9 @@ func convertType(message *discordgo.MessageCreate, T string, value string) inter
 		}
 		break
 	case "RoleMention":
-		if len(message.MentionRoles) > 0 {
+		if value == "none" {
+			a = sql.NullString{}
+		} else if len(message.MentionRoles) > 0 {
 			a = sql.NullString{
 				String: message.MentionRoles[0],
 				Valid:  true,
@@ -165,7 +164,9 @@ func convertType(message *discordgo.MessageCreate, T string, value string) inter
 		}
 		break
 	case "ChannelMention":
-		if len(value) > 18 {
+		if value == "none" {
+			a = sql.NullString{}
+		} else if len(value) > 18 {
 			a = sql.NullString{
 				String: value[2:20],
 				Valid:  true,

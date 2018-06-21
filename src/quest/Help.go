@@ -2,7 +2,7 @@ package MyCommands
 
 import (
 	"github.com/bwmarrin/discordgo"
-	commands "discordcommands"
+	commands ".././discordcommands"
 	"bytes"
 	"fmt"
 	"strings"

@@ -1,3 +1,15 @@
+<<<<<<< HEAD
+.*
+!/.gitignore
+
+bin
+run.bat
+app.json
+run_quest.cmd
+app_develop.json
+app_master.json
+=======
 bin/
 .*
 !.gitignore
+>>>>>>> 12b73e51bc3faacaa86c6b491d2e2b68b17b41c8
