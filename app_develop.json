@@ -1,9 +1,0 @@
-{
-  "token": "NDU5Mjk4MzQ1NDI1NDM2Njcy.Dg0KcQ.dlvj-ZobMVuFcWQ8oGw6TALcahA",
-  "user": "root",
-  "pass": "uxZ4CXBPxs!$C-$W",
-  "host": "127.0.0.1",
-  "table": "discordbot",
-  "commands": ".\\src\\json\\Commands.json",
-  "types": ".\\src\\json\\Types.json"
-}
