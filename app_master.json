@@ -1,0 +1,9 @@
+{
+  "token": "NDEyNzAyNTQ5NjQ1MzI4Mzk3.Df_xHA.EthrREQSQSg8zE1t9kUw6AbYxO0",
+  "user": "root",
+  "pass": "uxZ4CXBPxs!$C-$W",
+  "host": "127.0.0.1",
+  "table": "quest",
+  "commands": ".\\src\\json\\Commands.json",
+  "types": ".\\src\\json\\Types.json"
+}

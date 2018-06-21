@@ -47,7 +47,7 @@ func QueryAllData(db *sqlx.DB) (Guilds, error) {
 		if err != nil {
 			fmt.Println(err)
 			if strings.HasPrefix(err.Error(), "Error 1146") {
-				CreateAllData(db, id)
+				CreateAllData(tx, id)
 				goto start
 			}
 		}
@@ -56,7 +56,7 @@ func QueryAllData(db *sqlx.DB) (Guilds, error) {
 		if err != nil {
 			fmt.Println(err)
 			if strings.HasPrefix(err.Error(), "Error 1146") {
-				CreateAllData(db, id)
+				CreateAllData(tx, id)
 				goto start
 			}
 		}
@@ -119,12 +119,12 @@ func queryRoleData(tx *sqlx.Tx, guildID string) (Roles, error) {
 	return roles, nil
 }
 
-func CreateAllData(db *sqlx.DB, guildID string) {
-	db.MustExec(`INSERT IGNORE INTO guilds (id) VALUES (?);`, guildID)
+func CreateAllData(tx *sqlx.Tx, guildID string) {
+	tx.MustExec(`INSERT IGNORE INTO guilds (id) VALUES (?);`, guildID)
 	q := fmt.Sprintf(schema, guildID)
-	db.MustExec(q)
+	tx.MustExec(q)
 	q = fmt.Sprintf(rolesSchema, guildID)
-	db.MustExec(q)
+	tx.MustExec(q)
 }
 
 func PostAllData(db *sqlx.DB, guilds Guilds) error {
@@ -132,13 +132,14 @@ func PostAllData(db *sqlx.DB, guilds Guilds) error {
 	if err != nil {
 		return err
 	}
+	defer tx.Commit()
 	defer func() {
 		if r := recover(); r != nil {
 			log.Println(r)
 			tx.Rollback()
+			PostAllData(db, guilds)
 		}
 	}()
-	defer tx.Commit()
 	err = postGuildData(tx, guilds)
 	if err != nil {
 		return err
@@ -149,7 +150,7 @@ func PostAllData(db *sqlx.DB, guilds Guilds) error {
 		if err != nil {
 			fmt.Println(err)
 			if strings.HasPrefix(err.Error(), "Error 1146") {
-				CreateAllData(db, id)
+				CreateAllData(tx, id)
 				goto start
 			}
 		}
@@ -157,7 +158,7 @@ func PostAllData(db *sqlx.DB, guilds Guilds) error {
 		if err != nil {
 			fmt.Println(err)
 			if strings.HasPrefix(err.Error(), "Error 1146") {
-				CreateAllData(db, id)
+				CreateAllData(tx, id)
 				goto start
 			}
 		}
