@@ -12,7 +12,8 @@ import (
 	"encoding/json"
 	commands "./discordcommands"
 	_ "database/sql"
-	quest "./quest"
+	quest "./quest/commands/guild"
+	direct "./quest/commands/direct"
 	"github.com/jmoiron/sqlx"
 	"math/rand"
 	"runtime/debug"
@@ -35,6 +36,9 @@ var QuestCommands = commands.HandlerMap{
 	"set":         quest.Set,
 	"leaderboard": quest.Leaderboard,
 }
+var DirectCommands = commands.HandlerMap{
+	"help": direct.Help,
+}
 var CommandsData commands.CommandMap
 var RegexVerifiers = map[string]string{}
 
@@ -43,7 +47,7 @@ type App struct {
 	User     string
 	Pass     string
 	Host     string
-	Table    string
+	Database string
 	Commands string
 	Types    string
 }
@@ -97,8 +101,8 @@ func messageCreate(session *discordgo.Session, message *discordgo.MessageCreate)
 	defer func() {
 		if r := recover(); r != nil {
 			log.Println(string(debug.Stack()))
-			session.ChannelMessageSend(message.ChannelID, "```"+ `An unexpected panic occured in the execution of that quest.
-`+ fmt.Sprint(r)+ "```")
+			session.ChannelMessageSend(message.ChannelID, "```"+ `An unexpected panic occured in the execution of that command.
+`+ fmt.Sprint(r) + "\nTry again later, or contact themeeman#8354" + "```")
 		}
 	}()
 	fmt.Println(message.Content)
@@ -143,9 +147,9 @@ func grantExp(bot *commands.Bot, session *discordgo.Session, message *discordgo.
 		bot.ExpTimes[s] = time.Now()
 		var r int64
 		if g.ExpGainLower > g.ExpGainUpper {
-			r = int64(rand.Intn(int(g.ExpGainLower + 1 - g.ExpGainUpper)) + int(g.ExpGainUpper))
+			r = int64(rand.Intn(int(g.ExpGainLower+1-g.ExpGainUpper)) + int(g.ExpGainUpper))
 		} else {
-			r = int64(rand.Intn(int(g.ExpGainUpper + 1 - g.ExpGainLower)) + int(g.ExpGainLower))
+			r = int64(rand.Intn(int(g.ExpGainUpper+1-g.ExpGainLower)) + int(g.ExpGainLower))
 		}
 		member.Experience += r
 		fmt.Println(s.Member, r)
@@ -161,9 +165,9 @@ func grantExp(bot *commands.Bot, session *discordgo.Session, message *discordgo.
 			u, _ := session.GuildMember(s.Guild, s.Member)
 			var r int64
 			if g.LotteryLower > g.LotteryUpper {
-				r = int64(rand.Intn(int(g.LotteryLower + 1 - g.LotteryUpper)) + int(g.LotteryUpper))
+				r = int64(rand.Intn(int(g.LotteryLower+1-g.LotteryUpper)) + int(g.LotteryUpper))
 			} else {
-				r = int64(rand.Intn(int(g.LotteryUpper + 1 - g.LotteryLower)) + int(g.LotteryLower))
+				r = int64(rand.Intn(int(g.LotteryUpper+1-g.LotteryLower)) + int(g.LotteryLower))
 			}
 			if err == nil {
 				session.ChannelMessageSend(ch.ID, fmt.Sprintf(`Looks like SOMEBODY is a lucky winner!
@@ -237,7 +241,7 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
-	db, err = commands.InitDB(app.User, app.Pass, app.Host, app.Table)
+	db, err = commands.InitDB(app.User, app.Pass, app.Host, app.Database)
 	if err != nil {
 		panic(err)
 	}

@@ -1,8 +1,8 @@
-package MyCommands
+package guild
 
 import (
 	"github.com/bwmarrin/discordgo"
-	commands ".././discordcommands"
+	commands "../../../discordcommands"
 	"bytes"
 	"fmt"
 	"strings"
@@ -22,7 +22,8 @@ func Help(session *discordgo.Session, message *discordgo.MessageCreate, args map
 		sort.Strings(names)
 		for _, name := range names {
 			v := bot.CommandMap[name]
-			if _, ok := bot.HandlerMap[name]; ok && !v.Hidden {
+			sufficient, _, _ := commands.SufficentPermissions(session, message, bot, v)
+			if _, ok := bot.HandlerMap[name]; ok && !v.Hidden && sufficient {
 				buf.WriteString(fmt.Sprintf("**%s - ** %s\n", name, v.Description))
 			}
 		}

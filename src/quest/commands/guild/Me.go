@@ -1,8 +1,8 @@
-package MyCommands
+package guild
 
 import (
 	"github.com/bwmarrin/discordgo"
-	commands ".././discordcommands"
+	commands "../../../discordcommands"
 	"strconv"
 	"fmt"
 )
@@ -22,6 +22,9 @@ func Me(session *discordgo.Session, message *discordgo.MessageCreate, args map[s
 	m, err := session.GuildMember(guild.ID, id)
 	if err != nil {
 		return commands.UserNotFoundError{}
+	}
+	if m.User.Bot {
+		return commands.CustomError("Cannot use `me` command on a bot!")
 	}
 	member := guild.Members.Get(id)
 	g, _ := session.Guild(commands.MustGetGuildID(session, message))

@@ -147,6 +147,20 @@ func (d Command) ForcedArgs() (i int) {
 }
 
 func MustGetGuildID(session *discordgo.Session, message *discordgo.MessageCreate) string {
-	must := func(v *discordgo.Channel, _ error) *discordgo.Channel { return v }
-	return must(session.Channel(message.ChannelID)).GuildID
+	c, _ := session.Channel(message.ChannelID)
+	if c != nil {
+		return c.GuildID
+	} else {
+		return MustGetGuildID(session, message)
+	}
+}
+
+func IsDirectMessage(session *discordgo.Session, message *discordgo.MessageCreate) bool {
+	c, _ := session.Channel(message.ChannelID)
+	if c != nil {
+		g, _ := session.Guild(c.GuildID)
+		return g == nil
+	} else {
+		return IsDirectMessage(session, message)
+	}
 }

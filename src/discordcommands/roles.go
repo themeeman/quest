@@ -10,7 +10,7 @@ import (
 func GrantRoles(session *discordgo.Session, message *discordgo.MessageCreate, guild *Guild, member *Member) error {
 	m, _ := session.GuildMember(MustGetGuildID(session, message), member.ID)
 	for _, r := range guild.Roles {
-		if member.Experience >= r.Experience {
+		if m != nil && member.Experience >= r.Experience {
 			role, err := FindRole(session, guild.ID, r.ID)
 			if err != nil {
 				continue

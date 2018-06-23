@@ -21,8 +21,8 @@ const rolesSchema = `CREATE TABLE IF NOT EXISTS roles_%s (
 	PRIMARY KEY (id)
 )`
 
-func InitDB(user string, pass string, host string, table string) (*sqlx.DB, error) {
-	return sqlx.Connect("mysql", fmt.Sprintf("%s:%s@tcp(%s)/%s", user, pass, host, table))
+func InitDB(user string, pass string, host string, database string) (*sqlx.DB, error) {
+	return sqlx.Connect("mysql", fmt.Sprintf("%s:%s@tcp(%s)/%s", user, pass, host, database))
 }
 
 func QueryAllData(db *sqlx.DB) (Guilds, error) {
@@ -65,7 +65,7 @@ func QueryAllData(db *sqlx.DB) (Guilds, error) {
 	return guilds, nil
 }
 
-func queryGuildData(tx *sqlx.Tx) (map[string]*Guild, error) {
+func queryGuildData(tx *sqlx.Tx) (Guilds, error) {
 	var length int
 	err := tx.Get(&length, "SELECT COUNT(*) FROM guilds")
 	if err != nil {

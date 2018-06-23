@@ -64,6 +64,11 @@
       {
         "name": "Amount",
         "type": "Integer"
+      },
+      {
+        "name": "User",
+        "type": "UserMention",
+        "optional": true
       }
     ],
     "permission": 1,

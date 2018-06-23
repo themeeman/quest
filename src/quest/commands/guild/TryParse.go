@@ -1,8 +1,8 @@
-package MyCommands
+package guild
 
 import (
 	"github.com/bwmarrin/discordgo"
-	commands ".././discordcommands"
+	commands "../../../discordcommands"
 	"regexp"
 	"fmt"
 )

@@ -6,6 +6,7 @@ bin
 run.bat
 app.json
 run_quest.cmd
+run_develop.cmd
 app_develop.json
 app_master.json
 =======

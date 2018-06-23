@@ -139,6 +139,12 @@ func (e OptionError) Error() string {
 	return fmt.Sprintf("Option %s does not exist for this guild. Try q:set to list options.", e.Option)
 }
 
+type CustomError string
+
+func (e CustomError) Error() string {
+	return string(e)
+}
+
 func ErrorEmbed(e BotError) *discordgo.MessageEmbed {
 	emb := &discordgo.MessageEmbed{
 		Type:        "rich",
