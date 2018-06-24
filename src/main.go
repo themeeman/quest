@@ -35,6 +35,7 @@ var QuestCommands = commands.HandlerMap{
 	"roles":       quest.Roles,
 	"set":         quest.Set,
 	"leaderboard": quest.Leaderboard,
+	"pull": 	   quest.Pull,
 }
 var DirectCommands = commands.HandlerMap{
 	"help": direct.Help,
@@ -55,7 +56,7 @@ type App struct {
 var db *sqlx.DB
 var guilds commands.Guilds
 var app App
-var bot commands.Bot
+var bot *commands.Bot
 
 const (
 	prefix = "q:"
@@ -71,7 +72,7 @@ func ready(s *discordgo.Session, _ *discordgo.Ready) {
 		fmt.Println(v)
 	}
 	s.UpdateStatus(0, "q:help")
-	bot = commands.Bot{
+	bot = &commands.Bot{
 		HandlerMap: QuestCommands,
 		CommandMap: CommandsData,
 		ExpTimes: make(map[struct {
@@ -120,7 +121,7 @@ func messageCreate(session *discordgo.Session, message *discordgo.MessageCreate)
 				session.ChannelMessageSendEmbed(message.ChannelID, commands.ErrorEmbed(err))
 			}
 		}
-		grantExp(&bot, session, message)
+		grantExp(bot, session, message)
 		fmt.Println("-----------------------")
 	}
 }

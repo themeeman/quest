@@ -6,6 +6,7 @@ import (
 	"github.com/jmoiron/sqlx"
 	"database/sql/driver"
 	"time"
+	"reflect"
 )
 
 type Argument struct {
@@ -28,7 +29,7 @@ type Command struct {
 type Handler func(session *discordgo.Session,
 	message *discordgo.MessageCreate,
 	args map[string]string,
-	context Bot) BotError
+	bot *Bot) BotError
 
 type HandlerMap map[string]Handler
 
@@ -163,4 +164,17 @@ func IsDirectMessage(session *discordgo.Session, message *discordgo.MessageCreat
 	} else {
 		return IsDirectMessage(session, message)
 	}
+}
+
+func Contains(slice interface{}, value interface{}) (bool, int) {
+	s := reflect.ValueOf(slice)
+	if !(s.Kind() == reflect.Slice || s.Kind() == reflect.Array) {
+		panic("Slice must be a slice!")
+	}
+	for i := 0; i < s.Len(); i++ {
+		if value == s.Index(i).Interface() {
+			return true, i
+		}
+	}
+	return false, 0
 }

@@ -12,7 +12,7 @@ func TimeToTimestamp(t time.Time) string {
 	return t.Format("2006-01-02T15:04:05+00:00")
 }
 
-func GetCommand(bot Bot, name string) (*Command, Handler, string) {
+func GetCommand(bot *Bot, name string) (*Command, Handler, string) {
 	name = strings.ToLower(name)
 	command, okc := bot.CommandMap[name]
 	handler, okh := bot.HandlerMap[name]
@@ -28,7 +28,7 @@ func GetCommand(bot Bot, name string) (*Command, Handler, string) {
 	return command, handler, name
 }
 
-func ExecuteCommand(session *discordgo.Session, message *discordgo.MessageCreate, bot Bot) BotError {
+func ExecuteCommand(session *discordgo.Session, message *discordgo.MessageCreate, bot *Bot) BotError {
 	t := time.Now()
 	ss := strings.TrimPrefix(message.Content, bot.Prefix)
 	args := strings.Fields(ss)
@@ -40,7 +40,9 @@ func ExecuteCommand(session *discordgo.Session, message *discordgo.MessageCreate
 	if cmd == nil || info == nil {
 		return nil
 	}
-	sufficent, had, required := SufficentPermissions(session, message, bot, info)
+	g, _ := session.Guild(MustGetGuildID(session, message))
+	author, _ := session.GuildMember(g.ID, message.Author.ID)
+	sufficent, had, required := SufficentPermissions(session, g, author, bot, info)
 	if !sufficent {
 		s := []string{"member", "moderator", "admin", "owner"}
 		return InsufficentPermissionsError{
@@ -67,7 +69,7 @@ func ExecuteCommand(session *discordgo.Session, message *discordgo.MessageCreate
 	return nil
 }
 
-func parseArgs(bot Bot, command *Command, args []string) (newArgs map[string]string, err BotError) {
+func parseArgs(bot *Bot, command *Command, args []string) (newArgs map[string]string, err BotError) {
 	newArgs = make(map[string]string)
 	for index, argument := range command.Arguments {
 		fmt.Println(index, argument)

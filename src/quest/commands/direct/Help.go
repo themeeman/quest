@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-func Help(session *discordgo.Session, message *discordgo.MessageCreate, args map[string]string, bot commands.Bot) commands.BotError {
+func Help(session *discordgo.Session, message *discordgo.MessageCreate, args map[string]string, bot *commands.Bot) commands.BotError {
 	if args["Command"] == "" {
 		var buf bytes.Buffer
 		names := make([]string, len(bot.CommandMap))

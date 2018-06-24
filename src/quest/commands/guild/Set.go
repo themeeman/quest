@@ -14,8 +14,8 @@ import (
 	"bytes"
 )
 
-func Set(session *discordgo.Session, message *discordgo.MessageCreate, args map[string]string, bot commands.Bot) commands.BotError {
-	options := commands.GetOptions(&bot)
+func Set(session *discordgo.Session, message *discordgo.MessageCreate, args map[string]string, bot *commands.Bot) commands.BotError {
+	options := commands.GetOptions(bot)
 	if args["Option"] == "" {
 		names := make([]string, len(options))
 		i := 0

@@ -8,8 +8,12 @@ import (
 	"fmt"
 )
 
-func Roles(session *discordgo.Session, message *discordgo.MessageCreate, args map[string]string, bot commands.Bot) commands.BotError {
+func Roles(session *discordgo.Session, message *discordgo.MessageCreate, args map[string]string, bot *commands.Bot) commands.BotError {
 	guild := bot.Guilds.Get(commands.MustGetGuildID(session, message))
+	if len(guild.Roles) == 0 {
+		session.ChannelMessageSend(message.ChannelID, "No reward roles configured\nUse q:addrole to create some")
+		return nil
+	}
 	roles := make(commands.Roles, len(guild.Roles))
 	copy(roles, guild.Roles)
 	sort.Sort(roles)

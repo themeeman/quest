@@ -10,7 +10,7 @@ import (
 	"sort"
 )
 
-func Help(session *discordgo.Session, message *discordgo.MessageCreate, args map[string]string, bot commands.Bot) commands.BotError {
+func Help(session *discordgo.Session, message *discordgo.MessageCreate, args map[string]string, bot *commands.Bot) commands.BotError {
 	if args["Command"] == "" {
 		var buf bytes.Buffer
 		names := make([]string, len(bot.CommandMap))
@@ -20,9 +20,11 @@ func Help(session *discordgo.Session, message *discordgo.MessageCreate, args map
 			i++
 		}
 		sort.Strings(names)
+		guild, _ := session.Guild(commands.MustGetGuildID(session, message))
+		author, _ := session.GuildMember(guild.ID, message.Author.ID)
 		for _, name := range names {
 			v := bot.CommandMap[name]
-			sufficient, _, _ := commands.SufficentPermissions(session, message, bot, v)
+			sufficient, _, _ := commands.SufficentPermissions(session, guild, author, bot, v)
 			if _, ok := bot.HandlerMap[name]; ok && !v.Hidden && sufficient {
 				buf.WriteString(fmt.Sprintf("**%s - ** %s\n", name, v.Description))
 			}

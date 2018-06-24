@@ -93,7 +93,9 @@
     ]
   },
   "commit": {
-    "permission": 3,
+    "hidden": true
+  },
+  "pull": {
     "hidden": true
   },
   "addexp": {
@@ -196,7 +198,7 @@
       "q:addrole @Red 1500",
       "q:addrole 451829582018301928 100000"
     ],
-    "aliases": ["newrole", "createrole"],
+    "aliases": ["newrole", "createrole", "setrole"],
     "permission": 2
   },
   "roles": {
@@ -229,7 +231,7 @@
     ],
     "examples": ["q:set MuteRole @Muted", "q:set ExpReload 90"],
     "aliases": ["flag"],
-    "permission": 3
+    "permission": 2
   },
   "leaderboard": {
     "description": "View the leaderboards",

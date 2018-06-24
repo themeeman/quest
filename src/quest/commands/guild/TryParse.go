@@ -7,7 +7,7 @@ import (
 	"fmt"
 )
 
-func TryParse(session *discordgo.Session, message *discordgo.MessageCreate, args map[string]string, bot commands.Bot) commands.BotError {
+func TryParse(session *discordgo.Session, message *discordgo.MessageCreate, args map[string]string, bot *commands.Bot) commands.BotError {
 	pattern, ok := bot.Regex[args["Type"]]
 	if !ok {
 		return commands.TypeError{Name: args["Type"]}

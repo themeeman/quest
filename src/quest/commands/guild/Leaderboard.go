@@ -20,7 +20,7 @@ func (m membersSorted) Less(i, j int) bool {
 	return m.Members[m.IDs[i]].Experience > m.Members[m.IDs[j]].Experience
 }
 
-func Leaderboard(session *discordgo.Session, message *discordgo.MessageCreate, _ map[string]string, bot commands.Bot) commands.BotError {
+func Leaderboard(session *discordgo.Session, message *discordgo.MessageCreate, _ map[string]string, bot *commands.Bot) commands.BotError {
 	guild := bot.Guilds.Get(commands.MustGetGuildID(session, message))
 	sorted := membersSorted{
 		IDs:     make([]string, len(guild.Members)),

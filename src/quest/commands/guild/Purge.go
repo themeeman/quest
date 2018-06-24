@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-func Purge(session *discordgo.Session, message *discordgo.MessageCreate, args map[string]string, _ commands.Bot) commands.BotError {
+func Purge(session *discordgo.Session, message *discordgo.MessageCreate, args map[string]string, _ *commands.Bot) commands.BotError {
 	i, _ := strconv.Atoi(strings.Replace(args["Amount"], ",", "", -1))
 	msgs, err := session.ChannelMessages(message.ChannelID, i+1, "", "", "")
 	if err != nil {

@@ -6,7 +6,7 @@ import (
 	"fmt"
 )
 
-func MassRole(session *discordgo.Session, message *discordgo.MessageCreate, args map[string]string, bot commands.Bot) commands.BotError {
+func MassRole(session *discordgo.Session, message *discordgo.MessageCreate, args map[string]string, bot *commands.Bot) commands.BotError {
 	c, _ := session.Channel(message.ChannelID)
 	guild := bot.Guilds.Get(c.GuildID)
 	var role string

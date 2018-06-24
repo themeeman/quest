@@ -4,7 +4,16 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
-func GetPermissionLevel(member *discordgo.Member, guild *Guild, ownerID string) int {
+func GetPermissionLevel(session *discordgo.Session, member *discordgo.Member, guild *Guild, ownerID string) int {
+	roles := member.Roles
+	for _, r := range roles {
+		role, err := FindRole(session, guild.ID, r)
+		if err == nil {
+			if role.Permissions & discordgo.PermissionAdministrator == discordgo.PermissionAdministrator {
+				return 2
+			}
+		}
+	}
 	if member.User.ID == ownerID {
 		return 3
 	}
@@ -18,11 +27,9 @@ func GetPermissionLevel(member *discordgo.Member, guild *Guild, ownerID string) 
 	return 0
 }
 
-func SufficentPermissions(session *discordgo.Session, message *discordgo.MessageCreate, bot Bot, command *Command) (bool, int, int) {
-	g, _ := session.Guild(MustGetGuildID(session, message))
-	member, _ := session.GuildMember(g.ID, message.Author.ID)
-	guild := bot.Guilds.Get(g.ID)
-	had := GetPermissionLevel(member, guild, g.OwnerID)
+func SufficentPermissions(session *discordgo.Session, guild *discordgo.Guild, member *discordgo.Member, bot *Bot, command *Command) (bool, int, int) {
+	g := bot.Guilds.Get(guild.ID)
+	had := GetPermissionLevel(session, member, g, guild.OwnerID)
 	required := command.Permission
 	return had >= required, had, required
 }

@@ -88,7 +88,8 @@ type InsufficentArgumentsError struct {
 func (e InsufficentArgumentsError) Error() string {
 	return fmt.Sprintf(`The command recieved less arguments than the minimum required
 Minimum: %d
-Received: %d`, e.Minimum, e.Received)
+Received: %d
+Refer to q:help for info about the correct usage`, e.Minimum, e.Received)
 }
 
 type RoleError struct {

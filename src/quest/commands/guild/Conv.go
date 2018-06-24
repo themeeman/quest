@@ -10,7 +10,7 @@ import (
 	"math"
 )
 
-func Conv(session *discordgo.Session, message *discordgo.MessageCreate, args map[string]string, _ commands.Bot) commands.BotError {
+func Conv(session *discordgo.Session, message *discordgo.MessageCreate, args map[string]string, _ *commands.Bot) commands.BotError {
 	var number float64
 	c := strings.Split(args["Number"], "e")
 	v, err := strconv.ParseFloat(c[0], 32)

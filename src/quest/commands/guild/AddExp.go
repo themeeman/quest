@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-func AddExp(session *discordgo.Session, message *discordgo.MessageCreate, args map[string]string, bot commands.Bot) commands.BotError {
+func AddExp(session *discordgo.Session, message *discordgo.MessageCreate, args map[string]string, bot *commands.Bot) commands.BotError {
 	guild := bot.Guilds.Get(commands.MustGetGuildID(session, message))
 	var id string
 	if args["User"] == "" {

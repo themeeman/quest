@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-func Mute(session *discordgo.Session, message *discordgo.MessageCreate, args map[string]string, bot commands.Bot) commands.BotError {
+func Mute(session *discordgo.Session, message *discordgo.MessageCreate, args map[string]string, bot *commands.Bot) commands.BotError {
 	ch, _ := session.State.Channel(message.ChannelID)
 	var user *discordgo.User
 	if len(args["User"]) == 18 {

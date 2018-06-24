@@ -7,7 +7,7 @@ import (
 	"fmt"
 )
 
-func Me(session *discordgo.Session, message *discordgo.MessageCreate, args map[string]string, bot commands.Bot) commands.BotError {
+func Me(session *discordgo.Session, message *discordgo.MessageCreate, args map[string]string, bot *commands.Bot) commands.BotError {
 	var id string
 	if args["User"] == "" {
 		id = message.Author.ID
@@ -28,7 +28,7 @@ func Me(session *discordgo.Session, message *discordgo.MessageCreate, args map[s
 	}
 	member := guild.Members.Get(id)
 	g, _ := session.Guild(commands.MustGetGuildID(session, message))
-	rank := commands.GetPermissionLevel(m, guild, g.OwnerID)
+	rank := commands.GetPermissionLevel(session, m, guild, g.OwnerID)
 	s := []string{"Member", "Moderator", "Admin", "Owner"}
 	title := fmt.Sprintf("User %s#%s", m.User.Username, m.User.Discriminator)
 	session.ChannelMessageSendEmbed(message.ChannelID, bot.Embed(title, "", []*discordgo.MessageEmbedField{

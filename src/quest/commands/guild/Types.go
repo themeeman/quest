@@ -7,7 +7,7 @@ import (
 	"fmt"
 )
 
-func Types(session *discordgo.Session, message *discordgo.MessageCreate, _ map[string]string, bot commands.Bot) commands.BotError {
+func Types(session *discordgo.Session, message *discordgo.MessageCreate, _ map[string]string, bot *commands.Bot) commands.BotError {
 	var buffer bytes.Buffer
 	buffer.WriteString("```")
 	for k, v := range bot.Regex {
