@@ -172,7 +172,7 @@ func Contains(slice interface{}, value interface{}) (bool, int) {
 		panic("Slice must be a slice!")
 	}
 	for i := 0; i < s.Len(); i++ {
-		if value == s.Index(i).Interface() {
+		if reflect.DeepEqual(value, s.Index(i).Interface()) {
 			return true, i
 		}
 	}

@@ -3,6 +3,7 @@ package guild
 import (
 	"github.com/bwmarrin/discordgo"
 	commands "../../../discordcommands"
+	"../../experience"
 	"strconv"
 	"strings"
 )
@@ -26,7 +27,7 @@ func AddExp(session *discordgo.Session, message *discordgo.MessageCreate, args m
 	member := guild.Members.Get(id)
 	exp, _ := strconv.Atoi(strings.Replace(args["Value"], ",", "", -1))
 	member.Experience += int64(exp)
-	commands.GrantRoles(session, message, guild, member)
+	experience.GrantRoles(session, message, guild, member)
 	session.MessageReactionAdd(message.ChannelID, message.ID, "☑")
 	return nil
 }

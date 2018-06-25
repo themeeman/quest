@@ -5,17 +5,16 @@ import (
 )
 
 func GetPermissionLevel(session *discordgo.Session, member *discordgo.Member, guild *Guild, ownerID string) int {
-	roles := member.Roles
-	for _, r := range roles {
+	if member.User.ID == ownerID {
+		return 3
+	}
+	for _, r := range member.Roles {
 		role, err := FindRole(session, guild.ID, r)
 		if err == nil {
 			if role.Permissions & discordgo.PermissionAdministrator == discordgo.PermissionAdministrator {
 				return 2
 			}
 		}
-	}
-	if member.User.ID == ownerID {
-		return 3
 	}
 	for _, r := range member.Roles {
 		if r == guild.AdminRole.String {
