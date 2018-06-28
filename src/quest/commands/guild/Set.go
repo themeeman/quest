@@ -16,6 +16,7 @@ import (
 
 func Set(session *discordgo.Session, message *discordgo.MessageCreate, args map[string]string, bot *commands.Bot) commands.BotError {
 	options := commands.GetOptions(bot)
+	fmt.Println(options)
 	if args["Option"] == "" {
 		names := make([]string, len(options))
 		i := 0
@@ -37,10 +38,22 @@ func Set(session *discordgo.Session, message *discordgo.MessageCreate, args map[
 			Received: 1,
 		}
 	} else {
-		option, ok := options[args["Option"]]
+		keyName := args["Option"]
+		option, ok := options[keyName]
 		if !ok {
-			return commands.OptionError{
-				Option: option.Name,
+			var found bool
+			for k, o := range options {
+				if strings.ToLower(args["Option"]) == strings.ToLower(k) {
+					option = o
+					found = true
+					keyName = k
+					break
+				}
+			}
+			if !found {
+				return commands.OptionError{
+					Option: args["Option"],
+				}
 			}
 		}
 		pattern, _ := bot.Regex[option.Type]
@@ -54,9 +67,8 @@ func Set(session *discordgo.Session, message *discordgo.MessageCreate, args map[
 			}
 		}
 		val := convertType(message, option.Type, value)
-		fmt.Println(val)
 		guild := bot.Guilds.Get(commands.MustGetGuildID(session, message))
-		field := reflect.ValueOf(guild).Elem().FieldByName(args["Option"])
+		field := reflect.ValueOf(guild).Elem().FieldByName(keyName)
 		if n, ok := val.(int); ok {
 			val = convertInt(n, field)
 		} else if n, ok := val.(float64); ok {

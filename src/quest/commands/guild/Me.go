@@ -5,6 +5,7 @@ import (
 	commands "../../../discordcommands"
 	"strconv"
 	"fmt"
+	"time"
 )
 
 func Me(session *discordgo.Session, message *discordgo.MessageCreate, args map[string]string, bot *commands.Bot) commands.BotError {
@@ -31,7 +32,7 @@ func Me(session *discordgo.Session, message *discordgo.MessageCreate, args map[s
 	rank := commands.GetPermissionLevel(session, m, guild, g.OwnerID)
 	s := []string{"Member", "Moderator", "Admin", "Owner"}
 	title := fmt.Sprintf("User %s#%s", m.User.Username, m.User.Discriminator)
-	session.ChannelMessageSendEmbed(message.ChannelID, bot.Embed(title, "", []*discordgo.MessageEmbedField{
+	fields := []*discordgo.MessageEmbedField{
 		{
 			Name:  "Experience",
 			Value: strconv.Itoa(int(member.Experience)),
@@ -40,6 +41,16 @@ func Me(session *discordgo.Session, message *discordgo.MessageCreate, args map[s
 			Name:  "Rank",
 			Value: s[rank],
 		},
-	}))
+	}
+
+	now := time.Now().UTC()
+	if member.MuteExpires.Valid && member.MuteExpires.Time.UTC().After(now) {
+		dif := member.MuteExpires.Time.UTC().UnixNano() - now.UnixNano()
+		fields = append(fields, &discordgo.MessageEmbedField{
+			Name:  "Mute Time Left (Seconds)",
+			Value: strconv.Itoa(int(dif / int64(time.Second))),
+		})
+	}
+	session.ChannelMessageSendEmbed(message.ChannelID, bot.Embed(title, "", fields))
 	return nil
 }

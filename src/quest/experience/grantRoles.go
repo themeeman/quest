@@ -15,12 +15,7 @@ func GrantRoles(session *discordgo.Session, message *discordgo.MessageCreate, gu
 			if err != nil {
 				continue
 			}
-			var found bool
-			for _, rr := range m.Roles {
-				if rr == r.ID {
-					found = true
-				}
-			}
+			found, _ := commands.Contains(m.Roles, role.ID)
 			if !found {
 				session.GuildMemberRoleAdd(guild.ID, member.ID, r.ID)
 				session.ChannelMessageSendEmbed(message.ChannelID, questEmbedColor(role.Name,

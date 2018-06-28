@@ -65,7 +65,7 @@ func questEmbed(title string, description string, fields []*discordgo.MessageEmb
 	emb := &discordgo.MessageEmbed{
 		Type:      "rich",
 		Title:     title,
-		Timestamp: commands.TimeToTimestamp(time.Now()),
+		Timestamp: commands.TimeToTimestamp(time.Now().UTC()),
 		Color:     0x00ffff,
 		Footer: &discordgo.MessageEmbedFooter{
 			Text: "Quest Bot",
@@ -160,8 +160,9 @@ func main() {
 	sc := make(chan os.Signal, 1)
 	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, os.Kill)
 	<-sc
-	err = commands.PostAllData(db, guilds)
+	err = commands.PostAllData(db, bot.Guilds)
 	if err != nil {
-		err = commands.PostAllData(db, guilds)
+		fmt.Println(err)
+		err = commands.PostAllData(db, bot.Guilds)
 	}
 }

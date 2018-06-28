@@ -4,9 +4,9 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"database/sql"
 	"github.com/jmoiron/sqlx"
-	"database/sql/driver"
 	"time"
 	"reflect"
+	"github.com/go-sql-driver/mysql"
 )
 
 type Argument struct {
@@ -69,9 +69,9 @@ type Guild struct {
 }
 
 type Member struct {
-	ID          string   `db:"user_id"`
-	MuteExpires NullTime `db:"mute_expires"`
-	Experience  int64    `db:"experience"`
+	ID          string         `db:"user_id"`
+	MuteExpires mysql.NullTime `db:"mute_expires"`
+	Experience  int64          `db:"experience"`
 }
 
 type Role struct {
@@ -118,24 +118,6 @@ func (members Members) Get(id string) *Member {
 		return member
 	}
 	return member
-}
-
-//All NullTime code stolen from	lib/pq
-type NullTime struct {
-	Time  time.Time
-	Valid bool
-}
-
-func (nt *NullTime) Scan(value interface{}) error {
-	nt.Time, nt.Valid = value.(time.Time)
-	return nil
-}
-
-func (nt NullTime) Value() (driver.Value, error) {
-	if !nt.Valid {
-		return nil, nil
-	}
-	return nt.Time, nil
 }
 
 func (d Command) ForcedArgs() (i int) {

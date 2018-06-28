@@ -49,9 +49,9 @@ func Unmute(session *discordgo.Session, message *discordgo.MessageCreate, args m
 	m := guild.Get(user.ID)
 	m.MuteExpires.Valid = false
 	if args["Reason"] == "" {
-		session.ChannelMessageSendEmbed(message.ChannelID, bot.Embed("Success!", fmt.Sprintf("Successfully unmuted %session#%session!", user.Username, user.Discriminator), nil))
+		session.ChannelMessageSendEmbed(message.ChannelID, bot.Embed("Success!", fmt.Sprintf("Successfully unmuted %s#%s!", user.Username, user.Discriminator), nil))
 	} else {
-		session.ChannelMessageSendEmbed(message.ChannelID, bot.Embed("Success!", fmt.Sprintf("Successfully unmuted %session#%session! Reason: %session", user.Username, user.Discriminator, args["Reason"]), nil))
+		session.ChannelMessageSendEmbed(message.ChannelID, bot.Embed("Success!", fmt.Sprintf("Successfully unmuted %s#%s! Reason: %s", user.Username, user.Discriminator, args["Reason"]), nil))
 	}
 	return nil
 }

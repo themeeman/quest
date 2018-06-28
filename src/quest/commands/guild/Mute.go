@@ -25,6 +25,12 @@ func Mute(session *discordgo.Session, message *discordgo.MessageCreate, args map
 	}
 	member, _ := session.State.Member(ch.GuildID, user.ID)
 	guild := bot.Guilds.Get(ch.GuildID)
+	g, _ := session.Guild(ch.GuildID)
+	if commands.GetPermissionLevel(session, member, guild, g.OwnerID) >= 2 {
+		return commands.CustomError("That user is a admin, I can't mute them!")
+	} else if member.User.Bot {
+		return commands.CustomError("Can't mute a bot")
+	}
 	if !guild.MuteRole.Valid {
 		return commands.MuteRoleError{}
 	}
@@ -48,8 +54,8 @@ func Mute(session *discordgo.Session, message *discordgo.MessageCreate, args map
 		}
 	}
 	dur, _ := strconv.Atoi(strings.Replace(args["Minutes"], ",", "", -1))
-	m := guild.Members.Get(message.Author.ID)
-	m.MuteExpires.Time = time.Now().Add(time.Minute * time.Duration(dur))
+	m := guild.Members.Get(user.ID)
+	m.MuteExpires.Time = time.Now().UTC().Add(time.Minute * time.Duration(dur))
 	m.MuteExpires.Valid = true
 	go func() {
 		time.Sleep(time.Minute * time.Duration(dur))

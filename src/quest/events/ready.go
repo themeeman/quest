@@ -31,5 +31,25 @@ func Ready(bot *commands.Bot) func(*discordgo.Session, *discordgo.Ready) {
 				}
 			}
 		}()
+		applyMutes(bot, session)
+	}
+}
+
+func applyMutes(bot *commands.Bot, session *discordgo.Session) {
+	now := time.Now().UTC()
+	for _, guild := range bot.Guilds {
+		if guild.MuteRole.Valid {
+			for _, member := range guild.Members {
+				if member.MuteExpires.Valid && member.MuteExpires.Time.After(now) {
+					go func(guild *commands.Guild, member *commands.Member) {
+						dur := member.MuteExpires.Time.UTC().UnixNano() - now.UnixNano()
+						time.Sleep(time.Duration(dur))
+						session.GuildMemberRoleRemove(guild.ID, member.ID, guild.MuteRole.String)
+					}(guild, member)
+				} else if member.MuteExpires.Valid && member.MuteExpires.Time.Before(now) {
+					go session.GuildMemberRoleRemove(guild.ID, member.ID, guild.MuteRole.String)
+				}
+			}
+		}
 	}
 }

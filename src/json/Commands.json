@@ -180,7 +180,7 @@
       "q:massrole",
       "q:massrole @Scrubs"
     ],
-    "permission": 3
+    "permission": 2
   },
   "addrole": {
     "description": "Adds a new role to gain for EXP",

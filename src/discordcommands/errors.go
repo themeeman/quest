@@ -17,7 +17,7 @@ type ParsingError struct {
 }
 
 func (e ParsingError) Error() string {
-	return fmt.Sprintf(`Error parsing function arguments
+	return fmt.Sprintf(`Invalid command arguments
 Argument position: %v
 Expected Type: %s
 Received: %s`, e.Position, e.Expected, e.Value)
@@ -150,7 +150,7 @@ func ErrorEmbed(e BotError) *discordgo.MessageEmbed {
 	emb := &discordgo.MessageEmbed{
 		Type:        "rich",
 		Title:       "An error has occurred",
-		Timestamp:   TimeToTimestamp(time.Now()),
+		Timestamp:   TimeToTimestamp(time.Now().UTC()),
 		Color:       0x660000,
 		Footer: &discordgo.MessageEmbedFooter{
 			Text: "Quest Bot",

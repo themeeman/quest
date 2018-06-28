@@ -5,6 +5,7 @@
 bin
 run.bat
 app.json
+src/app.json
 run_quest.cmd
 run_develop.cmd
 app_develop.json
