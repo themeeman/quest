@@ -80,12 +80,12 @@ func (e BotPermissionsError) Error() string {
 	return fmt.Sprintf(`The bot permissions have not been set up correctly`)
 }
 
-type InsufficentArgumentsError struct {
+type UsageError struct {
 	Minimum  int
 	Received int
 }
 
-func (e InsufficentArgumentsError) Error() string {
+func (e UsageError) Error() string {
 	return fmt.Sprintf(`The command recieved less arguments than the minimum required
 Minimum: %d
 Received: %d

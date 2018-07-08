@@ -46,9 +46,16 @@ func GrantExp(bot *commands.Bot, session *discordgo.Session, message *discordgo.
 				r = int64(rand.Intn(int(g.LotteryUpper+1-g.LotteryLower)) + int(g.LotteryLower))
 			}
 			if err == nil {
-				session.ChannelMessageSend(ch.ID, fmt.Sprintf(`Looks like SOMEBODY is a lucky winner!
+				guild, _ := session.Guild(s.Guild)
+				if guild != nil {
+					session.ChannelMessageSend(ch.ID, fmt.Sprintf(`Looks like SOMEBODY is a lucky winner!
+That's right, **%s#%s**, you won a grand total of %d Experience in **%s**! You should give yourself a pat on the back, you're a real winner in life!
+🎉🎉🎉🎉🎉🎉🎉`, u.User.Username, u.User.Discriminator, r, guild.Name))
+				} else {
+					session.ChannelMessageSend(ch.ID, fmt.Sprintf(`Looks like SOMEBODY is a lucky winner!
 That's right, **%s#%s**, you won a grand total of %d Experience! You should give yourself a pat on the back, you're a real winner in life!
 🎉🎉🎉🎉🎉🎉🎉`, u.User.Username, u.User.Discriminator, r))
+				}
 			}
 			member.Experience += r
 		}

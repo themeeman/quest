@@ -7,6 +7,8 @@ import (
 	"time"
 	"reflect"
 	"github.com/go-sql-driver/mysql"
+	"bytes"
+	"fmt"
 )
 
 type Argument struct {
@@ -97,10 +99,13 @@ func (guilds Guilds) Get(id string) *Guild {
 	guild, ok := guilds[id]
 	if !ok {
 		guild = &Guild{
-			ID:           id,
-			ExpReload:    60,
-			ExpGainUpper: 25,
-			ExpGainLower: 10,
+			ID:            id,
+			ExpReload:     60,
+			ExpGainUpper:  25,
+			ExpGainLower:  10,
+			LotteryChance: 100,
+			LotteryUpper:  500,
+			LotteryLower:  250,
 		}
 		guilds[id] = guild
 	}
@@ -120,13 +125,26 @@ func (members Members) Get(id string) *Member {
 	return member
 }
 
-func (d Command) ForcedArgs() (i int) {
-	for _, v := range d.Arguments {
+func (c Command) ForcedArgs() (i int) {
+	for _, v := range c.Arguments {
 		if !v.Optional {
 			i += 1
 		}
 	}
 	return
+}
+
+func (c Command) GetUsage(prefix string, name string) string {
+	var buffer bytes.Buffer
+	buffer.WriteString(prefix + name)
+	for _, v := range c.Arguments {
+		if v.Optional {
+			buffer.WriteString(fmt.Sprintf(" <%s>", v.Name))
+		} else {
+			buffer.WriteString(fmt.Sprintf(" [%s]", v.Name))
+		}
+	}
+	return buffer.String()
 }
 
 func MustGetGuildID(session *discordgo.Session, message *discordgo.MessageCreate) string {

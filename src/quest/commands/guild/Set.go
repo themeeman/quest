@@ -28,7 +28,7 @@ func Set(session *discordgo.Session, message *discordgo.MessageCreate, args map[
 		guild := bot.Guilds.Get(commands.MustGetGuildID(session, message))
 		var buf bytes.Buffer
 		for _, name := range names {
-			current := repr(reflect.Indirect(reflect.ValueOf(*guild)).FieldByName(name).Interface())
+			current := repr(reflect.Indirect(reflect.ValueOf(guild).Elem()).FieldByName(name).Interface())
 			buf.WriteString(fmt.Sprintf("**%s** - %s\n", name, current))
 		}
 		session.ChannelMessageSend(message.ChannelID, buf.String())
@@ -66,16 +66,10 @@ func Set(session *discordgo.Session, message *discordgo.MessageCreate, args map[
 				Expected: option.Type,
 			}
 		}
-		val := convertType(message, option.Type, value)
 		guild := bot.Guilds.Get(commands.MustGetGuildID(session, message))
 		field := reflect.ValueOf(guild).Elem().FieldByName(keyName)
-		if n, ok := val.(int); ok {
-			val = convertInt(n, field)
-		} else if n, ok := val.(float64); ok {
-			val = convertFloat(n, field)
-		} else if n, ok := val.(complex128); ok {
-			val = convertComplex(n, field)
-		}
+		fieldType := reflect.TypeOf(field.Interface())
+		val := reflect.ValueOf(convertType(message, option.Type, value)).Convert(fieldType).Interface()
 		field.Set(reflect.ValueOf(val))
 		session.MessageReactionAdd(message.ChannelID, message.ID, "☑")
 	}
@@ -93,42 +87,6 @@ func repr(val interface{}) string {
 	default:
 		return fmt.Sprint(val)
 	}
-}
-
-
-func convertInt(val int, field reflect.Value) interface{} {
-	var a interface{}
-	switch field.Interface().(type) {
-	case uint8: a = uint8(val)
-	case uint16: a = uint16(val)
-	case uint32: a = uint32(val)
-	case uint64: a = uint64(val)
-	case int8: a = int8(val)
-	case int16: a = int16(val)
-	case int32: a = int32(val)
-	case int64: a = int64(val)
-	case int: a = val
-	case uint: a = uint(val)
-	}
-	return a
-}
-
-func convertFloat(val float64, field reflect.Value) interface{} {
-	var a interface{}
-	switch field.Interface().(type) {
-	case float32: a = float32(val)
-	case float64: a = float64(val)
-	}
-	return a
-}
-
-func convertComplex(val complex128, field reflect.Value) interface{} {
-	var a interface{}
-	switch field.Interface().(type) {
-	case complex64: a = complex64(val)
-	case complex128: a = complex128(val)
-	}
-	return a
 }
 
 func convertType(message *discordgo.MessageCreate, T string, value string) interface{} {

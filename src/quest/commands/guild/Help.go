@@ -50,15 +50,6 @@ func Help(session *discordgo.Session, message *discordgo.MessageCreate, args map
 			}
 			session.ChannelMessageSend(message.ChannelID, "```json\n"+string(b)+"```")
 		}
-		var buffer bytes.Buffer
-		buffer.WriteString(bot.Prefix + name)
-		for _, v := range cmdInfo.Arguments {
-			if v.Optional {
-				buffer.WriteString(fmt.Sprintf(" <%s>", v.Name))
-			} else {
-				buffer.WriteString(fmt.Sprintf(" [%s]", v.Name))
-			}
-		}
 		var fields []*discordgo.MessageEmbedField
 		if len(cmdInfo.Examples) > 0 {
 			var exampleBuffer bytes.Buffer
@@ -69,7 +60,7 @@ func Help(session *discordgo.Session, message *discordgo.MessageCreate, args map
 			fields = []*discordgo.MessageEmbedField{
 				{
 					Name:  "Usage",
-					Value: "```" + buffer.String() + "```",
+					Value: "```" + cmdInfo.GetUsage(bot.Prefix, name) + "```",
 				},
 				{
 					Name:  "Examples",
@@ -80,7 +71,7 @@ func Help(session *discordgo.Session, message *discordgo.MessageCreate, args map
 			fields = []*discordgo.MessageEmbedField{
 				{
 					Name:  "Usage",
-					Value: "```" + buffer.String() + "```",
+					Value: "```" + cmdInfo.GetUsage(bot.Prefix, name) + "```",
 				},
 			}
 		}
