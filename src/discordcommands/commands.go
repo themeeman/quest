@@ -73,7 +73,7 @@ func parseArgs(bot *Bot, command *Command, args []string) (newArgs map[string]st
 	newArgs = make(map[string]string)
 	for index, argument := range command.Arguments {
 		fmt.Println(index, argument)
-		value, err := newArgValue(argument, args, index, command.ForcedArgs())
+		value, err := newArgValue(command, argument, args, index, command.ForcedArgs())
 		if err != nil {
 			return nil, err
 		}
@@ -93,11 +93,10 @@ func parseArgs(bot *Bot, command *Command, args []string) (newArgs map[string]st
 	return
 }
 
-func newArgValue(argument *Argument, args []string, index int, forcedArgs int) (string, BotError) {
+func newArgValue(command *Command, argument *Argument, args []string, index int, forcedArgs int) (string, BotError) {
 	if index >= len(args) && !argument.Optional {
-		return "", InsufficentArgumentsError{
-			Minimum:  forcedArgs,
-			Received: len(args),
+		return "", UsageError{
+			Usage: command.GetUsage("q:", args[0]),
 		}
 	} else if index >= len(args) && argument.Optional {
 		return "", nil

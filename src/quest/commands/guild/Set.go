@@ -33,9 +33,8 @@ func Set(session *discordgo.Session, message *discordgo.MessageCreate, args map[
 		}
 		session.ChannelMessageSend(message.ChannelID, buf.String())
 	} else if args["Value"] == "" {
-		return commands.InsufficentArgumentsError{
-			Minimum:  2,
-			Received: 1,
+		return commands.UsageError{
+			Usage: bot.CommandMap["Set"].GetUsage(bot.Prefix, "set"),
 		}
 	} else {
 		keyName := args["Option"]

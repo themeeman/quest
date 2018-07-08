@@ -81,15 +81,12 @@ func (e BotPermissionsError) Error() string {
 }
 
 type UsageError struct {
-	Minimum  int
-	Received int
+	Usage string
 }
 
 func (e UsageError) Error() string {
-	return fmt.Sprintf(`The command recieved less arguments than the minimum required
-Minimum: %d
-Received: %d
-Refer to q:help for info about the correct usage`, e.Minimum, e.Received)
+	return fmt.Sprintf("The command usage is invalid!\n" +
+		"The correct way to use the command is `%s`", e.Usage)
 }
 
 type RoleError struct {
