@@ -1,0 +1,8 @@
+{
+  "ExpReload":     60,
+  "ExpGainUpper":  25,
+  "ExpGainLower":  10,
+  "LotteryChance": 100,
+  "LotteryUpper":  500,
+  "LotteryLower":  250
+}

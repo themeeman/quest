@@ -8,9 +8,12 @@ import (
 )
 
 func GrantRoles(session *discordgo.Session, message *discordgo.MessageCreate, guild *commands.Guild, member *commands.Member) error {
-	m, _ := session.GuildMember(commands.MustGetGuildID(session, message), member.ID)
+	m, err := session.GuildMember(guild.ID, member.ID)
+	if err != nil {
+		return err
+	}
 	for _, r := range guild.Roles {
-		if m != nil && member.Experience >= r.Experience {
+		if member.Experience >= r.Experience {
 			role, err := commands.FindRole(session, guild.ID, r.ID)
 			if err != nil {
 				continue
@@ -27,11 +30,11 @@ func GrantRoles(session *discordgo.Session, message *discordgo.MessageCreate, gu
 
 func questEmbedColor(username string, discriminator string, rolename string, color int) *discordgo.MessageEmbed {
 	emb := &discordgo.MessageEmbed{
-		Type:      "rich",
-		Title:     fmt.Sprintf("Congratulations %s#%s", username, discriminator),
+		Type:        "rich",
+		Title:       fmt.Sprintf("Congratulations %s#%s", username, discriminator),
 		Description: fmt.Sprintf("You received the %s role", rolename),
-		Timestamp: commands.TimeToTimestamp(time.Now()),
-		Color:     color,
+		Timestamp:   commands.TimeToTimestamp(time.Now()),
+		Color:       color,
 		Footer: &discordgo.MessageEmbedFooter{
 			Text: "Quest Bot",
 		},

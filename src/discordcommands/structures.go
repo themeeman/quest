@@ -9,6 +9,9 @@ import (
 	"github.com/go-sql-driver/mysql"
 	"bytes"
 	"fmt"
+	"strings"
+	"os"
+	"encoding/json"
 )
 
 type Argument struct {
@@ -177,4 +180,15 @@ func Contains(slice interface{}, value interface{}) (bool, int) {
 		}
 	}
 	return false, 0
+}
+
+func HasPrefix(s, prefix string) bool {
+	return len(s) >= len(prefix) && strings.ToLower(s)[0:len(prefix)] == strings.ToLower(prefix)
+}
+
+func TrimPrefix(s, prefix string) string {
+	if HasPrefix(s, prefix) {
+		return s[len(prefix):]
+	}
+	return s
 }

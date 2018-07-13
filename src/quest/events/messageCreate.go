@@ -29,14 +29,13 @@ func MessageCreate(bot *commands.Bot) func(*discordgo.Session, *discordgo.Messag
 					session.ChannelMessageDelete(message.ChannelID, m.ID)
 				}
 			}
-			if strings.HasPrefix(strings.ToLower(message.Content), bot.Prefix) {
+			if commands.HasPrefix(message.Content, bot.Prefix) {
 				err := commands.ExecuteCommand(session, message, bot)
 				if err != nil {
 					session.ChannelMessageSendEmbed(message.ChannelID, commands.ErrorEmbed(err))
 				}
 			}
 			experience.GrantExp(bot, session, message)
-			fmt.Println("-----------------------")
 		}
 	}
 }

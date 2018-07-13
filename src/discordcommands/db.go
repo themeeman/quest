@@ -207,8 +207,8 @@ func postRoleData(tx *sqlx.Tx, guilds Guilds, guildID string) error {
 	if err != nil {
 		return err
 	}
-	for _, member := range guild.Roles {
-		_, err = stmt.Exec(member)
+	for _, role := range guild.Roles {
+		_, err = stmt.Exec(role)
 		if err != nil {
 			return err
 		}

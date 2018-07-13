@@ -30,7 +30,7 @@ func GetCommand(bot *Bot, name string) (*Command, Handler, string) {
 
 func ExecuteCommand(session *discordgo.Session, message *discordgo.MessageCreate, bot *Bot) BotError {
 	t := time.Now()
-	ss := strings.TrimPrefix(message.Content, bot.Prefix)
+	ss := TrimPrefix(message.Content, bot.Prefix)
 	args := strings.Fields(ss)
 	if len(args) == 0 {
 		return nil
@@ -41,7 +41,13 @@ func ExecuteCommand(session *discordgo.Session, message *discordgo.MessageCreate
 		return nil
 	}
 	g, _ := session.Guild(MustGetGuildID(session, message))
-	author, _ := session.GuildMember(g.ID, message.Author.ID)
+	if g == nil {
+		return nil
+	}
+	author, err := session.GuildMember(g.ID, message.Author.ID)
+	if err != nil {
+		return nil
+	}
 	sufficent, had, required := SufficentPermissions(session, g, author, bot, info)
 	if !sufficent {
 		s := []string{"member", "moderator", "admin", "owner"}

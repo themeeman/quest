@@ -21,6 +21,7 @@ func (m membersSorted) Less(i, j int) bool {
 }
 
 func Leaderboard(session *discordgo.Session, message *discordgo.MessageCreate, _ map[string]string, bot *commands.Bot) commands.BotError {
+	session.State.TrackMembers = true
 	guild := bot.Guilds.Get(commands.MustGetGuildID(session, message))
 	sorted := membersSorted{
 		IDs:     make([]string, len(guild.Members)),
@@ -110,7 +111,7 @@ func getMembers(session *discordgo.Session, guildID string, ids []string, ch cha
 	ms := make([]*discordgo.Member, len(ids))
 	for i, id := range ids {
 		go func(i int, id string) {
-			ms[i], _ = session.GuildMember(guildID, id)
+			ms[i], _ = session.State.Member(guildID, id)
 			if ch != nil {
 				ch <- &memberData{
 					Index:  i,
