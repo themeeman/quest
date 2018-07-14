@@ -38,11 +38,10 @@ func Me(session *discordgo.Session, message *discordgo.MessageCreate, args map[s
 			Value: strconv.Itoa(int(member.Experience)),
 		},
 		{
-			Name:  "Rank",
+			Name:  "Group",
 			Value: s[rank],
 		},
 	}
-
 	now := time.Now().UTC()
 	if member.MuteExpires.Valid && member.MuteExpires.Time.UTC().After(now) {
 		dif := member.MuteExpires.Time.UTC().UnixNano() - now.UnixNano()
