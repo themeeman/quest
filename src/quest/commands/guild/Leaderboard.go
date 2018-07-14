@@ -96,7 +96,7 @@ func findIndex(ss []string, s string) (int, bool) {
 			return i, true
 		}
 	}
-	return len(ss), false
+	return len(ss) - 1, false
 }
 
 type memberData struct {
