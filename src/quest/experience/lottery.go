@@ -3,11 +3,11 @@ package experience
 import (
 	"fmt"
 	"math/rand"
-	commands "../../discordcommands"
 	"github.com/bwmarrin/discordgo"
+	"../structures"
 )
 
-func GrantLottery(session *discordgo.Session, guild *commands.Guild, member *commands.Member) {
+func GrantLottery(session *discordgo.Session, guild *structures.Guild, member *structures.Member) {
 	var a int
 	if guild.LotteryChance == 0 {
 		a = 1

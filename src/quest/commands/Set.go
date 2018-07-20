@@ -1,8 +1,8 @@
-package guild
+package commands
 
 import (
 	"github.com/bwmarrin/discordgo"
-	commands "../../../discordcommands"
+	commands "../../discordcommands"
 	"regexp"
 	"strings"
 	"strconv"
@@ -12,10 +12,29 @@ import (
 	"fmt"
 	"sort"
 	"bytes"
+	"../structures"
+	"github.com/fatih/structs"
 )
+func getOptions(bot *Bot) map[string]*structures.Option {
+	g := new(structures.Guild)
+	t := reflect.TypeOf(*g)
+	options := make(map[string]*structures.Option)
+	for _, s := range structs.Names(*g) {
+		field, _ := t.FieldByName(s)
+		t, ok := field.Tag.Lookup("type")
+		if ok {
+			name, _ := field.Tag.Lookup("db")
+			options[s] = &structures.Option{
+				Name: name,
+				Type: t,
+			}
+		}
+	}
+	return options
+}
 
-func Set(session *discordgo.Session, message *discordgo.MessageCreate, args map[string]string, bot *commands.Bot) commands.BotError {
-	options := commands.GetOptions(bot)
+func (bot *Bot) Set(session *discordgo.Session, message *discordgo.MessageCreate, args map[string]string) error {
+	options := getOptions(bot)
 	fmt.Println(options)
 	if args["Option"] == "" {
 		names := make([]string, len(options))

@@ -2,10 +2,10 @@ package events
 
 import (
 	"github.com/bwmarrin/discordgo"
-	commands "../../discordcommands"
+	quest "../commands"
 )
 
-func MemberAdd(bot *commands.Bot) func(*discordgo.Session, *discordgo.GuildMemberAdd) {
+func MemberAdd(bot *quest.Bot) func(*discordgo.Session, *discordgo.GuildMemberAdd) {
 	return func(session *discordgo.Session, event *discordgo.GuildMemberAdd) {
 		guild := bot.Guilds.Get(event.GuildID)
 		if guild.Autorole.Valid {

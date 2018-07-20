@@ -1,13 +1,14 @@
-package guild
+package commands
 
 import (
 	"github.com/bwmarrin/discordgo"
-	commands "../../../discordcommands"
+	commands "../../discordcommands"
+	"../structures"
 	"strconv"
 	"fmt"
 )
 
-func AddRole(session *discordgo.Session, message *discordgo.MessageCreate, args map[string]string, bot *commands.Bot) commands.BotError {
+func (bot *Bot) AddRole(session *discordgo.Session, message *discordgo.MessageCreate, args map[string]string) error {
 	var roleID string
 	if len(message.MentionRoles) > 0 {
 		roleID = message.MentionRoles[0]
@@ -16,7 +17,7 @@ func AddRole(session *discordgo.Session, message *discordgo.MessageCreate, args 
 	}
 	guild := bot.Guilds.Get(commands.MustGetGuildID(session, message))
 	exp, _ := strconv.Atoi(args["Experience"])
-	role := &commands.Role{
+	role := &structures.Role{
 		Experience: int64(exp),
 		ID:         roleID,
 	}
@@ -37,7 +38,7 @@ func AddRole(session *discordgo.Session, message *discordgo.MessageCreate, args 
 	return nil
 }
 
-func isRoleIn(roles commands.Roles, id string) bool {
+func isRoleIn(roles structures.Roles, id string) bool {
 	for _, r := range roles {
 		if r.ID == id {
 			return true

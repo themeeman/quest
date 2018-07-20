@@ -1,8 +1,9 @@
-package guild
+package commands
 
 import (
 	"github.com/bwmarrin/discordgo"
-	commands "../../../discordcommands"
+	commands "../../discordcommands"
+	"../structures"
 	"sort"
 	"fmt"
 	"bytes"
@@ -11,7 +12,7 @@ import (
 
 type membersSorted struct {
 	IDs []string
-	commands.Members
+	structures.Members
 }
 
 func (m membersSorted) Len() int      { return len(m.IDs) }
@@ -20,7 +21,7 @@ func (m membersSorted) Less(i, j int) bool {
 	return m.Members[m.IDs[i]].Experience > m.Members[m.IDs[j]].Experience
 }
 
-func Leaderboard(session *discordgo.Session, message *discordgo.MessageCreate, _ map[string]string, bot *commands.Bot) commands.BotError {
+func (bot *Bot) Leaderboard(session *discordgo.Session, message *discordgo.MessageCreate, _ map[string]string) error {
 	session.State.TrackMembers = true
 	guild := bot.Guilds.Get(commands.MustGetGuildID(session, message))
 	sorted := membersSorted{

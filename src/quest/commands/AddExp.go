@@ -1,14 +1,13 @@
-package guild
+package commands
 
 import (
 	"github.com/bwmarrin/discordgo"
-	commands "../../../discordcommands"
-	"../../experience"
+	commands "../../discordcommands"
 	"strconv"
 	"strings"
 )
 
-func AddExp(session *discordgo.Session, message *discordgo.MessageCreate, args map[string]string, bot *commands.Bot) commands.BotError {
+func (bot *Bot) AddExp(session *discordgo.Session, message *discordgo.MessageCreate, args map[string]string) error {
 	guild := bot.Guilds.Get(commands.MustGetGuildID(session, message))
 	var id string
 	if args["User"] == "" {
@@ -27,7 +26,6 @@ func AddExp(session *discordgo.Session, message *discordgo.MessageCreate, args m
 	member := guild.Members.Get(id)
 	exp, _ := strconv.Atoi(strings.Replace(args["Value"], ",", "", -1))
 	member.Experience += int64(exp)
-	experience.GrantRoles(session, message, guild, member)
 	session.MessageReactionAdd(message.ChannelID, message.ID, "☑")
 	return nil
 }

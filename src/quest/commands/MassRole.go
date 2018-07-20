@@ -1,12 +1,12 @@
-package guild
+package commands
 
 import (
 	"github.com/bwmarrin/discordgo"
-	commands "../../../discordcommands"
+	commands "../../discordcommands"
 	"fmt"
 )
 
-func MassRole(session *discordgo.Session, message *discordgo.MessageCreate, args map[string]string, bot *commands.Bot) commands.BotError {
+func (bot *Bot) MassRole(session *discordgo.Session, message *discordgo.MessageCreate, args map[string]string) error {
 	c, _ := session.Channel(message.ChannelID)
 	guild := bot.Guilds.Get(c.GuildID)
 	var role string

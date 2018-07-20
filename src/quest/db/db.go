@@ -1,4 +1,4 @@
-package discordcommands
+package db
 
 import (
 	_ "github.com/go-sql-driver/mysql"
@@ -6,6 +6,7 @@ import (
 	"strings"
 	"github.com/jmoiron/sqlx"
 	"log"
+	"../structures"
 )
 
 const schema = `CREATE TABLE IF NOT EXISTS guild_%s (
@@ -25,7 +26,7 @@ func InitDB(user string, pass string, host string, database string) (*sqlx.DB, e
 	return sqlx.Connect("mysql", fmt.Sprintf("%s:%s@tcp(%s)/%s", user, pass, host, database))
 }
 
-func QueryAllData(db *sqlx.DB) (Guilds, error) {
+func QueryAllData(db *sqlx.DB) (structures.Guilds, error) {
 	tx, err := db.Beginx()
 	if err != nil {
 		return nil, err
@@ -65,25 +66,25 @@ func QueryAllData(db *sqlx.DB) (Guilds, error) {
 	return guilds, nil
 }
 
-func queryGuildData(tx *sqlx.Tx) (Guilds, error) {
+func queryGuildData(tx *sqlx.Tx) (structures.Guilds, error) {
 	var length int
 	err := tx.Get(&length, "SELECT COUNT(*) FROM guilds")
 	if err != nil {
 		return nil, err
 	}
-	xs := make([]*Guild, 0, length)
+	xs := make([]*structures.Guild, 0, length)
 	err = tx.Select(&xs, "SELECT * FROM guilds")
 	if err != nil {
 		return nil, err
 	}
-	guilds := make(map[string]*Guild)
+	guilds := make(structures.Guilds)
 	for _, x := range xs {
 		guilds[x.ID] = x
 	}
 	return guilds, nil
 }
 
-func queryMemberData(tx *sqlx.Tx, guildID string) (Members, error) {
+func queryMemberData(tx *sqlx.Tx, guildID string) (structures.Members, error) {
 	q := fmt.Sprintf("SELECT * FROM guild_%s", guildID)
 	q2 := fmt.Sprintf("SELECT COUNT(*) FROM guild_%s", guildID)
 	var length int
@@ -91,19 +92,19 @@ func queryMemberData(tx *sqlx.Tx, guildID string) (Members, error) {
 	if err != nil {
 		return nil, err
 	}
-	xs := make([]*Member, 0, length)
+	xs := make([]*structures.Member, 0, length)
 	err = tx.Select(&xs, q)
 	if err != nil {
 		return nil, err
 	}
-	members := make(Members)
+	members := make(structures.Members)
 	for _, x := range xs {
 		members[x.ID] = x
 	}
 	return members, nil
 }
 
-func queryRoleData(tx *sqlx.Tx, guildID string) (Roles, error) {
+func queryRoleData(tx *sqlx.Tx, guildID string) (structures.Roles, error) {
 	q := fmt.Sprintf("SELECT * FROM roles_%s", guildID)
 	q2 := fmt.Sprintf("SELECT COUNT(*) FROM roles_%s", guildID)
 	var length int
@@ -111,7 +112,7 @@ func queryRoleData(tx *sqlx.Tx, guildID string) (Roles, error) {
 	if err != nil {
 		return nil, err
 	}
-	roles := make(Roles, 0, length)
+	roles := make(structures.Roles, 0, length)
 	err = tx.Select(&roles, q)
 	if err != nil {
 		return nil, err
@@ -127,7 +128,7 @@ func CreateAllData(tx *sqlx.Tx, guildID string) {
 	tx.MustExec(q)
 }
 
-func PostAllData(db *sqlx.DB, guilds Guilds) error {
+func PostAllData(db *sqlx.DB, guilds structures.Guilds) error {
 	tx, err := db.Beginx()
 	if err != nil {
 		return err
@@ -166,10 +167,10 @@ func PostAllData(db *sqlx.DB, guilds Guilds) error {
 	return nil
 }
 
-func postGuildData(tx *sqlx.Tx, guilds Guilds) error {
+func postGuildData(tx *sqlx.Tx, guilds structures.Guilds) error {
 	stmt, err := tx.PrepareNamed("INSERT INTO guilds VALUES (:id, :mute_role, :mod_role, :admin_role, :mod_log, :autorole, :exp_reload, :exp_gain_upper, :exp_gain_lower, :lottery_chance, :lottery_upper, :lottery_lower) " +
 		"ON DUPLICATE KEY UPDATE mute_role=:mute_role, mod_role=:mod_role, admin_role=:admin_role, mod_log=:mod_log, autorole=:autorole, exp_reload=:exp_reload, " +
-			"exp_gain_upper=:exp_gain_upper, exp_gain_lower=:exp_gain_lower, lottery_chance=:lottery_chance, lottery_upper=:lottery_upper, lottery_lower=:lottery_lower")
+		"exp_gain_upper=:exp_gain_upper, exp_gain_lower=:exp_gain_lower, lottery_chance=:lottery_chance, lottery_upper=:lottery_upper, lottery_lower=:lottery_lower")
 	if err != nil {
 		return err
 	}
@@ -182,10 +183,10 @@ func postGuildData(tx *sqlx.Tx, guilds Guilds) error {
 	return nil
 }
 
-func postMemberData(tx *sqlx.Tx, guilds Guilds, guildID string) error {
+func postMemberData(tx *sqlx.Tx, guilds structures.Guilds, guildID string) error {
 	guild := guilds.Get(guildID)
-	q := fmt.Sprintf("INSERT INTO guild_%s VALUES (:user_id, :mute_expires, :experience) "+
-		"ON DUPLICATE KEY UPDATE user_id=:user_id, mute_expires=:mute_expires, experience=:experience", guildID)
+	q := fmt.Sprintf("INSERT INTO guild_%s VALUES (:user_id, :mute_expires, :experience, :chests) "+
+		"ON DUPLICATE KEY UPDATE user_id=:user_id, mute_expires=:mute_expires, experience=:experience, chests=:chests", guildID)
 	stmt, err := tx.PrepareNamed(q)
 	if err != nil {
 		return err
@@ -199,7 +200,7 @@ func postMemberData(tx *sqlx.Tx, guilds Guilds, guildID string) error {
 	return nil
 }
 
-func postRoleData(tx *sqlx.Tx, guilds Guilds, guildID string) error {
+func postRoleData(tx *sqlx.Tx, guilds structures.Guilds, guildID string) error {
 	guild := guilds.Get(guildID)
 	q := fmt.Sprintf("INSERT INTO roles_%s VALUES (:id, :experience) "+
 		"ON DUPLICATE KEY UPDATE id=:id, experience=:experience", guildID)

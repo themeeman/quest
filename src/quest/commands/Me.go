@@ -1,14 +1,15 @@
-package guild
+package commands
 
 import (
 	"github.com/bwmarrin/discordgo"
-	commands "../../../discordcommands"
+	commands "../../discordcommands"
 	"strconv"
 	"fmt"
 	"time"
+	"../permissions"
 )
 
-func Me(session *discordgo.Session, message *discordgo.MessageCreate, args map[string]string, bot *commands.Bot) commands.BotError {
+func (bot *Bot) Me(session *discordgo.Session, message *discordgo.MessageCreate, args map[string]string) error {
 	var id string
 	if args["User"] == "" {
 		id = message.Author.ID
@@ -29,7 +30,7 @@ func Me(session *discordgo.Session, message *discordgo.MessageCreate, args map[s
 	}
 	member := guild.Members.Get(id)
 	g, _ := session.Guild(commands.MustGetGuildID(session, message))
-	rank := commands.GetPermissionLevel(session, m, guild, g.OwnerID)
+	rank := permissions.GetPermissionLevel(session, m, guild, g.OwnerID)
 	s := []string{"Member", "Moderator", "Admin", "Owner"}
 	title := fmt.Sprintf("User %s#%s", m.User.Username, m.User.Discriminator)
 	fields := []*discordgo.MessageEmbedField{

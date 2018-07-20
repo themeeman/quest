@@ -4,14 +4,17 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"log"
 	"fmt"
-	commands "../../discordcommands"
+	"../structures"
+	"../db"
 	"time"
+	quest "../commands"
+	commands "../../discordcommands"
 )
 
-func Ready(bot *commands.Bot) func(*discordgo.Session, *discordgo.Ready) {
-	return func(session *discordgo.Session, ready *discordgo.Ready) {
+func Ready(bot *quest.Bot) func(*discordgo.Session, *discordgo.Ready) {
+	return func(session *discordgo.Session, event *discordgo.Ready) {
 		var err error
-		guilds, err := commands.QueryAllData(bot.DB)
+		guilds, err := db.QueryAllData(bot.DB)
 		if err != nil {
 			log.Println("b", err)
 		}
@@ -23,7 +26,7 @@ func Ready(bot *commands.Bot) func(*discordgo.Session, *discordgo.Ready) {
 		go func() {
 			for {
 				time.Sleep(time.Minute * 10)
-				err := commands.PostAllData(bot.DB, bot.Guilds)
+				err := db.PostAllData(bot.DB, bot.Guilds)
 				if err != nil {
 					log.Println(err)
 				} else {
@@ -31,17 +34,29 @@ func Ready(bot *commands.Bot) func(*discordgo.Session, *discordgo.Ready) {
 				}
 			}
 		}()
-		applyMutes(bot, session)
+		go func() {
+			for {
+				err := <- bot.Errors
+				if err.Err != nil {
+					if e, ok := err.Err.(commands.ZeroArgumentsError); ok {
+						bot.Help(session, err.MessageCreate, map[string]string{"Command": e.Command})
+					} else {
+						session.ChannelMessageSendEmbed(err.ChannelID, commands.ErrorEmbed(err.Err))
+					}
+				}
+			}
+		}()
+		applyMutes(guilds, session)
 	}
 }
 
-func applyMutes(bot *commands.Bot, session *discordgo.Session) {
+func applyMutes(guilds structures.Guilds, session *discordgo.Session) {
 	now := time.Now().UTC()
-	for _, guild := range bot.Guilds {
+	for _, guild := range guilds {
 		if guild.MuteRole.Valid {
 			for _, member := range guild.Members {
 				if member.MuteExpires.Valid && member.MuteExpires.Time.After(now) {
-					go func(guild *commands.Guild, member *commands.Member) {
+					go func(guild *structures.Guild, member *structures.Member) {
 						dur := member.MuteExpires.Time.UTC().UnixNano() - now.UnixNano()
 						time.Sleep(time.Duration(dur))
 						session.GuildMemberRoleRemove(guild.ID, member.ID, guild.MuteRole.String)

@@ -1,16 +1,16 @@
-package guild
+package commands
 
 import (
 	"github.com/bwmarrin/discordgo"
-	commands "../../../discordcommands"
+	"../db"
 	"fmt"
 )
 
-func Commit(session *discordgo.Session, message *discordgo.MessageCreate, _ map[string]string, bot *commands.Bot) commands.BotError {
+func (bot *Bot) Commit(session *discordgo.Session, message *discordgo.MessageCreate, _ map[string]string) error {
 	if message.Author.ID != "164759167561629696" {
 		return nil
 	}
-	err := commands.PostAllData(bot.DB, bot.Guilds)
+	err := db.PostAllData(bot.DB, bot.Guilds)
 	if err != nil {
 		fmt.Println(err)
 		return nil

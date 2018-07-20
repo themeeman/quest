@@ -1,15 +1,16 @@
-package guild
+package commands
 
 import (
 	"github.com/bwmarrin/discordgo"
-	commands "../../../discordcommands"
+	commands "../../discordcommands"
 	"strconv"
 	"fmt"
 	"strings"
 	"time"
+	"../permissions"
 )
 
-func Mute(session *discordgo.Session, message *discordgo.MessageCreate, args map[string]string, bot *commands.Bot) commands.BotError {
+func (bot *Bot) Mute(session *discordgo.Session, message *discordgo.MessageCreate, args map[string]string) error {
 	ch, _ := session.State.Channel(message.ChannelID)
 	var user *discordgo.User
 	if len(args["User"]) == 18 {
@@ -26,7 +27,7 @@ func Mute(session *discordgo.Session, message *discordgo.MessageCreate, args map
 	member, _ := session.State.Member(ch.GuildID, user.ID)
 	guild := bot.Guilds.Get(ch.GuildID)
 	g, _ := session.Guild(ch.GuildID)
-	if commands.GetPermissionLevel(session, member, guild, g.OwnerID) >= 2 {
+	if permissions.GetPermissionLevel(session, member, guild, g.OwnerID) >= permissions.PermissionAdmin {
 		return commands.CustomError("That user is a admin, I can't mute them!")
 	} else if member.User.Bot {
 		return commands.CustomError("Can't mute a bot")

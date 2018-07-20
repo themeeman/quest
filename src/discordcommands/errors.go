@@ -6,10 +6,6 @@ import (
 	"fmt"
 )
 
-type BotError interface {
-	Error() string
-}
-
 type ParsingError struct {
 	Value    string
 	Position int
@@ -21,6 +17,14 @@ func (e ParsingError) Error() string {
 Argument position: %v
 Expected Type: %s
 Received: %s`, e.Position, e.Expected, e.Value)
+}
+
+type ZeroArgumentsError struct {
+	Command string
+}
+
+func (e ZeroArgumentsError) Error() string {
+	return "No arguments were given"
 }
 
 type UnknownCommandError struct {
@@ -143,7 +147,7 @@ func (e CustomError) Error() string {
 	return string(e)
 }
 
-func ErrorEmbed(e BotError) *discordgo.MessageEmbed {
+func ErrorEmbed(e error) *discordgo.MessageEmbed {
 	emb := &discordgo.MessageEmbed{
 		Type:        "rich",
 		Title:       "An error has occurred",

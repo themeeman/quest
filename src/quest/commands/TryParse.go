@@ -1,13 +1,13 @@
-package guild
+package commands
 
 import (
 	"github.com/bwmarrin/discordgo"
-	commands "../../../discordcommands"
+	commands "../../discordcommands"
 	"regexp"
 	"fmt"
 )
 
-func TryParse(session *discordgo.Session, message *discordgo.MessageCreate, args map[string]string, bot *commands.Bot) commands.BotError {
+func (bot *Bot) TryParse(session *discordgo.Session, message *discordgo.MessageCreate, args map[string]string) error {
 	pattern, ok := bot.Regex[args["Type"]]
 	if !ok {
 		return commands.TypeError{Name: args["Type"]}

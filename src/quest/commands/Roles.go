@@ -1,20 +1,21 @@
-package guild
+package commands
 
 import (
 	"github.com/bwmarrin/discordgo"
-	commands "../../../discordcommands"
+	commands "../../discordcommands"
+	"../structures"
 	"sort"
 	"bytes"
 	"fmt"
 )
 
-func Roles(session *discordgo.Session, message *discordgo.MessageCreate, args map[string]string, bot *commands.Bot) commands.BotError {
+func (bot *Bot) Roles(session *discordgo.Session, message *discordgo.MessageCreate, args map[string]string) error {
 	guild := bot.Guilds.Get(commands.MustGetGuildID(session, message))
 	if len(guild.Roles) == 0 {
 		session.ChannelMessageSend(message.ChannelID, "No reward roles configured\nUse q:addrole to create some")
 		return nil
 	}
-	roles := make(commands.Roles, len(guild.Roles))
+	roles := make(structures.Roles, len(guild.Roles))
 	copy(roles, guild.Roles)
 	sort.Sort(roles)
 	var buffer bytes.Buffer

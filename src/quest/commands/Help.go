@@ -1,15 +1,16 @@
-package direct
+package commands
 
 import (
 	"github.com/bwmarrin/discordgo"
-	commands "../../../discordcommands"
+	commands "../../discordcommands"
 	"bytes"
-	"sort"
 	"fmt"
 	"strings"
+	"sort"
+	"../permissions"
 )
 
-func Help(session *discordgo.Session, message *discordgo.MessageCreate, args map[string]string, bot *commands.Bot) commands.BotError {
+func (bot *Bot) Help(session *discordgo.Session, message *discordgo.MessageCreate, args map[string]string) error {
 	if args["Command"] == "" {
 		var buf bytes.Buffer
 		names := make([]string, len(bot.CommandMap))
@@ -19,10 +20,14 @@ func Help(session *discordgo.Session, message *discordgo.MessageCreate, args map
 			i++
 		}
 		sort.Strings(names)
+		guild, _ := session.Guild(commands.MustGetGuildID(session, message))
+		author, _ := session.GuildMember(guild.ID, message.Author.ID)
+		level := permissions.GetPermissionLevel(session, author, bot.Guilds.Get(guild.ID), guild.OwnerID)
 		for _, name := range names {
-			v := bot.CommandMap[name]
-			if _, ok := bot.HandlerMap[name]; ok && !v.Hidden {
-				buf.WriteString(fmt.Sprintf("**%s - ** %s\n", name, v.Description))
+			command := bot.CommandMap[name]
+			sufficient := level >= command.Group
+			if !command.Hidden && sufficient {
+				buf.WriteString(fmt.Sprintf("**%s - ** %s\n", name, command.Description))
 			}
 		}
 		fields := []*discordgo.MessageEmbedField{
@@ -33,19 +38,10 @@ func Help(session *discordgo.Session, message *discordgo.MessageCreate, args map
 		}
 		session.ChannelMessageSendEmbed(message.ChannelID, bot.Embed("Help", "", fields))
 	} else {
-		cmdInfo, hand, name := commands.GetCommand(bot, args["Command"])
-		if cmdInfo == nil || hand == nil {
+		cmdInfo, name := getCommand(bot.CommandMap, args["Command"])
+		if cmdInfo == nil {
 			return commands.UnknownCommandError{
 				Command: name,
-			}
-		}
-		var buffer bytes.Buffer
-		buffer.WriteString(bot.Prefix + name)
-		for _, v := range cmdInfo.Arguments {
-			if v.Optional {
-				buffer.WriteString(fmt.Sprintf(" <%s>", v.Name))
-			} else {
-				buffer.WriteString(fmt.Sprintf(" [%s]", v.Name))
 			}
 		}
 		var fields []*discordgo.MessageEmbedField
@@ -58,7 +54,7 @@ func Help(session *discordgo.Session, message *discordgo.MessageCreate, args map
 			fields = []*discordgo.MessageEmbedField{
 				{
 					Name:  "Usage",
-					Value: "```" + buffer.String() + "```",
+					Value: "```" + cmdInfo.GetUsage(bot.Prefix, name) + "```",
 				},
 				{
 					Name:  "Examples",
@@ -69,7 +65,7 @@ func Help(session *discordgo.Session, message *discordgo.MessageCreate, args map
 			fields = []*discordgo.MessageEmbedField{
 				{
 					Name:  "Usage",
-					Value: "```" + buffer.String() + "```",
+					Value: "```" + cmdInfo.GetUsage(bot.Prefix, name) + "```",
 				},
 			}
 		}
@@ -82,4 +78,19 @@ func Help(session *discordgo.Session, message *discordgo.MessageCreate, args map
 		session.ChannelMessageSendEmbed(message.ChannelID, bot.Embed(strings.Title(name), cmdInfo.Description, fields))
 	}
 	return nil
+}
+
+func getCommand(commands commands.CommandMap, name string) (*commands.Command, string) {
+	name = strings.ToLower(name)
+	command, okc := commands[name]
+	if !okc {
+		for n, cmd := range commands {
+			for _, alias := range cmd.Aliases {
+				if name == alias {
+					return getCommand(commands, n)
+				}
+			}
+		}
+	}
+	return command, name
 }

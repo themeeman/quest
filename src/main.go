@@ -11,34 +11,15 @@ import (
 	"encoding/json"
 	commands "./discordcommands"
 	_ "database/sql"
-	quest "./quest/commands/guild"
-	"./quest/commands/direct"
 	"./quest/events"
+	"./quest/structures"
 	"github.com/jmoiron/sqlx"
 	"math/rand"
 	"flag"
+	quest "./quest/commands"
+	database "./quest/db"
 )
 
-var QuestCommands = commands.HandlerMap{
-	"help":        quest.Help,
-	"mute":        quest.Mute,
-	"unmute":      quest.Unmute,
-	"purge":       quest.Purge,
-	"types":       quest.Types,
-	"commit":      quest.Commit,
-	"addexp":      quest.AddExp,
-	"me":          quest.Me,
-	"tryparse":    quest.TryParse,
-	"massrole":    quest.MassRole,
-	"addrole":     quest.AddRole,
-	"roles":       quest.Roles,
-	"set":         quest.Set,
-	"leaderboard": quest.Leaderboard,
-	"pull": 	   quest.Pull,
-}
-var DirectCommands = commands.HandlerMap{
-	"help": direct.Help,
-}
 var CommandsData commands.CommandMap
 var RegexVerifiers = map[string]string{}
 
@@ -53,9 +34,9 @@ type App struct {
 }
 
 var db *sqlx.DB
-var guilds commands.Guilds
+var guilds structures.Guilds
 var app App
-var bot *commands.Bot
+var bot *quest.Bot
 
 const (
 	prefix = "q:"
@@ -121,7 +102,7 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
-	db, err = commands.InitDB(app.User, app.Pass, app.Host, app.Database)
+	db, err = database.InitDB(app.User, app.Pass, app.Host, app.Database)
 	if err != nil {
 		panic(err)
 	}
@@ -129,20 +110,29 @@ func init() {
 
 func main() {
 	defer db.Close()
-	bot = &commands.Bot{
-		HandlerMap: QuestCommands,
+	bot = &quest.Bot{
 		CommandMap: CommandsData,
 		ExpTimes: make(map[struct {
 			Guild  string
 			Member string
 		}]time.Time),
-		Regex:  RegexVerifiers,
+		Errors: make(chan struct {
+			Err error
+			*discordgo.MessageCreate
+		}),
+		Regex: RegexVerifiers,
+		GroupNames: map[commands.Group]string{
+			0: "Member",
+			1: "Moderator",
+			2: "Admin",
+			3: "Owner",
+		},
 		Prefix: prefix,
 		Guilds: guilds,
 		DB:     db,
 		Embed:  questEmbed,
 	}
-	dg, err := discordgo.New("Bot " + app.Token)
+	dg, err := commands.NewSession(bot, app.Token)
 	if err != nil {
 		log.Fatalln("Error making discord session", err)
 		return
@@ -160,9 +150,9 @@ func main() {
 	sc := make(chan os.Signal, 1)
 	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, os.Kill)
 	<-sc
-	err = commands.PostAllData(db, bot.Guilds)
+	err = database.PostAllData(db, bot.Guilds)
 	if err != nil {
 		fmt.Println(err)
-		err = commands.PostAllData(db, bot.Guilds)
+		err = database.PostAllData(db, bot.Guilds)
 	}
 }

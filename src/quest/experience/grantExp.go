@@ -5,9 +5,10 @@ import (
 	"time"
 	"fmt"
 	commands "../../discordcommands"
+	quest "../commands"
 )
 
-func GrantExp(bot *commands.Bot, session *discordgo.Session, message *discordgo.MessageCreate) {
+func GrantExp(bot *quest.Bot, session *discordgo.Session, message *discordgo.MessageCreate) {
 	s := struct {
 		Guild  string
 		Member string
@@ -32,4 +33,3 @@ func GrantExp(bot *commands.Bot, session *discordgo.Session, message *discordgo.
 		GrantRoles(session, message, guild, member)
 	}
 }
-

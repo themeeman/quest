@@ -1,11 +1,16 @@
-package discordcommands
+package structures
 
 import (
 	"reflect"
 	"github.com/fatih/structs"
 )
 
-func GetOptions(bot *Bot) map[string]*Option {
+type Option struct {
+	Name string
+	Type string
+}
+
+func GetOptions() map[string]*Option {
 	g := new(Guild)
 	t := reflect.TypeOf(*g)
 	options := make(map[string]*Option)

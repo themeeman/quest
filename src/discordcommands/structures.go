@@ -2,11 +2,7 @@ package discordcommands
 
 import (
 	"github.com/bwmarrin/discordgo"
-	"database/sql"
-	"github.com/jmoiron/sqlx"
-	"time"
 	"reflect"
-	"github.com/go-sql-driver/mysql"
 	"bytes"
 	"fmt"
 	"strings"
@@ -23,7 +19,7 @@ type Command struct {
 	Description string      `json:"description"`
 	Arguments   []*Argument `json:"arguments"`
 	Cooldown    int         `json:"cooldown"`
-	Permission  int         `json:"permission"`
+	Group                   `json:"permission"`
 	Aliases     []string    `json:"aliases"`
 	Examples    []string    `json:"examples"`
 	Hidden      bool        `json:"hidden"`
@@ -31,100 +27,11 @@ type Command struct {
 
 type Handler func(session *discordgo.Session,
 	message *discordgo.MessageCreate,
-	args map[string]string,
-	bot *Bot) BotError
+	args map[string]string) error
 
 type HandlerMap map[string]Handler
 
 type CommandMap map[string]*Command
-
-type Bot struct {
-	HandlerMap
-	CommandMap
-	ExpTimes map[struct {
-		Guild  string
-		Member string
-	}]time.Time
-	Regex  map[string]string
-	Prefix string
-	Guilds
-	DB     *sqlx.DB
-	Embed func(title string,
-		description string,
-		fields []*discordgo.MessageEmbedField) *discordgo.MessageEmbed
-}
-
-type Guild struct {
-	ID            string         `db:"id"`
-	MuteRole      sql.NullString `db:"mute_role"      type:"RoleMention"`
-	ModRole       sql.NullString `db:"mod_role"       type:"RoleMention"`
-	AdminRole     sql.NullString `db:"admin_role"     type:"RoleMention"`
-	Modlog        sql.NullString `db:"mod_log"        type:"RoleMention"`
-	Autorole      sql.NullString `db:"autorole"       type:"RoleMention"`
-	ExpReload     uint16         `db:"exp_reload"     type:"Integer"`
-	ExpGainUpper  uint16         `db:"exp_gain_upper" type:"Integer"`
-	ExpGainLower  uint16         `db:"exp_gain_lower" type:"Integer"`
-	LotteryChance uint8          `db:"lottery_chance" type:"Integer"`
-	LotteryUpper  uint32         `db:"lottery_upper"  type:"Integer"`
-	LotteryLower  uint32         `db:"lottery_lower"  type:"Integer"`
-	Members
-	Roles
-}
-
-type Member struct {
-	ID          string         `db:"user_id"`
-	MuteExpires mysql.NullTime `db:"mute_expires"`
-	Experience  int64          `db:"experience"`
-}
-
-type Role struct {
-	ID         string `db:"id"`
-	Experience int64  `db:"experience"`
-}
-
-type Option struct {
-	Name string
-	Type string
-}
-
-type Guilds map[string]*Guild
-type Members map[string]*Member
-
-type Roles []*Role
-
-func (r Roles) Len() int           { return len(r) }
-func (r Roles) Swap(i, j int)      { r[i], r[j] = r[j], r[i] }
-func (r Roles) Less(i, j int) bool { return r[i].Experience < r[j].Experience }
-
-func (guilds Guilds) Get(id string) *Guild {
-	guild, ok := guilds[id]
-	if !ok {
-		guild = &Guild{
-			ID:            id,
-			ExpReload:     60,
-			ExpGainUpper:  25,
-			ExpGainLower:  10,
-			LotteryChance: 100,
-			LotteryUpper:  500,
-			LotteryLower:  250,
-		}
-		guilds[id] = guild
-	}
-	if guild.Members == nil {
-		guild.Members = make(Members)
-	}
-	return guild
-}
-
-func (members Members) Get(id string) *Member {
-	member, ok := members[id]
-	if !ok {
-		member = &Member{ID: id}
-		members[id] = member
-		return member
-	}
-	return member
-}
 
 func (c Command) ForcedArgs() (i int) {
 	for _, v := range c.Arguments {
@@ -154,16 +61,6 @@ func MustGetGuildID(session *discordgo.Session, message *discordgo.MessageCreate
 		return c.GuildID
 	} else {
 		return MustGetGuildID(session, message)
-	}
-}
-
-func IsDirectMessage(session *discordgo.Session, message *discordgo.MessageCreate) bool {
-	c, _ := session.Channel(message.ChannelID)
-	if c != nil {
-		g, _ := session.Guild(c.GuildID)
-		return g == nil
-	} else {
-		return IsDirectMessage(session, message)
 	}
 }
 

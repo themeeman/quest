@@ -5,9 +5,10 @@ import (
 	"time"
 	commands "../../discordcommands"
 	"fmt"
+	"../structures"
 )
 
-func GrantRoles(session *discordgo.Session, message *discordgo.MessageCreate, guild *commands.Guild, member *commands.Member) error {
+func GrantRoles(session *discordgo.Session, message *discordgo.MessageCreate, guild *structures.Guild, member *structures.Member) error {
 	m, err := session.GuildMember(guild.ID, member.ID)
 	if err != nil {
 		return err
