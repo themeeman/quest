@@ -11,18 +11,20 @@ import (
 	"bytes"
 )
 
-const schema = `CREATE TABLE IF NOT EXISTS guild_%s (
-	user_id VARCHAR(18) NOT NULL,
-	mute_expires DATETIME NULL,
-	experience BIGINT NOT NULL,
-	PRIMARY KEY (user_id)
-)`
+const schema = `CREATE TABLE guild_%s (
+user_id VARCHAR(18) NOT NULL,
+mute_expires DATETIME NULL DEFAULT NULL,
+last_daily DATETIME NULL DEFAULT NULL,
+experience BIGINT(20) NOT NULL,
+chests JSON NOT NULL,
+PRIMARY KEY (user_id)
+);`
 
-const rolesSchema = `CREATE TABLE IF NOT EXISTS roles_%s (
+const rolesSchema = `CREATE TABLE roles_%s (
 	id VARCHAR(18) NOT NULL,
-	experience BIGINT NOT NULL DEFAULT 0,
+	experience BIGINT(20) NOT NULL DEFAULT '0',
 	PRIMARY KEY (id)
-)`
+);`
 
 func InitDB(user string, pass string, host string, database string) (*sqlx.DB, error) {
 	return sqlx.Connect("mysql", fmt.Sprintf("%s:%s@tcp(%s)/%s", user, pass, host, database))
