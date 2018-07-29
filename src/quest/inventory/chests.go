@@ -6,25 +6,37 @@ import (
 	"database/sql/driver"
 )
 
+const (
+	ChestDaily uint = iota
+)
+
 type Chest struct {
-	Name string
+	Name        string
+	Description string
 }
 
-type Chests []*Chest
+type ChestsInventory map[uint]uint
+type Chests map[uint]*Chest
 
-func (c Chests) Scan(val interface{}) error {
-	switch v := val.(type){
+func (c ChestsInventory) Scan(val interface{}) error {
+	switch v := val.(type) {
 	case []byte:
-		json.Unmarshal(v, c)
+		err := json.Unmarshal(v, &c)
+		if err != nil {
+			return err
+		}
 		return nil
 	case string:
-		json.Unmarshal([]byte(v), c)
+		err := json.Unmarshal([]byte(v), &c)
+		if err != nil {
+			return err
+		}
 		return nil
 	default:
 		return fmt.Errorf("unsupported type: %T", v)
 	}
 }
 
-func (c Chests) Value() (driver.Value, error) {
+func (c ChestsInventory) Value() (driver.Value, error) {
 	return json.Marshal(c)
 }

@@ -7,6 +7,8 @@ import (
 	"github.com/jmoiron/sqlx"
 	"log"
 	"../structures"
+	"reflect"
+	"bytes"
 )
 
 const schema = `CREATE TABLE IF NOT EXISTS guild_%s (
@@ -27,6 +29,9 @@ func InitDB(user string, pass string, host string, database string) (*sqlx.DB, e
 }
 
 func QueryAllData(db *sqlx.DB) (structures.Guilds, error) {
+	fmt.Println(createOverwriteQuery("?", structures.Role{}))
+	fmt.Println(createOverwriteQuery("?", structures.Member{}))
+	fmt.Println(createOverwriteQuery("?", structures.Guild{}))
 	tx, err := db.Beginx()
 	if err != nil {
 		return nil, err
@@ -168,9 +173,7 @@ func PostAllData(db *sqlx.DB, guilds structures.Guilds) error {
 }
 
 func postGuildData(tx *sqlx.Tx, guilds structures.Guilds) error {
-	stmt, err := tx.PrepareNamed("INSERT INTO guilds VALUES (:id, :mute_role, :mod_role, :admin_role, :mod_log, :autorole, :exp_reload, :exp_gain_upper, :exp_gain_lower, :lottery_chance, :lottery_upper, :lottery_lower) " +
-		"ON DUPLICATE KEY UPDATE mute_role=:mute_role, mod_role=:mod_role, admin_role=:admin_role, mod_log=:mod_log, autorole=:autorole, exp_reload=:exp_reload, " +
-		"exp_gain_upper=:exp_gain_upper, exp_gain_lower=:exp_gain_lower, lottery_chance=:lottery_chance, lottery_upper=:lottery_upper, lottery_lower=:lottery_lower")
+	stmt, err := tx.PrepareNamed(createOverwriteQuery("guilds", structures.Guild{}))
 	if err != nil {
 		return err
 	}
@@ -185,8 +188,7 @@ func postGuildData(tx *sqlx.Tx, guilds structures.Guilds) error {
 
 func postMemberData(tx *sqlx.Tx, guilds structures.Guilds, guildID string) error {
 	guild := guilds.Get(guildID)
-	q := fmt.Sprintf("INSERT INTO guild_%s VALUES (:user_id, :mute_expires, :experience, :chests) "+
-		"ON DUPLICATE KEY UPDATE user_id=:user_id, mute_expires=:mute_expires, experience=:experience, chests=:chests", guildID)
+	q := fmt.Sprintf(createOverwriteQuery("guild_%s", structures.Member{}), guildID)
 	stmt, err := tx.PrepareNamed(q)
 	if err != nil {
 		return err
@@ -202,8 +204,7 @@ func postMemberData(tx *sqlx.Tx, guilds structures.Guilds, guildID string) error
 
 func postRoleData(tx *sqlx.Tx, guilds structures.Guilds, guildID string) error {
 	guild := guilds.Get(guildID)
-	q := fmt.Sprintf("INSERT INTO roles_%s VALUES (:id, :experience) "+
-		"ON DUPLICATE KEY UPDATE id=:id, experience=:experience", guildID)
+	q := fmt.Sprintf(createOverwriteQuery("roles_%s", structures.Role{}), guildID)
 	stmt, err := tx.PrepareNamed(q)
 	if err != nil {
 		return err
@@ -215,4 +216,28 @@ func postRoleData(tx *sqlx.Tx, guilds structures.Guilds, guildID string) error {
 		}
 	}
 	return nil
+}
+
+func createOverwriteQuery(table string, v interface{}) string {
+	t := reflect.TypeOf(v)
+	start := fmt.Sprintf("INSERT INTO %s VALUES ", table)
+	cols := make([]string, 0, t.NumField())
+	for i := 0; i < t.NumField(); i++ {
+		if s, ok := t.Field(i).Tag.Lookup("db"); ok {
+			cols = append(cols, s)
+		}
+	}
+	ccols := make([]string, len(cols))
+	for i, s := range cols {
+		ccols[i] = ":" + s
+	}
+	values := fmt.Sprintf("(%s)", strings.Join(ccols, ", "))
+	var end bytes.Buffer
+	end.WriteString(" ON DUPLICATE KEY UPDATE ")
+	sss := make([]string, len(cols))
+	for i, s := range cols {
+		sss[i] = fmt.Sprintf("%s=:%s", s, s)
+	}
+	end.WriteString(strings.Join(sss, ", "))
+	return start + values + end.String() + ";"
 }

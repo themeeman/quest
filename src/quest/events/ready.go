@@ -36,7 +36,7 @@ func Ready(bot *quest.Bot) func(*discordgo.Session, *discordgo.Ready) {
 		}()
 		go func() {
 			for {
-				err := <- bot.Errors
+				err := <-bot.Errors
 				if err.Err != nil {
 					if e, ok := err.Err.(commands.ZeroArgumentsError); ok {
 						bot.Help(session, err.MessageCreate, map[string]string{"Command": e.Command})

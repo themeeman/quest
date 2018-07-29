@@ -13,9 +13,12 @@ func TimeToTimestamp(t time.Time) string {
 
 func parseArgs(regex map[string]string, command *Command, args []string) (newArgs map[string]string, err error) {
 	newArgs = make(map[string]string)
+	if command == nil {
+		return newArgs, nil
+	}
 	for index, argument := range command.Arguments {
 		fmt.Println(index, argument)
-		value, err := newArgValue(command, argument, args, index, command.ForcedArgs())
+		value, err := newArgValue(command, argument, args, index)
 		if err != nil {
 			return nil, err
 		}
@@ -35,7 +38,7 @@ func parseArgs(regex map[string]string, command *Command, args []string) (newArg
 	return
 }
 
-func newArgValue(command *Command, argument *Argument, args []string, index int, forcedArgs int) (string, error) {
+func newArgValue(command *Command, argument *Argument, args []string, index int) (string, error) {
 	if index >= len(args) && !argument.Optional {
 		return "", UsageError{
 			Usage: command.GetUsage("q:", args[0]),

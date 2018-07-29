@@ -18,6 +18,7 @@ import (
 	"flag"
 	quest "./quest/commands"
 	database "./quest/db"
+	"./quest/inventory"
 )
 
 var CommandsData commands.CommandMap
@@ -36,6 +37,7 @@ type App struct {
 var db *sqlx.DB
 var guilds structures.Guilds
 var app App
+var chests inventory.Chests
 var bot *quest.Bot
 
 const (
@@ -102,6 +104,10 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
+	err = unmarshalJson("src/json/chests.json", &chests)
+	if err != nil {
+		panic(err)
+	}
 	db, err = database.InitDB(app.User, app.Pass, app.Host, app.Database)
 	if err != nil {
 		panic(err)
@@ -130,6 +136,7 @@ func main() {
 		Prefix: prefix,
 		Guilds: guilds,
 		DB:     db,
+		Chests: chests,
 		Embed:  questEmbed,
 	}
 	dg, err := commands.NewSession(bot, app.Token)

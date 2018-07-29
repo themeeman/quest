@@ -236,5 +236,34 @@
   "leaderboard": {
     "description": "View the leaderboards",
     "aliases": ["lb", "ld"]
+  },
+  "daily": {
+    "description": "Claims your daily reward",
+    "aliases": ["redeem", "rd", "claim"]
+  },
+  "inventory": {
+    "description": "Checks inventory",
+    "aliases": ["inv"]
+  },
+  "give": {
+    "description": "Grants an item",
+    "arguments": [
+      {
+        "name": "Item",
+        "type": "Integer"
+      },
+      {
+        "name": "Amount",
+        "type": "Integer"
+      },
+      {
+        "name": "User",
+        "type": "UserMention",
+        "optional": true
+      }
+    ],
+    "aliases": ["giveitem"],
+    "examples": ["q:give 5 1", "q:give 6 10 @Lumite#1234"],
+    "permission": 2
   }
 }

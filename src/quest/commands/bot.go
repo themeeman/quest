@@ -6,6 +6,7 @@ import (
 	"github.com/bwmarrin/discordgo"
 	commands "../../discordcommands"
 	"../structures"
+	"../inventory"
 )
 
 type Bot struct {
@@ -23,6 +24,7 @@ type Bot struct {
 		Err       error
 		*discordgo.MessageCreate
 	}
+	inventory.Chests
 	Embed func(title string,
 		description string,
 		fields []*discordgo.MessageEmbedField) *discordgo.MessageEmbed
