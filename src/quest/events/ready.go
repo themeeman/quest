@@ -13,6 +13,10 @@ import (
 
 func Ready(bot *quest.Bot) func(*discordgo.Session, *discordgo.Ready) {
 	return func(session *discordgo.Session, event *discordgo.Ready) {
+		if bot.ReadyEvent {
+			return
+		}
+		bot.ReadyEvent = true
 		var err error
 		guilds, err := db.QueryAllData(bot.DB)
 		if err != nil {

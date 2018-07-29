@@ -21,10 +21,11 @@ type Bot struct {
 	structures.Guilds
 	DB         *sqlx.DB
 	Errors chan struct {
-		Err       error
+		Err error
 		*discordgo.MessageCreate
 	}
 	inventory.Chests
+	ReadyEvent bool
 	Embed func(title string,
 		description string,
 		fields []*discordgo.MessageEmbedField) *discordgo.MessageEmbed
