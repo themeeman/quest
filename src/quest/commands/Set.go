@@ -38,7 +38,7 @@ func (bot *Bot) Set(session *discordgo.Session, message *discordgo.MessageCreate
 	fmt.Println(options)
 	if args["Option"] == "" {
 		names := make([]string, len(options))
-		i := 0
+		var i int
 		for name := range options {
 			names[i] = name
 			i++
@@ -47,10 +47,15 @@ func (bot *Bot) Set(session *discordgo.Session, message *discordgo.MessageCreate
 		guild := bot.Guilds.Get(commands.MustGetGuildID(session, message))
 		var buf bytes.Buffer
 		for _, name := range names {
-			current := repr(reflect.Indirect(reflect.ValueOf(guild).Elem()).FieldByName(name).Interface())
+			current := repr(reflect.Indirect(reflect.ValueOf(guild).Elem()).FieldByName(name).Interface(), options[name].Type)
 			buf.WriteString(fmt.Sprintf("**%s** - %s\n", name, current))
 		}
-		session.ChannelMessageSend(message.ChannelID, buf.String())
+		_, err := session.ChannelMessageSendEmbed(message.ChannelID, &discordgo.MessageEmbed{
+			Description: buf.String(),
+		})
+		if err != nil {
+			fmt.Println(err)
+		}
 	} else if args["Value"] == "" {
 		return commands.UsageError{
 			Usage: bot.CommandMap["set"].GetUsage(bot.Prefix, "set"),
@@ -94,17 +99,25 @@ func (bot *Bot) Set(session *discordgo.Session, message *discordgo.MessageCreate
 	return nil
 }
 
-func repr(val interface{}) string {
+func repr(val interface{}, T string) string {
 	switch val.(type) {
 	case sql.NullString:
 		if val.(sql.NullString).Valid {
-			return val.(sql.NullString).String
+			switch T {
+			case "ChannelMention":
+				return "<#" + val.(sql.NullString).String + ">"
+			case "UserMention":
+				return "<@" + val.(sql.NullString).String + ">"
+			case "RoleMention":
+				return "<@&" + val.(sql.NullString).String + ">"
+			}
 		} else {
 			return "None"
 		}
 	default:
 		return fmt.Sprint(val)
 	}
+	return fmt.Sprint(val)
 }
 
 func convertType(message *discordgo.MessageCreate, T string, value string) interface{} {

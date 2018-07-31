@@ -6,18 +6,9 @@ import (
 	"strings"
 	"fmt"
 	"reflect"
-	"runtime"
 	"log"
 	"runtime/debug"
 )
-
-func getFunctionName(i interface{}) string {
-	s := strings.Split(runtime.FuncForPC(reflect.ValueOf(i).Pointer()).Name(), ".")
-	if len(s) > 0 {
-		return s[len(s)-1]
-	}
-	return ""
-}
 
 func getCommand(commands CommandMap, handlers HandlerMap, name string) (*Command, Handler, string) {
 	name = strings.ToLower(name)
@@ -38,9 +29,11 @@ func getCommand(commands CommandMap, handlers HandlerMap, name string) (*Command
 func NewSession(bot interface{}, token string) (*discordgo.Session, error) {
 	t := reflect.TypeOf(bot)
 	v := reflect.ValueOf(bot)
-	var prefix string
+	var prefix *string
 	if field, ok := t.Elem().FieldByName("Prefix"); ok && field.Type.Kind() == reflect.String {
-		prefix = v.Elem().FieldByName("Prefix").String()
+		prefix = v.Elem().FieldByName("Prefix").Addr().Interface().(*string)
+	} else {
+		*prefix = ""
 	}
 	var commands CommandMap
 	if field, ok := t.Elem().FieldByName("CommandMap"); ok && field.Type == reflect.TypeOf(commands) {
@@ -75,7 +68,12 @@ func NewSession(bot interface{}, token string) (*discordgo.Session, error) {
 	if field, ok := t.Elem().FieldByName("GroupNames"); ok && field.Type == reflect.TypeOf(groupNames) {
 		groupNames = v.Elem().FieldByName("GroupNames").Interface().(map[Group]string)
 	}
-	fmt.Println(prefix, commands, handlers, regex, errors, groupNames)
+	var userGroup func(session *discordgo.Session, guild *discordgo.Guild, member *discordgo.Member) Group
+	if _, ok := t.MethodByName("UserGroup"); ok {
+		if f, ok := v.MethodByName("UserGroup").Interface().(func(session *discordgo.Session, guild *discordgo.Guild, member *discordgo.Member) Group); ok {
+			userGroup = f
+		}
+	}
 	var execute func(*discordgo.Session, *discordgo.MessageCreate)
 	execute = func(session *discordgo.Session, message *discordgo.MessageCreate) {
 		defer func() {
@@ -86,13 +84,14 @@ func NewSession(bot interface{}, token string) (*discordgo.Session, error) {
 			}
 		}()
 		t := time.Now()
-		ss := TrimPrefix(message.Content, prefix)
-		args := strings.Fields(ss)
+		if !HasPrefix(message.Content, *prefix) {
+			return
+		}
+		args := strings.Fields(TrimPrefix(message.Content, *prefix))
 		if len(args) == 0 {
 			return
 		}
 		info, cmd, name := getCommand(commands, handlers, args[0])
-		args = args[1:]
 		if cmd == nil {
 			return
 		}
@@ -100,6 +99,28 @@ func NewSession(bot interface{}, token string) (*discordgo.Session, error) {
 		if g == nil {
 			return
 		}
+		m, _ := session.GuildMember(g.ID, message.Author.ID)
+		if m == nil {
+			return
+		}
+		if userGroup != nil {
+			if level := userGroup(session, g, m); level < info.Group {
+				if errors != nil {
+					errors <- struct {
+						Err error
+						*discordgo.MessageCreate
+					}{
+						Err: InsufficentPermissionsError{
+							Required: groupNames[info.Group],
+							Had:      groupNames[level],
+						},
+						MessageCreate: message,
+					}
+				}
+				return
+			}
+		}
+		args = args[1:]
 		if len(args) == 0 && info != nil && info.ForcedArgs() > 0 {
 			if errors != nil {
 				errors <- struct {
@@ -134,10 +155,10 @@ func NewSession(bot interface{}, token string) (*discordgo.Session, error) {
 		if err != nil {
 			if errors != nil {
 				errors <- struct {
-					Err       error
+					Err error
 					*discordgo.MessageCreate
 				}{
-					Err:       err,
+					Err:           err,
 					MessageCreate: message,
 				}
 			}

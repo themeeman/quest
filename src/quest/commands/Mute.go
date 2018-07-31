@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"strings"
 	"time"
-	"../permissions"
 )
 
 func (bot *Bot) Mute(session *discordgo.Session, message *discordgo.MessageCreate, args map[string]string) error {
@@ -27,7 +26,7 @@ func (bot *Bot) Mute(session *discordgo.Session, message *discordgo.MessageCreat
 	member, _ := session.State.Member(ch.GuildID, user.ID)
 	guild := bot.Guilds.Get(ch.GuildID)
 	g, _ := session.Guild(ch.GuildID)
-	if permissions.GetPermissionLevel(session, member, guild, g.OwnerID) >= permissions.PermissionAdmin {
+	if bot.UserGroup(session, g, member) >= PermissionAdmin {
 		return commands.CustomError("That user is a admin, I can't mute them!")
 	} else if member.User.Bot {
 		return commands.CustomError("Can't mute a bot")

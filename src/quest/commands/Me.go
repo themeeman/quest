@@ -6,7 +6,6 @@ import (
 	"strconv"
 	"fmt"
 	"time"
-	"../permissions"
 )
 
 func (bot *Bot) Me(session *discordgo.Session, message *discordgo.MessageCreate, args map[string]string) error {
@@ -30,7 +29,7 @@ func (bot *Bot) Me(session *discordgo.Session, message *discordgo.MessageCreate,
 	}
 	member := guild.Members.Get(id)
 	g, _ := session.Guild(commands.MustGetGuildID(session, message))
-	rank := permissions.GetPermissionLevel(session, m, guild, g.OwnerID)
+	rank := bot.UserGroup(session, g, m)
 	s := []string{"Member", "Moderator", "Admin", "Owner"}
 	title := fmt.Sprintf("User %s#%s", m.User.Username, m.User.Discriminator)
 	fields := []*discordgo.MessageEmbedField{

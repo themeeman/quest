@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"strings"
 	"sort"
-	"../permissions"
 )
 
 func (bot *Bot) Help(session *discordgo.Session, message *discordgo.MessageCreate, args map[string]string) error {
@@ -22,7 +21,7 @@ func (bot *Bot) Help(session *discordgo.Session, message *discordgo.MessageCreat
 		sort.Strings(names)
 		guild, _ := session.Guild(commands.MustGetGuildID(session, message))
 		author, _ := session.GuildMember(guild.ID, message.Author.ID)
-		level := permissions.GetPermissionLevel(session, author, bot.Guilds.Get(guild.ID), guild.OwnerID)
+		level := bot.UserGroup(session, guild, author)
 		for _, name := range names {
 			command := bot.CommandMap[name]
 			sufficient := level >= command.Group

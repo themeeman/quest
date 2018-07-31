@@ -1,9 +1,9 @@
 package commands
 
 import (
-"github.com/bwmarrin/discordgo"
-commands "../../discordcommands"
-"strconv"
+	"github.com/bwmarrin/discordgo"
+	commands "../../discordcommands"
+	"strconv"
 )
 
 func (bot *Bot) Give(session *discordgo.Session, message *discordgo.MessageCreate, args map[string]string) error {

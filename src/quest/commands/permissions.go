@@ -1,9 +1,8 @@
-package permissions
+package commands
 
 import (
 	commands "../../discordcommands"
 	"github.com/bwmarrin/discordgo"
-	"../structures"
 )
 
 const (
@@ -13,8 +12,9 @@ const (
 	PermissionOwner
 )
 
-func GetPermissionLevel(session *discordgo.Session, member *discordgo.Member, guild *structures.Guild, ownerID string) commands.Group {
-	if member.User.ID == ownerID {
+func (bot *Bot) UserGroup(session *discordgo.Session, guild *discordgo.Guild, member *discordgo.Member) commands.Group {
+	g := bot.Guilds.Get(guild.ID)
+	if member.User.ID == guild.OwnerID {
 		return PermissionOwner
 	}
 	for _, r := range member.Roles {
@@ -26,9 +26,9 @@ func GetPermissionLevel(session *discordgo.Session, member *discordgo.Member, gu
 		}
 	}
 	for _, r := range member.Roles {
-		if r == guild.AdminRole.String {
+		if r == g.AdminRole.String {
 			return PermissionAdmin
-		} else if r == guild.ModRole.String {
+		} else if r == g.ModRole.String {
 			return PermissionModerator
 		}
 	}
