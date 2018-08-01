@@ -16,6 +16,9 @@ func GrantExp(bot *quest.Bot, session *discordgo.Session, message *discordgo.Mes
 		Guild:  commands.MustGetGuildID(session, message),
 		Member: message.Author.ID,
 	}
+	if s.Guild == "" {
+		return
+	}
 	t, ok := bot.ExpTimes[s]
 	guild := bot.Guilds.Get(s.Guild)
 	member := guild.Members.Get(s.Member)
