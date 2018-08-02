@@ -144,9 +144,10 @@ func main() {
 		log.Fatalln("Error making discord session", err)
 		return
 	}
-	dg.AddHandler(events.Ready(bot))
-	dg.AddHandler(events.MessageCreate(bot))
-	dg.AddHandler(events.MemberAdd(bot))
+	e := events.BotEvents{Bot: bot}
+	dg.AddHandler(e.Ready)
+	dg.AddHandler(e.MessageCreate)
+	dg.AddHandler(e.MemberAdd)
 	err = dg.Open()
 	if err != nil {
 		log.Fatalln("Error opening connection", err)
