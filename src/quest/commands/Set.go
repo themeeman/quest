@@ -15,6 +15,7 @@ import (
 	"../structures"
 	"github.com/fatih/structs"
 )
+
 func getOptions(bot *Bot) map[string]*structures.Option {
 	g := new(structures.Guild)
 	t := reflect.TypeOf(*g)
@@ -100,17 +101,23 @@ func (bot *Bot) Set(session *discordgo.Session, message *discordgo.MessageCreate
 }
 
 func repr(val interface{}, T string) string {
-	switch val.(type) {
+	switch v := val.(type) {
 	case sql.NullString:
-		if val.(sql.NullString).Valid {
+		if v.Valid {
 			switch T {
 			case "ChannelMention":
-				return "<#" + val.(sql.NullString).String + ">"
+				return "<#" + v.String + ">"
 			case "UserMention":
-				return "<@" + val.(sql.NullString).String + ">"
+				return "<@" + v.String + ">"
 			case "RoleMention":
-				return "<@&" + val.(sql.NullString).String + ">"
+				return "<@&" + v.String + ">"
 			}
+		} else {
+			return "None"
+		}
+	case structures.Modlog:
+		if v.Valid {
+			return "<#" + v.ChannelID + ">"
 		} else {
 			return "None"
 		}
@@ -133,7 +140,6 @@ func convertType(message *discordgo.MessageCreate, T string, value string) inter
 		}
 		e, _ := strconv.Atoi(c[1])
 		a = v * math.Pow10(e)
-		break
 	case "UserMention":
 		if value == "none" {
 			a = sql.NullString{}
@@ -148,7 +154,6 @@ func convertType(message *discordgo.MessageCreate, T string, value string) inter
 				Valid:  true,
 			}
 		}
-		break
 	case "RoleMention":
 		if value == "none" {
 			a = sql.NullString{}
@@ -163,22 +168,22 @@ func convertType(message *discordgo.MessageCreate, T string, value string) inter
 				Valid:  true,
 			}
 		}
-		break
 	case "ChannelMention":
 		if value == "none" {
-			a = sql.NullString{}
+			a = structures.Modlog{}
 		} else if len(value) > 18 {
-			a = sql.NullString{
-				String: value[2:20],
+			a = structures.Modlog{
+				ChannelID: value[2:20],
 				Valid:  true,
+				Log: make(chan structures.Case),
 			}
 		} else {
-			a = sql.NullString{
-				String: value,
+			a = structures.Modlog{
+				ChannelID: value,
 				Valid:  true,
+				Log: make(chan structures.Case),
 			}
 		}
-		break
 	case "Boolean":
 		l := strings.ToLower(value)
 		if l == "true" || l == "yes" || l == "y" {
@@ -186,7 +191,6 @@ func convertType(message *discordgo.MessageCreate, T string, value string) inter
 		} else {
 			a = false
 		}
-		break
 	}
 	return a
 }

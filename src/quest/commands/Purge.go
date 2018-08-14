@@ -13,10 +13,14 @@ func (bot *Bot) Purge(session *discordgo.Session, message *discordgo.MessageCrea
 	if i >= 200 {
 		return fmt.Errorf("I can't purge more than 200 messages")
 	}
+	if i == 0 {
+		return fmt.Errorf("Invalid purge value")
+	}
 	msgs, err := session.ChannelMessages(message.ChannelID, i, message.ID, "", "")
 	if err != nil {
 		return nil
 	}
+	fmt.Println(msgs)
 	ids := make([]string, i)
 	for i, v := range msgs {
 		ids[i] = v.ID

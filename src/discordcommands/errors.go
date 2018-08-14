@@ -151,16 +151,11 @@ func ErrorEmbed(e error) *discordgo.MessageEmbed {
 	emb := &discordgo.MessageEmbed{
 		Type:        "rich",
 		Title:       "An error has occurred",
+		Description: e.Error(),
 		Timestamp:   TimeToTimestamp(time.Now().UTC()),
 		Color:       0x660000,
 		Footer: &discordgo.MessageEmbedFooter{
 			Text: "Quest Bot",
-		},
-		Fields: []*discordgo.MessageEmbedField{
-			{
-				Name:  "Info",
-				Value: e.Error(),
-			},
 		},
 	}
 	return emb

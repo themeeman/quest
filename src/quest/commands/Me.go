@@ -20,15 +20,23 @@ func (bot *Bot) Me(session *discordgo.Session, message *discordgo.MessageCreate,
 		return commands.UserNotFoundError{}
 	}
 	guild := bot.Guilds.Get(commands.MustGetGuildID(session, message))
-	m, err := session.GuildMember(guild.ID, id)
+	g, err := session.State.Guild(commands.MustGetGuildID(session, message))
 	if err != nil {
-		return commands.UserNotFoundError{}
+		return nil
+	}
+	var m *discordgo.Member
+	if found, index := containsMember(g.Members, id); found {
+		m = g.Members[index]
+	} else {
+		m, err = session.GuildMember(guild.ID, id)
+		if err != nil {
+			return commands.UserNotFoundError{}
+		}
 	}
 	if m.User.Bot {
 		return commands.CustomError("Cannot use `me` command on a bot!")
 	}
 	member := guild.Members.Get(id)
-	g, _ := session.Guild(commands.MustGetGuildID(session, message))
 	rank := bot.UserGroup(session, g, m)
 	s := []string{"Member", "Moderator", "Admin", "Owner"}
 	title := fmt.Sprintf("User %s#%s", m.User.Username, m.User.Discriminator)

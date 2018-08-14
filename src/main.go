@@ -148,6 +148,9 @@ func main() {
 	dg.AddHandler(e.Ready)
 	dg.AddHandler(e.MessageCreate)
 	dg.AddHandler(e.MemberAdd)
+	dg.AddHandler(events.GuildCreate)
+	dg.StateEnabled = true
+	dg.State.TrackMembers = true
 	err = dg.Open()
 	if err != nil {
 		log.Fatalln("Error opening connection", err)
