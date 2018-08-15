@@ -10,7 +10,7 @@ import (
 )
 
 type Modlog struct {
-	ChannelID string `db:"mod_log"`
+	ChannelID string
 	Valid     bool
 	Log       chan Case
 	Cases     []Case
@@ -19,17 +19,19 @@ type Modlog struct {
 func (m *Modlog) Scan(value interface{}) error {
 	null := sql.NullString{}
 	err := null.Scan(value)
-	fmt.Println(null)
 	if err != nil {
 		return err
 	}
 	m.ChannelID = null.String
 	m.Valid = null.Valid
+	if m.Valid {
+		m.Cases = make([]Case, 0)
+		m.Log = make(chan Case)
+	}
 	return nil
 }
 
-func (m *Modlog) Value() (driver.Value, error) {
-	fmt.Println(m)
+func (m Modlog) Value() (driver.Value, error) {
 	null := sql.NullString{
 		String: m.ChannelID,
 		Valid:  m.Valid,
@@ -44,31 +46,13 @@ type Case interface {
 type CaseMute struct {
 	ModeratorID string
 	UserID      string
-	GuildID     string
 	Duration    int
 	Reason      string
 }
 
-func getMember(session *discordgo.Session, guildID string, id string) (member *discordgo.Member) {
-	if session.StateEnabled {
-		guild, _ := session.State.Guild(guildID)
-		if guild != nil {
-			member = func() *discordgo.Member {
-				for _, m := range guild.Members {
-					if m.User.ID == id {
-						return m
-					}
-				}
-				return nil
-			}()
-			if member == nil {
-				member, _ = session.GuildMember(guildID, id)
-			}
-		}
-	} else {
-		member, _ = session.GuildMember(guildID, id)
-	}
-	return
+func getUser(session *discordgo.Session, id string) (user *discordgo.User) {
+	m, _ := session.User(id)
+	return m
 }
 
 func timeToTimestamp(t time.Time) string {
@@ -76,23 +60,23 @@ func timeToTimestamp(t time.Time) string {
 }
 
 func (cm *CaseMute) Embed(modlog Modlog, session *discordgo.Session) *discordgo.MessageEmbed {
-	member := getMember(session, cm.GuildID, cm.UserID)
-	moderator := getMember(session, cm.GuildID, cm.UserID)
+	member := getUser(session, cm.UserID)
+	moderator := getUser(session, cm.UserID)
 	return &discordgo.MessageEmbed{
 		Title:     fmt.Sprintf("Case %d | Mute", len(modlog.Cases)+1),
 		Color:     0x00ccff,
 		Timestamp: timeToTimestamp(time.Now().UTC()),
 		Author: &discordgo.MessageEmbedAuthor{
-			IconURL: moderator.User.AvatarURL(""),
-			Name:    moderator.User.String(),
+			IconURL: moderator.AvatarURL(""),
+			Name:    moderator.String(),
 		},
 		Image: &discordgo.MessageEmbedImage{
-			URL: member.User.AvatarURL(""),
+			URL: member.AvatarURL(""),
 		},
 		Fields: []*discordgo.MessageEmbedField{
 			{
 				Name:   "User",
-				Value:  member.User.String(),
+				Value:  member.String(),
 				Inline: true,
 			},
 			{
