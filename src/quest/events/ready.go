@@ -11,10 +11,6 @@ import (
 )
 
 func (bot BotEvents) Ready(session *discordgo.Session, _ *discordgo.Ready) {
-	if bot.ReadyEvent {
-		return
-	}
-	bot.ReadyEvent = true
 	var err error
 	guilds, err := db.QueryAllData(bot.DB)
 	if err != nil {
@@ -48,7 +44,23 @@ func (bot BotEvents) Ready(session *discordgo.Session, _ *discordgo.Ready) {
 			}
 		}
 	}()
-	applyMutes(guilds, session)
+	go applyMutes(guilds, session)
+	for _, g := range guilds {
+		fmt.Println(g.ID, g.Modlog)
+		go func(modlog *structures.Modlog) {
+			if modlog.Valid {
+				for {
+					c := <-modlog.Log
+					modlog.Mutex.Lock()
+					_, err := session.ChannelMessageSendEmbed(modlog.ChannelID, c.Embed(*modlog, session))
+					if err == nil {
+						modlog.Cases = append(modlog.Cases, c)
+					}
+					modlog.Mutex.Unlock()
+				}
+			}
+		}(&g.Modlog)
+	}
 }
 
 func applyMutes(guilds structures.Guilds, session *discordgo.Session) {

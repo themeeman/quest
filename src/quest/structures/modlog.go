@@ -4,9 +4,9 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"fmt"
 	"time"
-	"strconv"
 	"database/sql/driver"
 	"database/sql"
+	"sync"
 )
 
 type Modlog struct {
@@ -14,6 +14,7 @@ type Modlog struct {
 	Valid     bool
 	Log       chan Case
 	Cases     []Case
+	Mutex     *sync.Mutex
 }
 
 func (m *Modlog) Scan(value interface{}) error {
@@ -27,6 +28,7 @@ func (m *Modlog) Scan(value interface{}) error {
 	if m.Valid {
 		m.Cases = make([]Case, 0)
 		m.Log = make(chan Case)
+		m.Mutex = &sync.Mutex{}
 	}
 	return nil
 }
@@ -40,14 +42,7 @@ func (m Modlog) Value() (driver.Value, error) {
 }
 
 type Case interface {
-	Embed(*discordgo.Session) *discordgo.MessageEmbed
-}
-
-type CaseMute struct {
-	ModeratorID string
-	UserID      string
-	Duration    int
-	Reason      string
+	Embed(Modlog, *discordgo.Session) *discordgo.MessageEmbed
 }
 
 func getUser(session *discordgo.Session, id string) (user *discordgo.User) {
@@ -59,9 +54,34 @@ func timeToTimestamp(t time.Time) string {
 	return t.Format("2006-01-02T15:04:05+00:00")
 }
 
+type CaseMute struct {
+	ModeratorID string
+	UserID      string
+	Duration    int
+	Reason      string
+}
+
 func (cm *CaseMute) Embed(modlog Modlog, session *discordgo.Session) *discordgo.MessageEmbed {
 	member := getUser(session, cm.UserID)
-	moderator := getUser(session, cm.UserID)
+	moderator := getUser(session, cm.ModeratorID)
+	fields := []*discordgo.MessageEmbedField{
+		{
+			Name:   "User",
+			Value:  member.String() + " " + member.Mention(),
+			Inline: true,
+		},
+		{
+			Name:   "Duration",
+			Value:  fmt.Sprintf("%d Minutes", cm.Duration),
+			Inline: true,
+		},
+	}
+	if cm.Reason != "" {
+		fields = append(fields, &discordgo.MessageEmbedField{
+			Name:  "Reason",
+			Value: cm.Reason,
+		})
+	}
 	return &discordgo.MessageEmbed{
 		Title:     fmt.Sprintf("Case %d | Mute", len(modlog.Cases)+1),
 		Color:     0x00ccff,
@@ -73,21 +93,43 @@ func (cm *CaseMute) Embed(modlog Modlog, session *discordgo.Session) *discordgo.
 		Image: &discordgo.MessageEmbedImage{
 			URL: member.AvatarURL(""),
 		},
-		Fields: []*discordgo.MessageEmbedField{
-			{
-				Name:   "User",
-				Value:  member.String(),
-				Inline: true,
-			},
-			{
-				Name:   "Duration",
-				Value:  strconv.Itoa(cm.Duration),
-				Inline: true,
-			},
-			{
-				Name:  "Reason",
-				Value: cm.Reason,
-			},
+		Fields: fields,
+	}
+}
+
+type CaseUnmute struct {
+	ModeratorID string
+	UserID      string
+	Reason      string
+}
+
+func (cm *CaseUnmute) Embed(modlog Modlog, session *discordgo.Session) *discordgo.MessageEmbed {
+	member := getUser(session, cm.UserID)
+	moderator := getUser(session, cm.ModeratorID)
+	fields := []*discordgo.MessageEmbedField{
+		{
+			Name:   "User",
+			Value:  member.String() + " " + member.Mention(),
+			Inline: true,
 		},
+	}
+	if cm.Reason != "" {
+		fields = append(fields, &discordgo.MessageEmbedField{
+			Name:  "Reason",
+			Value: cm.Reason,
+		})
+	}
+	return &discordgo.MessageEmbed{
+		Title:     fmt.Sprintf("Case %d | Unmute", len(modlog.Cases)+1),
+		Color:     0xbb3344,
+		Timestamp: timeToTimestamp(time.Now().UTC()),
+		Author: &discordgo.MessageEmbedAuthor{
+			IconURL: moderator.AvatarURL(""),
+			Name:    moderator.String(),
+		},
+		Image: &discordgo.MessageEmbedImage{
+			URL: member.AvatarURL(""),
+		},
+		Fields: fields,
 	}
 }

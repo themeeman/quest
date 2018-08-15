@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"strings"
 	"time"
+	"../structures"
 )
 
 func (bot *Bot) Mute(session *discordgo.Session, message *discordgo.MessageCreate, args map[string]string) error {
@@ -65,6 +66,14 @@ func (bot *Bot) Mute(session *discordgo.Session, message *discordgo.MessageCreat
 		session.ChannelMessageSendEmbed(message.ChannelID, bot.Embed("Success!", fmt.Sprintf("Successfully muted %s#%s!", user.Username, user.Discriminator), nil))
 	} else {
 		session.ChannelMessageSendEmbed(message.ChannelID, bot.Embed("Success!", fmt.Sprintf("Successfully muted %s#%s! Reason: %s", user.Username, user.Discriminator, args["Reason"]), nil))
+	}
+	if guild.Modlog.Valid {
+		guild.Modlog.Log <- &structures.CaseMute{
+			ModeratorID: message.Author.ID,
+			UserID:      user.ID,
+			Duration:    dur,
+			Reason:      args["Reason"],
+		}
 	}
 	return nil
 }

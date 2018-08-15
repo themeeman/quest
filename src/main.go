@@ -145,7 +145,7 @@ func main() {
 		return
 	}
 	e := events.BotEvents{Bot: bot}
-	dg.AddHandler(e.Ready)
+	dg.AddHandlerOnce(e.Ready)
 	dg.AddHandler(e.MessageCreate)
 	dg.AddHandler(e.MemberAdd)
 	dg.AddHandler(events.GuildCreate)

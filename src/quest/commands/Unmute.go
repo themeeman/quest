@@ -5,6 +5,7 @@ import (
 	commands "../../discordcommands"
 	"strings"
 	"fmt"
+	"../structures"
 )
 
 func (bot *Bot) Unmute(session *discordgo.Session, message *discordgo.MessageCreate, args map[string]string) error {
@@ -52,6 +53,13 @@ func (bot *Bot) Unmute(session *discordgo.Session, message *discordgo.MessageCre
 		session.ChannelMessageSendEmbed(message.ChannelID, bot.Embed("Success!", fmt.Sprintf("Successfully unmuted %s#%s!", user.Username, user.Discriminator), nil))
 	} else {
 		session.ChannelMessageSendEmbed(message.ChannelID, bot.Embed("Success!", fmt.Sprintf("Successfully unmuted %s#%s! Reason: %s", user.Username, user.Discriminator, args["Reason"]), nil))
+	}
+	if guild.Modlog.Valid {
+		guild.Modlog.Log <- &structures.CaseUnmute{
+			ModeratorID: message.Author.ID,
+			UserID:      user.ID,
+			Reason:      args["Reason"],
+		}
 	}
 	return nil
 }

@@ -25,7 +25,6 @@ type Bot struct {
 		*discordgo.MessageCreate
 	}
 	inventory.Chests
-	ReadyEvent bool
 	Embed func(title string,
 		description string,
 		fields []*discordgo.MessageEmbedField) *discordgo.MessageEmbed
