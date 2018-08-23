@@ -1,14 +1,14 @@
 package db
 
 import (
-	_ "github.com/go-sql-driver/mysql"
+	"../structures"
+	"bytes"
 	"fmt"
-	"strings"
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
 	"log"
-	"../structures"
 	"reflect"
-	"bytes"
+	"strings"
 )
 
 const schema = `CREATE TABLE guild_%s (

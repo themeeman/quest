@@ -1,10 +1,10 @@
 package commands
 
 import (
-	"github.com/bwmarrin/discordgo"
 	commands "../../discordcommands"
-	"strconv"
 	"fmt"
+	"github.com/bwmarrin/discordgo"
+	"strconv"
 	"time"
 )
 
@@ -17,7 +17,7 @@ func (bot *Bot) Me(session *discordgo.Session, message *discordgo.MessageCreate,
 	} else if len(message.Mentions) > 0 {
 		id = message.Mentions[0].ID
 	} else {
-		return commands.UserNotFoundError{}
+		return UserNotFoundError{}
 	}
 	guild := bot.Guilds.Get(commands.MustGetGuildID(session, message))
 	g, err := session.State.Guild(commands.MustGetGuildID(session, message))
@@ -30,11 +30,11 @@ func (bot *Bot) Me(session *discordgo.Session, message *discordgo.MessageCreate,
 	} else {
 		m, err = session.GuildMember(guild.ID, id)
 		if err != nil {
-			return commands.UserNotFoundError{}
+			return UserNotFoundError{}
 		}
 	}
 	if m.User.Bot {
-		return commands.CustomError("Cannot use `me` command on a bot!")
+		return fmt.Errorf("Cannot use `me` command on a bot!")
 	}
 	member := guild.Members.Get(id)
 	rank := bot.UserGroup(session, g, m)

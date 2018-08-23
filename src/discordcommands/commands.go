@@ -1,10 +1,10 @@
 package discordcommands
 
 import (
-	"time"
 	"fmt"
 	"regexp"
 	"strings"
+	"time"
 )
 
 func TimeToTimestamp(t time.Time) string {
@@ -18,7 +18,7 @@ func parseArgs(regex map[string]string, command *Command, args []string) (newArg
 	}
 	for index, argument := range command.Arguments {
 		fmt.Println(index, argument)
-		value, err := newArgValue(command, argument, args, index)
+		value, err := newArgValue(argument, args, index)
 		if err != nil {
 			return nil, err
 		}
@@ -38,11 +38,9 @@ func parseArgs(regex map[string]string, command *Command, args []string) (newArg
 	return
 }
 
-func newArgValue(command *Command, argument *Argument, args []string, index int) (string, error) {
+func newArgValue(argument *Argument, args []string, index int) (string, error) {
 	if index >= len(args) && !argument.Optional {
-		return "", UsageError{
-			Usage: command.GetUsage("q:", args[0]),
-		}
+		return "", UsageError{}
 	} else if index >= len(args) && argument.Optional {
 		return "", nil
 	} else if argument.Infinite {

@@ -1,10 +1,10 @@
 package discordcommands
 
 import (
-	"github.com/bwmarrin/discordgo"
-	"reflect"
 	"bytes"
 	"fmt"
+	"github.com/bwmarrin/discordgo"
+	"reflect"
 	"strings"
 )
 
@@ -19,10 +19,10 @@ type Command struct {
 	Description string      `json:"description"`
 	Arguments   []*Argument `json:"arguments"`
 	Cooldown    int         `json:"cooldown"`
-	Group                   `json:"permission"`
-	Aliases     []string    `json:"aliases"`
-	Examples    []string    `json:"examples"`
-	Hidden      bool        `json:"hidden"`
+	Group       `json:"permission"`
+	Aliases     []string `json:"aliases"`
+	Examples    []string `json:"examples"`
+	Hidden      bool     `json:"hidden"`
 }
 
 type Handler func(session *discordgo.Session,

@@ -1,9 +1,9 @@
 package inventory
 
 import (
+	"database/sql/driver"
 	"encoding/json"
 	"fmt"
-	"database/sql/driver"
 )
 
 const (

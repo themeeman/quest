@@ -1,28 +1,28 @@
 package main
 
 import (
+	commands "./discordcommands"
+	quest "./quest/commands"
+	database "./quest/db"
+	"./quest/events"
+	"./quest/inventory"
+	"./quest/structures"
+	_ "database/sql"
+	"encoding/json"
+	"flag"
 	"fmt"
 	"github.com/bwmarrin/discordgo"
+	"github.com/jmoiron/sqlx"
 	"log"
+	"math/rand"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
-	"encoding/json"
-	commands "./discordcommands"
-	_ "database/sql"
-	"./quest/events"
-	"./quest/structures"
-	"github.com/jmoiron/sqlx"
-	"math/rand"
-	"flag"
-	quest "./quest/commands"
-	database "./quest/db"
-	"./quest/inventory"
 )
 
 var CommandsData commands.CommandMap
-var RegexVerifiers = map[string]string{}
+var Types = map[string]string{}
 
 type App struct {
 	Token    string
@@ -35,7 +35,7 @@ type App struct {
 }
 
 var db *sqlx.DB
-var guilds structures.Guilds
+var guilds = structures.Guilds{}
 var app App
 var chests inventory.Chests
 var bot *quest.Bot
@@ -100,7 +100,7 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
-	err = unmarshalJson(app.Types, &RegexVerifiers)
+	err = unmarshalJson(app.Types, &Types)
 	if err != nil {
 		panic(err)
 	}
@@ -126,7 +126,7 @@ func main() {
 			Err error
 			*discordgo.MessageCreate
 		}),
-		Regex: RegexVerifiers,
+		Types: Types,
 		GroupNames: map[commands.Group]string{
 			quest.PermissionMember:    "Member",
 			quest.PermissionModerator: "Moderator",
@@ -142,19 +142,18 @@ func main() {
 	dg, err := commands.NewSession(bot, app.Token)
 	if err != nil {
 		log.Fatalln("Error making discord session", err)
-		return
 	}
 	e := events.BotEvents{Bot: bot}
 	dg.AddHandlerOnce(e.Ready)
+	dg.AddHandler(func(session *discordgo.Session, _ *discordgo.Ready) { session.UpdateStatus(0, "q:help") })
 	dg.AddHandler(e.MessageCreate)
 	dg.AddHandler(e.MemberAdd)
-	dg.AddHandler(events.GuildCreate)
+	dg.AddHandler(e.GuildCreate)
 	dg.StateEnabled = true
 	dg.State.TrackMembers = true
 	err = dg.Open()
 	if err != nil {
 		log.Fatalln("Error opening connection", err)
-		return
 	}
 	defer dg.Close()
 	fmt.Println("Quest is now running.  Press CTRL-C to exit.")

@@ -1,13 +1,14 @@
 package events
 
 import (
+	commands "../../discordcommands"
+	"../db"
+	"../modlog"
+	"../structures"
+	"fmt"
 	"github.com/bwmarrin/discordgo"
 	"log"
-	"fmt"
-	"../structures"
-	"../db"
 	"time"
-	commands "../../discordcommands"
 )
 
 func (bot BotEvents) Ready(session *discordgo.Session, _ *discordgo.Ready) {
@@ -20,7 +21,6 @@ func (bot BotEvents) Ready(session *discordgo.Session, _ *discordgo.Ready) {
 		fmt.Println(v)
 	}
 	bot.Guilds = guilds
-	session.UpdateStatus(0, "q:help")
 	go func() {
 		for {
 			time.Sleep(time.Minute * 10)
@@ -39,28 +39,12 @@ func (bot BotEvents) Ready(session *discordgo.Session, _ *discordgo.Ready) {
 				if e, ok := err.Err.(commands.ZeroArgumentsError); ok {
 					bot.Help(session, err.MessageCreate, map[string]string{"Command": e.Command})
 				} else {
-					session.ChannelMessageSendEmbed(err.ChannelID, commands.ErrorEmbed(err.Err))
+					session.ChannelMessageSendEmbed(err.ChannelID, bot.ErrorEmbed(err.Err))
 				}
 			}
 		}
 	}()
 	go applyMutes(guilds, session)
-	for _, g := range guilds {
-		fmt.Println(g.ID, g.Modlog)
-		go func(modlog *structures.Modlog) {
-			if modlog.Valid {
-				for {
-					c := <-modlog.Log
-					modlog.Mutex.Lock()
-					_, err := session.ChannelMessageSendEmbed(modlog.ChannelID, c.Embed(*modlog, session))
-					if err == nil {
-						modlog.Cases = append(modlog.Cases, c)
-					}
-					modlog.Mutex.Unlock()
-				}
-			}
-		}(&g.Modlog)
-	}
 }
 
 func applyMutes(guilds structures.Guilds, session *discordgo.Session) {
@@ -69,13 +53,33 @@ func applyMutes(guilds structures.Guilds, session *discordgo.Session) {
 		if guild.MuteRole.Valid {
 			for _, member := range guild.Members {
 				if member.MuteExpires.Valid && member.MuteExpires.Time.After(now) {
+					fmt.Println("After")
 					go func(guild *structures.Guild, member *structures.Member) {
+						member.MuteExpires.Valid = false
 						dur := member.MuteExpires.Time.UTC().UnixNano() - now.UnixNano()
 						time.Sleep(time.Duration(dur))
-						session.GuildMemberRoleRemove(guild.ID, member.ID, guild.MuteRole.String)
+						err := session.GuildMemberRoleRemove(guild.ID, member.ID, guild.MuteRole.String)
+						if err == nil && guild.Modlog != nil && guild.Modlog.Valid {
+							guild.Modlog.Log <- &modlog.CaseUnmute{
+								ModeratorID: "412702549645328397",
+								UserID:      member.ID,
+								Reason:      "Auto",
+							}
+						}
 					}(guild, member)
 				} else if member.MuteExpires.Valid && member.MuteExpires.Time.Before(now) {
-					go session.GuildMemberRoleRemove(guild.ID, member.ID, guild.MuteRole.String)
+					fmt.Println("Before")
+					go func(guild *structures.Guild, member *structures.Member) {
+						member.MuteExpires.Valid = false
+						err := session.GuildMemberRoleRemove(guild.ID, member.ID, guild.MuteRole.String)
+						if err == nil && guild.Modlog != nil && guild.Modlog.Valid {
+							guild.Modlog.Log <- &modlog.CaseUnmute{
+								ModeratorID: "412702549645328397",
+								UserID:      member.ID,
+								Reason:      "Auto",
+							}
+						}
+					}(guild, member)
 				}
 			}
 		}

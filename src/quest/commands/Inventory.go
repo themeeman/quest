@@ -1,10 +1,10 @@
 package commands
 
 import (
-	"github.com/bwmarrin/discordgo"
 	commands "../../discordcommands"
 	"bytes"
 	"fmt"
+	"github.com/bwmarrin/discordgo"
 )
 
 func (bot *Bot) Inventory(session *discordgo.Session, message *discordgo.MessageCreate, args map[string]string) error {
@@ -21,7 +21,7 @@ func (bot *Bot) Inventory(session *discordgo.Session, message *discordgo.Message
 	if inv.String() != "" {
 		session.ChannelMessageSendEmbed(message.ChannelID, bot.Embed("", "", []*discordgo.MessageEmbedField{
 			{
-				Name: "Inventory",
+				Name:  "Inventory",
 				Value: inv.String(),
 			},
 		}))

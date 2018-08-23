@@ -1,11 +1,11 @@
 package experience
 
 import (
-	"github.com/bwmarrin/discordgo"
-	"time"
-	"fmt"
 	commands "../../discordcommands"
 	quest "../commands"
+	"fmt"
+	"github.com/bwmarrin/discordgo"
+	"time"
 )
 
 func GrantExp(bot *quest.Bot, session *discordgo.Session, message *discordgo.MessageCreate) {

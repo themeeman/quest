@@ -7,6 +7,7 @@ import (
 	"sort"
 	"bytes"
 	"fmt"
+	"time"
 )
 
 func (bot *Bot) Roles(session *discordgo.Session, message *discordgo.MessageCreate, args map[string]string) error {
@@ -20,15 +21,33 @@ func (bot *Bot) Roles(session *discordgo.Session, message *discordgo.MessageCrea
 	sort.Sort(roles)
 	var buffer bytes.Buffer
 	buffer.WriteString("```\n")
-	for _, v := range roles {
-		r, err := commands.FindRole(session, guild.ID, v.ID)
-		if err != nil {
-			fmt.Println(err)
-			continue
+	allRoles, err := session.GuildRoles(guild.ID)
+	if err != nil {
+		return nil
+	}
+	discordRoles := make(discordgo.Roles, len(roles))
+	for i, r := range roles {
+		ok, index := roleContains(allRoles, r.ID)
+		if ok {
+			discordRoles[i] = allRoles[index]
 		}
-		buffer.WriteString(fmt.Sprintf("%v EXP: %s\n", v.Experience, r.Name))
+	}
+	for i, v := range discordRoles {
+		r := roles[i]
+		buffer.WriteString(fmt.Sprintf("%v EXP: %s\n", r.Experience, v.Name))
 	}
 	buffer.WriteString("```")
+	t := time.Now()
 	session.ChannelMessageSend(message.ChannelID, buffer.String())
+	fmt.Println(time.Since(t))
 	return nil
+}
+
+func roleContains(roles []*discordgo.Role, id string) (bool, int) {
+	for i, r := range roles {
+		if r.ID == id {
+			return true, i
+		}
+	}
+	return false, 0
 }

@@ -1,12 +1,12 @@
 package commands
 
 import (
-	"github.com/bwmarrin/discordgo"
 	commands "../../discordcommands"
 	"bytes"
 	"fmt"
-	"strings"
+	"github.com/bwmarrin/discordgo"
 	"sort"
+	"strings"
 )
 
 func (bot *Bot) Help(session *discordgo.Session, message *discordgo.MessageCreate, args map[string]string) error {
@@ -39,7 +39,7 @@ func (bot *Bot) Help(session *discordgo.Session, message *discordgo.MessageCreat
 	} else {
 		cmdInfo, name := getCommand(bot.CommandMap, args["Command"])
 		if cmdInfo == nil {
-			return commands.UnknownCommandError{
+			return UnknownCommandError{
 				Command: name,
 			}
 		}

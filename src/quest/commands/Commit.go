@@ -1,9 +1,9 @@
 package commands
 
 import (
-	"github.com/bwmarrin/discordgo"
 	"../db"
 	"fmt"
+	"github.com/bwmarrin/discordgo"
 )
 
 func (bot *Bot) Commit(session *discordgo.Session, message *discordgo.MessageCreate, _ map[string]string) error {

@@ -1,8 +1,8 @@
 package commands
 
 import (
-	"github.com/bwmarrin/discordgo"
 	commands "../../discordcommands"
+	"github.com/bwmarrin/discordgo"
 	"strconv"
 	"strings"
 )
@@ -17,11 +17,11 @@ func (bot *Bot) AddExp(session *discordgo.Session, message *discordgo.MessageCre
 	} else if len(message.Mentions) > 0 {
 		id = message.Mentions[0].ID
 	} else {
-		return commands.UserNotFoundError{}
+		return UserNotFoundError{}
 	}
 	_, err := session.GuildMember(commands.MustGetGuildID(session, message), id)
 	if err != nil {
-		return commands.UserNotFoundError{}
+		return UserNotFoundError{}
 	}
 	member := guild.Members.Get(id)
 	exp, _ := strconv.Atoi(strings.Replace(args["Value"], ",", "", -1))

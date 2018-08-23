@@ -1,8 +1,8 @@
 package structures
 
 import (
-	"github.com/go-sql-driver/mysql"
 	"../inventory"
+	"github.com/go-sql-driver/mysql"
 )
 
 type Member struct {

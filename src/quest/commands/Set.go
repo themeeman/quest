@@ -1,22 +1,24 @@
 package commands
 
 import (
-	"github.com/bwmarrin/discordgo"
 	commands "../../discordcommands"
-	"regexp"
-	"strings"
-	"strconv"
-	"math"
-	"reflect"
+	"../modlog"
+	"../structures"
+	"bytes"
 	"database/sql"
 	"fmt"
-	"sort"
-	"bytes"
-	"../structures"
+	"github.com/bwmarrin/discordgo"
 	"github.com/fatih/structs"
+	"math"
+	"reflect"
+	"regexp"
+	"sort"
+	"strconv"
+	"strings"
+	"sync"
 )
 
-func getOptions(bot *Bot) map[string]*structures.Option {
+func getOptions() map[string]*structures.Option {
 	g := new(structures.Guild)
 	t := reflect.TypeOf(*g)
 	options := make(map[string]*structures.Option)
@@ -35,7 +37,7 @@ func getOptions(bot *Bot) map[string]*structures.Option {
 }
 
 func (bot *Bot) Set(session *discordgo.Session, message *discordgo.MessageCreate, args map[string]string) error {
-	options := getOptions(bot)
+	options := getOptions()
 	fmt.Println(options)
 	if args["Option"] == "" {
 		names := make([]string, len(options))
@@ -75,12 +77,12 @@ func (bot *Bot) Set(session *discordgo.Session, message *discordgo.MessageCreate
 				}
 			}
 			if !found {
-				return commands.OptionError{
-					Option: args["Option"],
-				}
+				return fmt.Errorf(`The provided argument for the Type was incorrect:
+%s is **not** a Type.
+Use q:types to view all types.`, args["Type"])
 			}
 		}
-		pattern, _ := bot.Regex[option.Type]
+		pattern, _ := bot.Types[option.Type]
 		value := args["Value"]
 		result, _ := regexp.MatchString(pattern, value)
 		if !result {
@@ -93,9 +95,22 @@ func (bot *Bot) Set(session *discordgo.Session, message *discordgo.MessageCreate
 		guild := bot.Guilds.Get(commands.MustGetGuildID(session, message))
 		field := reflect.ValueOf(guild).Elem().FieldByName(keyName)
 		fieldType := reflect.TypeOf(field.Interface())
-		val := reflect.ValueOf(convertType(message, option.Type, value)).Convert(fieldType).Interface()
-		field.Set(reflect.ValueOf(val))
+		val := reflect.ValueOf(convertType(guild, message, option.Type, value)).Convert(fieldType)
+		if val.Type() == reflect.TypeOf(&modlog.Modlog{}) {
+			if guild.Modlog.Quit != nil {
+				guild.Modlog.Quit <- struct{}{}
+			}
+			go modlog.StartLogging(session, val.Interface().(*modlog.Modlog))
+		}
+		field.Set(val)
 		session.MessageReactionAdd(message.ChannelID, message.ID, "☑")
+		if guild.Modlog != nil {
+			guild.Modlog.Log <- &modlog.CaseSet{
+				ModeratorID: message.Author.ID,
+				Option:      keyName,
+				Value:       repr(val.Interface(), option.Type),
+			}
+		}
 	}
 	return nil
 }
@@ -115,7 +130,7 @@ func repr(val interface{}, T string) string {
 		} else {
 			return "None"
 		}
-	case structures.Modlog:
+	case *modlog.Modlog:
 		if v.Valid {
 			return "<#" + v.ChannelID + ">"
 		} else {
@@ -127,7 +142,7 @@ func repr(val interface{}, T string) string {
 	return fmt.Sprint(val)
 }
 
-func convertType(message *discordgo.MessageCreate, T string, value string) interface{} {
+func convertType(guild *structures.Guild, message *discordgo.MessageCreate, T string, value string) interface{} {
 	var a interface{}
 	switch T {
 	case "Integer", "SignedInteger":
@@ -170,18 +185,46 @@ func convertType(message *discordgo.MessageCreate, T string, value string) inter
 		}
 	case "ChannelMention":
 		if value == "none" {
-			a = structures.Modlog{}
+			a = &modlog.Modlog{}
 		} else if len(value) > 18 {
-			a = structures.Modlog{
-				ChannelID: value[2:20],
-				Valid:  true,
-				Log: make(chan structures.Case),
+			if guild.Modlog != nil {
+				a = &modlog.Modlog{
+					ChannelID: value[2:20],
+					Valid:     true,
+					Log:       guild.Modlog.Log,
+					Quit:      make(chan struct{}),
+					Cases:     guild.Modlog.Cases,
+					Mutex:     &sync.Mutex{},
+				}
+			} else {
+				a = &modlog.Modlog{
+					ChannelID: value[2:20],
+					Valid:     true,
+					Log:       make(chan modlog.Case),
+					Quit:      make(chan struct{}),
+					Cases:     make(modlog.Cases, 0),
+					Mutex:     &sync.Mutex{},
+				}
 			}
 		} else {
-			a = structures.Modlog{
-				ChannelID: value,
-				Valid:  true,
-				Log: make(chan structures.Case),
+			if guild.Modlog != nil {
+				a = &modlog.Modlog{
+					ChannelID: value,
+					Valid:     true,
+					Log:       guild.Modlog.Log,
+					Quit:      make(chan struct{}),
+					Cases:     guild.Modlog.Cases,
+					Mutex:     &sync.Mutex{},
+				}
+			} else {
+				a = &modlog.Modlog{
+					ChannelID: value,
+					Valid:     true,
+					Log:       make(chan modlog.Case),
+					Quit:      make(chan struct{}),
+					Cases:     make(modlog.Cases, 0),
+					Mutex:     &sync.Mutex{},
+				}
 			}
 		}
 	case "Boolean":

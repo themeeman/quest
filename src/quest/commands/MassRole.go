@@ -1,9 +1,8 @@
 package commands
 
 import (
-	"github.com/bwmarrin/discordgo"
-	commands "../../discordcommands"
 	"fmt"
+	"github.com/bwmarrin/discordgo"
 )
 
 func (bot *Bot) MassRole(session *discordgo.Session, message *discordgo.MessageCreate, args map[string]string) error {
@@ -12,7 +11,7 @@ func (bot *Bot) MassRole(session *discordgo.Session, message *discordgo.MessageC
 	var role string
 	if args["Role"] == "" {
 		if !guild.Autorole.Valid {
-			return commands.AutoRoleError{}
+			return fmt.Errorf("An Autorole is not configured for the server. Use q:set Autorole to configure one.")
 		} else {
 			role = guild.Autorole.String
 		}

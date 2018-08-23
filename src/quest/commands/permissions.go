@@ -6,7 +6,7 @@ import (
 )
 
 const (
-	PermissionMember    commands.Group = iota
+	PermissionMember commands.Group = iota
 	PermissionModerator
 	PermissionAdmin
 	PermissionOwner
@@ -20,7 +20,7 @@ func (bot *Bot) UserGroup(session *discordgo.Session, guild *discordgo.Guild, me
 	for _, r := range member.Roles {
 		role, err := commands.GetRole(session, guild.ID, r)
 		if err == nil {
-			if role.Permissions & discordgo.PermissionAdministrator == discordgo.PermissionAdministrator {
+			if role.Permissions&discordgo.PermissionAdministrator == discordgo.PermissionAdministrator {
 				return PermissionAdmin
 			}
 		}

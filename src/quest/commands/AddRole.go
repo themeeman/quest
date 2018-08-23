@@ -1,11 +1,11 @@
 package commands
 
 import (
-	"github.com/bwmarrin/discordgo"
 	commands "../../discordcommands"
 	"../structures"
-	"strconv"
 	"fmt"
+	"github.com/bwmarrin/discordgo"
+	"strconv"
 )
 
 func (bot *Bot) AddRole(session *discordgo.Session, message *discordgo.MessageCreate, args map[string]string) error {
@@ -30,7 +30,7 @@ func (bot *Bot) AddRole(session *discordgo.Session, message *discordgo.MessageCr
 	if ok {
 		guild.Roles[index] = role
 	} else if len(guild.Roles) >= 64 {
-		return commands.CustomError("Invalid action - 64 roles is the absolute limit\nTry removing a role")
+		return fmt.Errorf("Invalid action - 64 roles is the absolute limit\nTry removing a role")
 	} else {
 		guild.Roles = append(guild.Roles, role)
 	}

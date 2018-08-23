@@ -1,11 +1,11 @@
 package events
 
 import (
-	"github.com/bwmarrin/discordgo"
+	"../experience"
 	"fmt"
+	"github.com/bwmarrin/discordgo"
 	"strings"
 	"time"
-	"../experience"
 )
 
 func (bot BotEvents) MessageCreate(session *discordgo.Session, message *discordgo.MessageCreate) {

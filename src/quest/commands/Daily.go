@@ -1,17 +1,17 @@
 package commands
 
 import (
-	"github.com/bwmarrin/discordgo"
 	commands "../../discordcommands"
 	"../inventory"
-	"time"
 	"fmt"
+	"github.com/bwmarrin/discordgo"
+	"time"
 )
 
 func (bot *Bot) Daily(session *discordgo.Session, message *discordgo.MessageCreate, args map[string]string) error {
 	guild := bot.Guilds.Get(commands.MustGetGuildID(session, message))
 	member := guild.Members.Get(message.Author.ID)
-	if !member.LastDaily.Valid || time.Since(member.LastDaily.Time.UTC()) > 23 * time.Hour {
+	if !member.LastDaily.Valid || time.Since(member.LastDaily.Time.UTC()) > 23*time.Hour {
 		member.LastDaily.Valid = true
 		member.LastDaily.Time = time.Now().UTC()
 		member.Chests[inventory.ChestDaily] += 1
@@ -25,7 +25,7 @@ func (bot *Bot) Daily(session *discordgo.Session, message *discordgo.MessageCrea
 		t := member.LastDaily.Time.Add(23 * time.Hour).Sub(time.Now().UTC())
 		session.ChannelMessageSend(message.ChannelID,
 			fmt.Sprintf("Sorry, you need to wait %d hours and %d minutes before your next redeem",
-			int(t.Hours()), int(t.Minutes()) % 60))
+				int(t.Hours()), int(t.Minutes())%60))
 	}
 	return nil
 }

@@ -1,8 +1,8 @@
 package structures
 
 import (
-	"reflect"
 	"github.com/fatih/structs"
+	"reflect"
 )
 
 type Option struct {

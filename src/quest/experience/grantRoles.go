@@ -1,11 +1,11 @@
 package experience
 
 import (
+	commands "../../discordcommands"
+	"../structures"
+	"fmt"
 	"github.com/bwmarrin/discordgo"
 	"time"
-	commands "../../discordcommands"
-	"fmt"
-	"../structures"
 )
 
 func GrantRoles(session *discordgo.Session, message *discordgo.MessageCreate, guild *structures.Guild, member *structures.Member) error {
@@ -13,9 +13,20 @@ func GrantRoles(session *discordgo.Session, message *discordgo.MessageCreate, gu
 	if err != nil {
 		return err
 	}
-	for _, r := range guild.Roles {
+	allRoles, err := session.GuildRoles(guild.ID)
+	if err != nil {
+		return nil
+	}
+	discordRoles := make(discordgo.Roles, len(guild.Roles))
+	for i, r := range guild.Roles {
+		ok, index := roleContains(allRoles, r.ID)
+		if ok {
+			discordRoles[i] = allRoles[index]
+		}
+	}
+	for i, role := range discordRoles {
+		r := guild.Roles[i]
 		if member.Experience >= r.Experience {
-			role, err := commands.FindRole(session, guild.ID, r.ID)
 			if err != nil {
 				continue
 			}
@@ -41,4 +52,13 @@ func questEmbedColor(username string, discriminator string, rolename string, col
 		},
 	}
 	return emb
+}
+
+func roleContains(roles []*discordgo.Role, id string) (bool, int) {
+	for i, r := range roles {
+		if r.ID == id {
+			return true, i
+		}
+	}
+	return false, 0
 }

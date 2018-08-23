@@ -1,16 +1,17 @@
 package commands
 
 import (
-	"github.com/bwmarrin/discordgo"
-	commands "../../discordcommands"
-	"regexp"
 	"fmt"
+	"github.com/bwmarrin/discordgo"
+	"regexp"
 )
 
 func (bot *Bot) TryParse(session *discordgo.Session, message *discordgo.MessageCreate, args map[string]string) error {
-	pattern, ok := bot.Regex[args["Type"]]
+	pattern, ok := bot.Types[args["Type"]]
 	if !ok {
-		return commands.TypeError{Name: args["Type"]}
+		return fmt.Errorf(`The provided argument for the Type was incorrect:
+%s is **not** a Type.
+Use q:types to view all types.`, args["Type"])
 	}
 	result, err := regexp.MatchString(pattern, args["Value"])
 	if err != nil {

@@ -1,13 +1,12 @@
 package commands
 
 import (
-	"github.com/bwmarrin/discordgo"
-	commands "../../discordcommands"
-	"strconv"
+	"../modlog"
 	"fmt"
+	"github.com/bwmarrin/discordgo"
+	"strconv"
 	"strings"
 	"time"
-	"../structures"
 )
 
 func (bot *Bot) Mute(session *discordgo.Session, message *discordgo.MessageCreate, args map[string]string) error {
@@ -17,27 +16,27 @@ func (bot *Bot) Mute(session *discordgo.Session, message *discordgo.MessageCreat
 		var err error
 		user, err = session.User(args["User"])
 		if err != nil {
-			return commands.UserNotFoundError{}
+			return UserNotFoundError{}
 		}
 	} else if len(message.Mentions) > 0 {
 		user = message.Mentions[0]
 	} else {
-		return commands.UserNotFoundError{}
+		return UserNotFoundError{}
 	}
 	member, _ := session.State.Member(ch.GuildID, user.ID)
 	guild := bot.Guilds.Get(ch.GuildID)
 	g, _ := session.Guild(ch.GuildID)
 	if bot.UserGroup(session, g, member) >= PermissionAdmin {
-		return commands.CustomError("That user is a admin, I can't mute them!")
+		return fmt.Errorf("That user is a admin, I can't mute them!")
 	} else if member.User.Bot {
-		return commands.CustomError("Can't mute a bot")
+		return fmt.Errorf("Can't mute a bot")
 	}
 	if !guild.MuteRole.Valid {
-		return commands.MuteRoleError{}
+		return fmt.Errorf("No mute role has been configured for the server! Use q:set muterole [Value]")
 	}
 	for _, r := range member.Roles {
 		if r == guild.MuteRole.String {
-			return commands.MutedError{
+			return MutedError{
 				Username:      user.Username,
 				Discriminator: user.Discriminator,
 			}
@@ -47,11 +46,11 @@ func (bot *Bot) Mute(session *discordgo.Session, message *discordgo.MessageCreat
 	if err != nil {
 		fmt.Println(err)
 		if strings.HasPrefix(err.Error(), "HTTP 403 Forbidden") {
-			return commands.BotPermissionsError{}
+			return fmt.Errorf("Make sure the bot has Manage Roles Permission in Discord!")
 		} else if strings.HasPrefix(err.Error(), "HTTP 400 Bad Request") {
-			return commands.RoleError{ID: guild.MuteRole.String}
+			return RoleError{ID: guild.MuteRole.String}
 		} else {
-			return commands.UserNotFoundError{}
+			return UserNotFoundError{}
 		}
 	}
 	dur, _ := strconv.Atoi(strings.Replace(args["Minutes"], ",", "", -1))
@@ -61,6 +60,14 @@ func (bot *Bot) Mute(session *discordgo.Session, message *discordgo.MessageCreat
 	go func() {
 		time.Sleep(time.Minute * time.Duration(dur))
 		session.GuildMemberRoleRemove(ch.GuildID, user.ID, guild.MuteRole.String)
+		err := session.GuildMemberRoleRemove(guild.ID, user.ID, guild.MuteRole.String)
+		if err == nil && guild.Modlog != nil && guild.Modlog.Valid {
+			guild.Modlog.Log <- &modlog.CaseUnmute{
+				ModeratorID: "412702549645328397",
+				UserID:      user.ID,
+				Reason:      "Auto",
+			}
+		}
 	}()
 	if args["Reason"] == "" {
 		session.ChannelMessageSendEmbed(message.ChannelID, bot.Embed("Success!", fmt.Sprintf("Successfully muted %s#%s!", user.Username, user.Discriminator), nil))
@@ -68,7 +75,7 @@ func (bot *Bot) Mute(session *discordgo.Session, message *discordgo.MessageCreat
 		session.ChannelMessageSendEmbed(message.ChannelID, bot.Embed("Success!", fmt.Sprintf("Successfully muted %s#%s! Reason: %s", user.Username, user.Discriminator, args["Reason"]), nil))
 	}
 	if guild.Modlog.Valid {
-		guild.Modlog.Log <- &structures.CaseMute{
+		guild.Modlog.Log <- &modlog.CaseMute{
 			ModeratorID: message.Author.ID,
 			UserID:      user.ID,
 			Duration:    dur,

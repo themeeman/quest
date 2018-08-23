@@ -1,8 +1,8 @@
 package commands
 
 import (
-	"github.com/bwmarrin/discordgo"
 	commands "../../discordcommands"
+	"github.com/bwmarrin/discordgo"
 	"strconv"
 )
 
@@ -15,7 +15,7 @@ func (bot *Bot) Give(session *discordgo.Session, message *discordgo.MessageCreat
 	} else if len(message.Mentions) > 0 {
 		id = message.Mentions[0].ID
 	} else {
-		return commands.UserNotFoundError{}
+		return UserNotFoundError{}
 	}
 	item, _ := strconv.Atoi(args["Item"])
 	amount, _ := strconv.Atoi(args["Amount"])

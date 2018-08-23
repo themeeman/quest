@@ -1,10 +1,10 @@
 package experience
 
 import (
-	"fmt"
-	"math/rand"
-	"github.com/bwmarrin/discordgo"
 	"../structures"
+	"fmt"
+	"github.com/bwmarrin/discordgo"
+	"math/rand"
 )
 
 func GrantLottery(session *discordgo.Session, guild *structures.Guild, member *structures.Member) {

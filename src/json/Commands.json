@@ -35,7 +35,7 @@
     "permission": 1,
     "examples": [
       "q:mute @themeeman#8354 10",
-      "q:mute @TrippyPepper#3457 500 Trolling and posting gay porn"
+      "q:mute @TrippyPepper#3457 500 Trolling and being rude"
     ]
   },
   "unmute": {
@@ -230,7 +230,7 @@
       }
     ],
     "examples": ["q:set MuteRole @Muted", "q:set ExpReload 90"],
-    "aliases": ["flag"],
+    "aliases": ["flag", "config", "cfg"],
     "permission": 2
   },
   "leaderboard": {
@@ -265,5 +265,73 @@
     "aliases": ["giveitem"],
     "examples": ["q:give 5 1", "q:give 6 10 @Lumite#1234"],
     "permission": 2
+  },
+  "ban": {
+    "description": "Ban a rebellious youth",
+    "arguments": [
+      {
+        "name": "User",
+        "type": "UserMention"
+      },
+      {
+        "name": "Reason",
+        "type": "String",
+        "optional": true,
+        "infinite": true
+      }
+    ],
+    "examples": ["q:ban @Trippy#3457 More trolling"],
+    "permission": 1
+  },
+  "unban": {
+    "description": "Unban a rebellious youth",
+    "arguments": [
+      {
+        "name": "User",
+        "type": "UserMention"
+      },
+      {
+        "name": "Reason",
+        "type": "String",
+        "optional": true,
+        "infinite": true
+      }
+    ],
+    "examples": ["q:unban @Trippy#3457 Repented"],
+    "permission": 1
+  },
+  "kick": {
+    "description": "Kicks a boy",
+    "arguments": [
+      {
+        "name": "User",
+        "type": "UserMention"
+      },
+      {
+        "name": "Reason",
+        "type": "String",
+        "optional": true,
+        "infinite": true
+      }
+    ],
+    "examples": ["q:kick @Superjombombo#9999"],
+    "permission": 1
+  },
+  "warn": {
+    "description": "Issues a warn",
+    "arguments": [
+      {
+        "name": "User",
+        "type": "UserMention"
+      },
+      {
+        "name": "Reason",
+        "type": "String",
+        "optional": true,
+        "infinite": true
+      }
+    ],
+    "examples": ["q:warn @artist#3794 being dumb"],
+    "permission": 1
   }
 }

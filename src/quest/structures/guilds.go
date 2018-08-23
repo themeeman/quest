@@ -1,13 +1,16 @@
 package structures
 
-import "database/sql"
+import (
+	"../modlog"
+	"database/sql"
+)
 
 type Guild struct {
 	ID            string         `db:"id"`
 	MuteRole      sql.NullString `db:"mute_role"      type:"RoleMention"`
 	ModRole       sql.NullString `db:"mod_role"       type:"RoleMention"`
 	AdminRole     sql.NullString `db:"admin_role"     type:"RoleMention"`
-	Modlog        Modlog         `db:"mod_log"        type:"ChannelMention"`
+	Modlog        *modlog.Modlog `db:"mod_log"        type:"ChannelMention"`
 	Autorole      sql.NullString `db:"autorole"       type:"RoleMention"`
 	ExpReload     uint16         `db:"exp_reload"     type:"Integer"`
 	ExpGainUpper  uint16         `db:"exp_gain_upper" type:"Integer"`

@@ -1,13 +1,13 @@
 package discordcommands
 
 import (
-	"github.com/bwmarrin/discordgo"
-	"time"
-	"strings"
 	"fmt"
-	"reflect"
+	"github.com/bwmarrin/discordgo"
 	"log"
+	"reflect"
 	"runtime/debug"
+	"strings"
+	"time"
 )
 
 func getCommand(commands CommandMap, handlers HandlerMap, name string) (*Command, Handler, string) {
@@ -50,9 +50,9 @@ func NewSession(bot interface{}, token string) (*discordgo.Session, error) {
 			handlers[strings.ToLower(t.Method(i).Name)] = funcValue.Convert(handlerType).Interface().(Handler)
 		}
 	}
-	var regex map[string]string
-	if field, ok := t.Elem().FieldByName("Regex"); ok && field.Type == reflect.TypeOf(regex) {
-		regex = v.Elem().FieldByName("Regex").Interface().(map[string]string)
+	var types map[string]string
+	if field, ok := t.Elem().FieldByName("Types"); ok && field.Type == reflect.TypeOf(types) {
+		types = v.Elem().FieldByName("Types").Interface().(map[string]string)
 	}
 	var errors chan struct {
 		Err error
@@ -79,8 +79,8 @@ func NewSession(bot interface{}, token string) (*discordgo.Session, error) {
 		defer func() {
 			if r := recover(); r != nil {
 				log.Println(string(debug.Stack()))
-				session.ChannelMessageSend(message.ChannelID, "```"+ `An unexpected panic occured in the execution of that command.
-`+ fmt.Sprint(r)+ "\nTry again later, or contact themeeman#8354"+ "```")
+				session.ChannelMessageSend(message.ChannelID, "```"+`An unexpected panic occured in the execution of that command.
+`+fmt.Sprint(r)+"\nTry again later, or contact themeeman#8354"+"```")
 			}
 		}()
 		t := time.Now()
@@ -110,7 +110,7 @@ func NewSession(bot interface{}, token string) (*discordgo.Session, error) {
 						Err error
 						*discordgo.MessageCreate
 					}{
-						Err: InsufficentPermissionsError{
+						Err: InsufficientPermissionsError{
 							Required: groupNames[info.Group],
 							Had:      groupNames[level],
 						},
@@ -134,11 +134,15 @@ func NewSession(bot interface{}, token string) (*discordgo.Session, error) {
 			return
 		}
 		var newArgs = map[string]string{}
-		if regex != nil {
+		if types != nil {
 			var err error
-			newArgs, err = parseArgs(regex, info, args)
+			newArgs, err = parseArgs(types, info, args)
 			if err != nil {
 				if errors != nil {
+					if e, ok := err.(UsageError); ok {
+						e.Usage = info.GetUsage(*prefix, name)
+						err = e
+					}
 					errors <- struct {
 						Err error
 						*discordgo.MessageCreate

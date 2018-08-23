@@ -1,8 +1,8 @@
 package commands
 
 import (
-	"github.com/bwmarrin/discordgo"
 	"../db"
+	"github.com/bwmarrin/discordgo"
 )
 
 func (bot *Bot) Pull(session *discordgo.Session, message *discordgo.MessageCreate, _ map[string]string) error {
