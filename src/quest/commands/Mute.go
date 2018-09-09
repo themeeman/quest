@@ -61,7 +61,7 @@ func (bot *Bot) Mute(session *discordgo.Session, message *discordgo.MessageCreat
 		time.Sleep(time.Minute * time.Duration(dur))
 		session.GuildMemberRoleRemove(ch.GuildID, user.ID, guild.MuteRole.String)
 		err := session.GuildMemberRoleRemove(guild.ID, user.ID, guild.MuteRole.String)
-		if err == nil && guild.Modlog != nil && guild.Modlog.Valid {
+		if err == nil && guild.Modlog.Valid {
 			guild.Modlog.Log <- &modlog.CaseUnmute{
 				ModeratorID: "412702549645328397",
 				UserID:      user.ID,

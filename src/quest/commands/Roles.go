@@ -1,12 +1,12 @@
 package commands
 
 import (
-	"github.com/bwmarrin/discordgo"
 	commands "../../discordcommands"
 	"../structures"
-	"sort"
 	"bytes"
 	"fmt"
+	"github.com/bwmarrin/discordgo"
+	"sort"
 	"time"
 )
 

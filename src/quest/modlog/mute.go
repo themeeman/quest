@@ -13,7 +13,7 @@ type CaseMute struct {
 	Reason      string `json:"reason"`
 }
 
-func (cm *CaseMute) Embed(modlog *Modlog, session *discordgo.Session) *discordgo.MessageEmbed {
+func (cm *CaseMute) Embed(session *discordgo.Session) *discordgo.MessageEmbed {
 	member := getUser(session, cm.UserID)
 	moderator := getUser(session, cm.ModeratorID)
 	fields := []*discordgo.MessageEmbedField{
@@ -35,7 +35,7 @@ func (cm *CaseMute) Embed(modlog *Modlog, session *discordgo.Session) *discordgo
 		})
 	}
 	return &discordgo.MessageEmbed{
-		Title:     fmt.Sprintf("Case %d | Mute", len(modlog.Cases)+1),
+		Title:     "Mute",
 		Color:     0x00ccff,
 		Timestamp: timeToTimestamp(time.Now().UTC()),
 		Author: &discordgo.MessageEmbedAuthor{

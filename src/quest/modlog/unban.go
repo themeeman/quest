@@ -1,7 +1,6 @@
 package modlog
 
 import (
-	"fmt"
 	"github.com/bwmarrin/discordgo"
 	"time"
 )
@@ -12,7 +11,7 @@ type CaseUnban struct {
 	Reason      string `json:"reason"`
 }
 
-func (cm *CaseUnban) Embed(modlog *Modlog, session *discordgo.Session) *discordgo.MessageEmbed {
+func (cm *CaseUnban) Embed(session *discordgo.Session) *discordgo.MessageEmbed {
 	member := getUser(session, cm.UserID)
 	moderator := getUser(session, cm.ModeratorID)
 	fields := []*discordgo.MessageEmbedField{
@@ -29,7 +28,7 @@ func (cm *CaseUnban) Embed(modlog *Modlog, session *discordgo.Session) *discordg
 		})
 	}
 	return &discordgo.MessageEmbed{
-		Title:     fmt.Sprintf("Case %d | Unban", len(modlog.Cases)+1),
+		Title:     "Unban",
 		Color:     0x008800,
 		Timestamp: timeToTimestamp(time.Now().UTC()),
 		Author: &discordgo.MessageEmbedAuthor{

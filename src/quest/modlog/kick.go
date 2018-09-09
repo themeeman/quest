@@ -1,7 +1,6 @@
 package modlog
 
 import (
-	"fmt"
 	"github.com/bwmarrin/discordgo"
 	"time"
 )
@@ -12,7 +11,7 @@ type CaseKick struct {
 	Reason      string `json:"reason"`
 }
 
-func (cm *CaseKick) Embed(modlog *Modlog, session *discordgo.Session) *discordgo.MessageEmbed {
+func (cm *CaseKick) Embed(session *discordgo.Session) *discordgo.MessageEmbed {
 	member := getUser(session, cm.UserID)
 	moderator := getUser(session, cm.ModeratorID)
 	fields := []*discordgo.MessageEmbedField{
@@ -29,7 +28,7 @@ func (cm *CaseKick) Embed(modlog *Modlog, session *discordgo.Session) *discordgo
 		})
 	}
 	return &discordgo.MessageEmbed{
-		Title:     fmt.Sprintf("Case %d | Kick", len(modlog.Cases)+1),
+		Title:     "Kick",
 		Color:     0xffcccc,
 		Timestamp: timeToTimestamp(time.Now().UTC()),
 		Author: &discordgo.MessageEmbedAuthor{

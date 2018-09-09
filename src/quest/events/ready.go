@@ -15,10 +15,14 @@ func (bot BotEvents) Ready(session *discordgo.Session, _ *discordgo.Ready) {
 	var err error
 	guilds, err := db.QueryAllData(bot.DB)
 	if err != nil {
-		log.Println("b", err)
+		log.Fatalln("b", err)
 	}
 	for _, v := range guilds {
-		fmt.Println(v)
+		//fmt.Println(v)
+		fmt.Println(v.ID, v.Cases)
+	}
+	if guilds == nil {
+		guilds = make(structures.Guilds)
 	}
 	bot.Guilds = guilds
 	go func() {
@@ -33,12 +37,18 @@ func (bot BotEvents) Ready(session *discordgo.Session, _ *discordgo.Ready) {
 		}
 	}()
 	go func() {
+		var err struct {
+			Err error
+			*discordgo.MessageCreate
+		}
 		for {
-			err := <-bot.Errors
+			err = <-bot.Errors
 			if err.Err != nil {
+				fmt.Println(err)
 				if e, ok := err.Err.(commands.ZeroArgumentsError); ok {
 					bot.Help(session, err.MessageCreate, map[string]string{"Command": e.Command})
 				} else {
+					fmt.Println(bot.ErrorEmbed == nil)
 					session.ChannelMessageSendEmbed(err.ChannelID, bot.ErrorEmbed(err.Err))
 				}
 			}
@@ -53,13 +63,12 @@ func applyMutes(guilds structures.Guilds, session *discordgo.Session) {
 		if guild.MuteRole.Valid {
 			for _, member := range guild.Members {
 				if member.MuteExpires.Valid && member.MuteExpires.Time.After(now) {
-					fmt.Println("After")
 					go func(guild *structures.Guild, member *structures.Member) {
 						member.MuteExpires.Valid = false
 						dur := member.MuteExpires.Time.UTC().UnixNano() - now.UnixNano()
 						time.Sleep(time.Duration(dur))
 						err := session.GuildMemberRoleRemove(guild.ID, member.ID, guild.MuteRole.String)
-						if err == nil && guild.Modlog != nil && guild.Modlog.Valid {
+						if err == nil && guild.Modlog.Valid {
 							guild.Modlog.Log <- &modlog.CaseUnmute{
 								ModeratorID: "412702549645328397",
 								UserID:      member.ID,
@@ -68,11 +77,10 @@ func applyMutes(guilds structures.Guilds, session *discordgo.Session) {
 						}
 					}(guild, member)
 				} else if member.MuteExpires.Valid && member.MuteExpires.Time.Before(now) {
-					fmt.Println("Before")
 					go func(guild *structures.Guild, member *structures.Member) {
 						member.MuteExpires.Valid = false
 						err := session.GuildMemberRoleRemove(guild.ID, member.ID, guild.MuteRole.String)
-						if err == nil && guild.Modlog != nil && guild.Modlog.Valid {
+						if err == nil && guild.Modlog.Valid {
 							guild.Modlog.Log <- &modlog.CaseUnmute{
 								ModeratorID: "412702549645328397",
 								UserID:      member.ID,

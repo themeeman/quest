@@ -27,11 +27,7 @@ func parseArgs(regex map[string]string, command *Command, args []string) (newArg
 		if value != "" && ok {
 			match, _ := regexp.MatchString(pattern, value)
 			if !match {
-				return nil, ParsingError{
-					Value:    value,
-					Position: index,
-					Expected: argument.Type,
-				}
+				return nil, UsageError{}
 			}
 		}
 	}

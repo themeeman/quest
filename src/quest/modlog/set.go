@@ -1,21 +1,20 @@
 package modlog
 
 import (
-	"fmt"
 	"github.com/bwmarrin/discordgo"
 	"time"
 )
 
 type CaseSet struct {
-	ModeratorID string
-	Option      string
-	Value       string
+	ModeratorID string `json:"moderator_id"`
+	Option      string `json:"option"`
+	Value       string `json:"value"`
 }
 
-func (cs *CaseSet) Embed(modlog *Modlog, session *discordgo.Session) *discordgo.MessageEmbed {
+func (cs *CaseSet) Embed(session *discordgo.Session) *discordgo.MessageEmbed {
 	moderator := getUser(session, cs.ModeratorID)
 	return &discordgo.MessageEmbed{
-		Title:     fmt.Sprintf("Case %d | Set Option", len(modlog.Cases)+1),
+		Title:     "Set Option",
 		Color:     0xffffff,
 		Timestamp: timeToTimestamp(time.Now().UTC()),
 		Author: &discordgo.MessageEmbedAuthor{

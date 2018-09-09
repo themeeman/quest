@@ -1,7 +1,6 @@
 package modlog
 
 import (
-	"fmt"
 	"github.com/bwmarrin/discordgo"
 	"time"
 )
@@ -12,7 +11,7 @@ type CaseWarn struct {
 	Reason      string `json:"reason"`
 }
 
-func (cm *CaseWarn) Embed(modlog *Modlog, session *discordgo.Session) *discordgo.MessageEmbed {
+func (cm *CaseWarn) Embed(session *discordgo.Session) *discordgo.MessageEmbed {
 	member := getUser(session, cm.UserID)
 	moderator := getUser(session, cm.ModeratorID)
 	fields := []*discordgo.MessageEmbedField{
@@ -29,7 +28,7 @@ func (cm *CaseWarn) Embed(modlog *Modlog, session *discordgo.Session) *discordgo
 		})
 	}
 	return &discordgo.MessageEmbed{
-		Title:     fmt.Sprintf("Case %d | Warn", len(modlog.Cases)+1),
+		Title:     "Warn",
 		Color:     0xaaaaaa,
 		Timestamp: timeToTimestamp(time.Now().UTC()),
 		Author: &discordgo.MessageEmbedAuthor{

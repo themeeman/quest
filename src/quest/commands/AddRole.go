@@ -17,6 +17,10 @@ func (bot *Bot) AddRole(session *discordgo.Session, message *discordgo.MessageCr
 	}
 	guild := bot.Guilds.Get(commands.MustGetGuildID(session, message))
 	exp, _ := strconv.Atoi(args["Experience"])
+	if exp == 0 {
+		return fmt.Errorf(`I see you are trying to add a role for 0 experience!
+If you want to, it is better to use q:set Autorole <role>`)
+	}
 	role := &structures.Role{
 		Experience: int64(exp),
 		ID:         roleID,

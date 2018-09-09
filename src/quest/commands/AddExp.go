@@ -2,6 +2,7 @@ package commands
 
 import (
 	commands "../../discordcommands"
+	"../modlog"
 	"github.com/bwmarrin/discordgo"
 	"strconv"
 	"strings"
@@ -27,5 +28,12 @@ func (bot *Bot) AddExp(session *discordgo.Session, message *discordgo.MessageCre
 	exp, _ := strconv.Atoi(strings.Replace(args["Value"], ",", "", -1))
 	member.Experience += int64(exp)
 	session.MessageReactionAdd(message.ChannelID, message.ID, "☑")
+	if guild.Modlog.Valid {
+		guild.Modlog.Log <- &modlog.CaseAddExp{
+			AdminID:    message.Author.ID,
+			Experience: exp,
+			UserID:     id,
+		}
+	}
 	return nil
 }

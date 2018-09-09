@@ -26,7 +26,7 @@ type Bot struct {
 	}
 	inventory.Chests
 	ErrorEmbed func(e error) *discordgo.MessageEmbed
-	Embed func(title string,
+	Embed      func(title string,
 		description string,
 		fields []*discordgo.MessageEmbedField) *discordgo.MessageEmbed
 }

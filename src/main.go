@@ -35,7 +35,6 @@ type App struct {
 }
 
 var db *sqlx.DB
-var guilds = structures.Guilds{}
 var app App
 var chests inventory.Chests
 var bot *quest.Bot
@@ -57,6 +56,20 @@ func questEmbed(title string, description string, fields []*discordgo.MessageEmb
 	}
 	if description != "" {
 		emb.Description = description
+	}
+	return emb
+}
+
+func errorEmbed(e error) *discordgo.MessageEmbed {
+	emb := &discordgo.MessageEmbed{
+		Type:        "rich",
+		Title:       "An error has occurred",
+		Description: e.Error(),
+		Timestamp:   commands.TimeToTimestamp(time.Now()),
+		Color:       0x660000,
+		Footer: &discordgo.MessageEmbedFooter{
+			Text: "Quest Bot",
+		},
 	}
 	return emb
 }
@@ -133,11 +146,12 @@ func main() {
 			quest.PermissionAdmin:     "Admin",
 			quest.PermissionOwner:     "Owner",
 		},
-		Prefix: prefix,
-		Guilds: guilds,
-		DB:     db,
-		Chests: chests,
-		Embed:  questEmbed,
+		Prefix:     prefix,
+		Guilds:     structures.Guilds{},
+		DB:         db,
+		Chests:     chests,
+		Embed:      questEmbed,
+		ErrorEmbed: errorEmbed,
 	}
 	dg, err := commands.NewSession(bot, app.Token)
 	if err != nil {

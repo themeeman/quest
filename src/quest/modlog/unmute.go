@@ -1,7 +1,6 @@
 package modlog
 
 import (
-	"fmt"
 	"github.com/bwmarrin/discordgo"
 	"time"
 )
@@ -12,7 +11,7 @@ type CaseUnmute struct {
 	Reason      string `json:"reason"`
 }
 
-func (cm *CaseUnmute) Embed(modlog *Modlog, session *discordgo.Session) *discordgo.MessageEmbed {
+func (cm *CaseUnmute) Embed(session *discordgo.Session) *discordgo.MessageEmbed {
 	member := getUser(session, cm.UserID)
 	moderator := getUser(session, cm.ModeratorID)
 	fields := []*discordgo.MessageEmbedField{
@@ -29,7 +28,7 @@ func (cm *CaseUnmute) Embed(modlog *Modlog, session *discordgo.Session) *discord
 		})
 	}
 	return &discordgo.MessageEmbed{
-		Title:     fmt.Sprintf("Case %d | Unmute", len(modlog.Cases)+1),
+		Title:     "Unmute",
 		Color:     0xbb3344,
 		Timestamp: timeToTimestamp(time.Now().UTC()),
 		Author: &discordgo.MessageEmbedAuthor{

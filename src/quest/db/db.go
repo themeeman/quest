@@ -31,20 +31,20 @@ func InitDB(user string, pass string, host string, database string) (*sqlx.DB, e
 }
 
 func QueryAllData(db *sqlx.DB) (structures.Guilds, error) {
-	fmt.Println(createOverwriteQuery("?", structures.Role{}))
-	fmt.Println(createOverwriteQuery("?", structures.Member{}))
-	fmt.Println(createOverwriteQuery("?", structures.Guild{}))
+	fmt.Println(overwriteQuery("?", structures.Role{}))
+	fmt.Println(overwriteQuery("?", structures.Member{}))
+	fmt.Println(overwriteQuery("?", structures.Guild{}))
 	tx, err := db.Beginx()
 	if err != nil {
 		return nil, err
 	}
+	defer tx.Commit()
 	defer func() {
 		if r := recover(); r != nil {
 			log.Println(r)
 			tx.Rollback()
 		}
 	}()
-	defer tx.Commit()
 	guilds, err := queryGuildData(tx)
 	if err != nil {
 		return nil, err
@@ -175,7 +175,7 @@ func PostAllData(db *sqlx.DB, guilds structures.Guilds) error {
 }
 
 func postGuildData(tx *sqlx.Tx, guilds structures.Guilds) error {
-	stmt, err := tx.PrepareNamed(createOverwriteQuery("guilds", structures.Guild{}))
+	stmt, err := tx.PrepareNamed(overwriteQuery("guilds", structures.Guild{}))
 	if err != nil {
 		return err
 	}
@@ -190,7 +190,7 @@ func postGuildData(tx *sqlx.Tx, guilds structures.Guilds) error {
 
 func postMemberData(tx *sqlx.Tx, guilds structures.Guilds, guildID string) error {
 	guild := guilds.Get(guildID)
-	q := fmt.Sprintf(createOverwriteQuery("guild_%s", structures.Member{}), guildID)
+	q := fmt.Sprintf(overwriteQuery("guild_%s", structures.Member{}), guildID)
 	stmt, err := tx.PrepareNamed(q)
 	if err != nil {
 		return err
@@ -206,7 +206,7 @@ func postMemberData(tx *sqlx.Tx, guilds structures.Guilds, guildID string) error
 
 func postRoleData(tx *sqlx.Tx, guilds structures.Guilds, guildID string) error {
 	guild := guilds.Get(guildID)
-	q := fmt.Sprintf(createOverwriteQuery("roles_%s", structures.Role{}), guildID)
+	q := fmt.Sprintf(overwriteQuery("roles_%s", structures.Role{}), guildID)
 	stmt, err := tx.PrepareNamed(q)
 	if err != nil {
 		return err
@@ -220,7 +220,7 @@ func postRoleData(tx *sqlx.Tx, guilds structures.Guilds, guildID string) error {
 	return nil
 }
 
-func createOverwriteQuery(table string, v interface{}) string {
+func overwriteQuery(table string, v interface{}) string {
 	t := reflect.TypeOf(v)
 	start := fmt.Sprintf("INSERT INTO %s VALUES ", table)
 	cols := make([]string, 0, t.NumField())

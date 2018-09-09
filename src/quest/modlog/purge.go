@@ -11,10 +11,10 @@ type CasePurge struct {
 	Amount      int    `json:"amount"`
 }
 
-func (cp *CasePurge) Embed(modlog *Modlog, session *discordgo.Session) *discordgo.MessageEmbed {
+func (cp *CasePurge) Embed(session *discordgo.Session) *discordgo.MessageEmbed {
 	moderator := getUser(session, cp.ModeratorID)
 	return &discordgo.MessageEmbed{
-		Title:     fmt.Sprintf("Case %d | Purge Messages", len(modlog.Cases)+1),
+		Title:     "Purge Messages",
 		Color:     0xffff00,
 		Timestamp: timeToTimestamp(time.Now().UTC()),
 		Author: &discordgo.MessageEmbedAuthor{

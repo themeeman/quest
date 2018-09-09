@@ -3,6 +3,7 @@ package structures
 import (
 	"../modlog"
 	"database/sql"
+	"sync"
 )
 
 type Guild struct {
@@ -10,7 +11,7 @@ type Guild struct {
 	MuteRole      sql.NullString `db:"mute_role"      type:"RoleMention"`
 	ModRole       sql.NullString `db:"mod_role"       type:"RoleMention"`
 	AdminRole     sql.NullString `db:"admin_role"     type:"RoleMention"`
-	Modlog        *modlog.Modlog `db:"mod_log"        type:"ChannelMention"`
+	Modlog        modlog.Modlog  `db:"mod_log"        type:"ChannelMention"`
 	Autorole      sql.NullString `db:"autorole"       type:"RoleMention"`
 	ExpReload     uint16         `db:"exp_reload"     type:"Integer"`
 	ExpGainUpper  uint16         `db:"exp_gain_upper" type:"Integer"`
@@ -18,14 +19,18 @@ type Guild struct {
 	LotteryChance uint8          `db:"lottery_chance" type:"Integer"`
 	LotteryUpper  uint32         `db:"lottery_upper"  type:"Integer"`
 	LotteryLower  uint32         `db:"lottery_lower"  type:"Integer"`
+	Cases         modlog.Cases   `db:"cases"`
 	Members
 	Roles
 }
 
 type Guilds map[string]*Guild
 
-func (guilds Guilds) Get(id string) *Guild {
-	guild, ok := guilds[id]
+func (guilds *Guilds) Get(id string) *Guild {
+	if guilds == nil {
+		*guilds = Guilds{}
+	}
+	guild, ok := (*guilds)[id]
 	if !ok {
 		guild = &Guild{
 			ID:            id,
@@ -35,8 +40,12 @@ func (guilds Guilds) Get(id string) *Guild {
 			LotteryChance: 100,
 			LotteryUpper:  500,
 			LotteryLower:  250,
+			Cases: modlog.Cases{
+				Cases: make([]modlog.CaseMessage, 0),
+				Mutex: &sync.Mutex{},
+			},
 		}
-		guilds[id] = guild
+		(*guilds)[id] = guild
 	}
 	if guild.Members == nil {
 		guild.Members = make(Members)

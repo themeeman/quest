@@ -20,6 +20,7 @@ func (bot *Bot) Me(session *discordgo.Session, message *discordgo.MessageCreate,
 		return UserNotFoundError{}
 	}
 	guild := bot.Guilds.Get(commands.MustGetGuildID(session, message))
+	fmt.Println(guild.Cases, fmt.Sprintf("%p", &guild.Cases))
 	g, err := session.State.Guild(commands.MustGetGuildID(session, message))
 	if err != nil {
 		return nil
@@ -52,10 +53,13 @@ func (bot *Bot) Me(session *discordgo.Session, message *discordgo.MessageCreate,
 	}
 	now := time.Now().UTC()
 	if member.MuteExpires.Valid && member.MuteExpires.Time.UTC().After(now) {
-		dif := member.MuteExpires.Time.UTC().UnixNano() - now.UnixNano()
+		dif := int(member.MuteExpires.Time.UTC().UnixNano() - now.UnixNano())
+		hours := dif / int(time.Hour)
+		minutes := (dif / int(time.Minute)) % 60
+		seconds := (dif / int(time.Second)) % 60
 		fields = append(fields, &discordgo.MessageEmbedField{
-			Name:  "Mute Time Left (Seconds)",
-			Value: strconv.Itoa(int(dif / int64(time.Second))),
+			Name:  "Mute Time Left",
+			Value: fmt.Sprintf("%d:%d:%d", hours, minutes, seconds),
 		})
 	}
 	session.ChannelMessageSendEmbed(message.ChannelID, bot.Embed(title, "", fields))

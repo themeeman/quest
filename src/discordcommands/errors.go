@@ -2,19 +2,6 @@ package discordcommands
 
 import "fmt"
 
-type ParsingError struct {
-	Value    string
-	Position int
-	Expected string
-}
-
-func (e ParsingError) Error() string {
-	return fmt.Sprintf(`Invalid command arguments
-Argument position: %v
-Expected Type: %s
-Received: %s`, e.Position, e.Expected, e.Value)
-}
-
 type UsageError struct {
 	Usage string
 }

@@ -1,14 +1,16 @@
-package structures
+package modlog
 
 import (
-	"reflect"
 	"encoding/json"
 	"github.com/bwmarrin/discordgo"
+	"reflect"
 	"sync"
+	"database/sql/driver"
+	"fmt"
 )
 
 type Case interface {
-	Embed(*discordgo.Session, Cases) *discordgo.MessageEmbed
+	Embed(*discordgo.Session) *discordgo.MessageEmbed
 }
 
 type CaseMessage struct {
@@ -16,7 +18,7 @@ type CaseMessage struct {
 	Case    Case
 }
 
-type Cases struct{
+type Cases struct {
 	Cases []CaseMessage
 	*sync.Mutex
 }
@@ -72,4 +74,79 @@ func (c *Cases) UnmarshalJSON(data []byte) error {
 		c.Cases[i].Case = a.Elem().Interface().(Case)
 	}
 	return nil
+}
+
+func (c *Cases) Scan(value interface{}) error {
+	if c == nil {
+		return nil
+	}
+	switch v := value.(type) {
+	case []byte:
+		err := json.Unmarshal(v, c)
+		if err != nil {
+			return err
+		}
+		c.Mutex = &sync.Mutex{}
+		return nil
+	case string:
+		err := json.Unmarshal([]byte(v), c)
+		if err != nil {
+			return err
+		}
+		c.Mutex = &sync.Mutex{}
+		return nil
+	default:
+		return fmt.Errorf("unsupported type: %T", v)
+	}
+}
+
+func (c Cases) Value() (driver.Value, error) {
+	return json.Marshal(c)
+}
+
+func caseName(i interface{}) string {
+	switch i.(type) {
+	case *CaseBan:
+		return "ban"
+	case *CaseKick:
+		return "kick"
+	case *CaseMute:
+		return "mute"
+	case *CasePurge:
+		return "purge"
+	case *CaseUnban:
+		return "unban"
+	case *CaseUnmute:
+		return "unmute"
+	case *CaseWarn:
+		return "warn"
+	case *CaseSet:
+		return "set"
+	}
+	return "invalid"
+}
+
+func caseType(s string) reflect.Type {
+	var a interface{}
+	switch s {
+	case "ban":
+		a = &CaseBan{}
+	case "kick":
+		a = &CaseKick{}
+	case "mute":
+		a = &CaseMute{}
+	case "purge":
+		a = &CasePurge{}
+	case "unban":
+		a = &CaseUnban{}
+	case "unmute":
+		a = &CaseUnmute{}
+	case "warn":
+		a = &CaseWarn{}
+	case "set":
+		a = &CaseSet{}
+	default:
+		a = nil
+	}
+	return reflect.TypeOf(a)
 }
