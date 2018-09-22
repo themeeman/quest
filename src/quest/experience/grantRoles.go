@@ -27,7 +27,7 @@ func GrantRoles(session *discordgo.Session, message *discordgo.MessageCreate, gu
 	for i, role := range discordRoles {
 		r := guild.Roles[i]
 		if member.Experience >= r.Experience {
-			if role != nil {
+			if role == nil {
 				continue
 			}
 			found, _ := commands.Contains(m.Roles, role.ID)
