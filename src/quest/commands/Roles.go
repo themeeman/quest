@@ -34,7 +34,9 @@ func (bot *Bot) Roles(session *discordgo.Session, message *discordgo.MessageCrea
 	}
 	for i, v := range discordRoles {
 		r := roles[i]
-		buffer.WriteString(fmt.Sprintf("%v EXP: %s\n", r.Experience, v.Name))
+		if r != nil && v != nil {
+			buffer.WriteString(fmt.Sprintf("%v EXP: %s\n", r.Experience, v.Name))
+		}
 	}
 	buffer.WriteString("```")
 	t := time.Now()
