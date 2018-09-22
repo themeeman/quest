@@ -23,7 +23,7 @@ func (bot *Bot) Purge(session *discordgo.Session, message *discordgo.MessageCrea
 		return nil
 	}
 	fmt.Println(msgs)
-	ids := make([]string, i)
+	ids := make([]string, len(msgs))
 	for i, v := range msgs {
 		ids[i] = v.ID
 		fmt.Println(v.Content)
@@ -33,7 +33,7 @@ func (bot *Bot) Purge(session *discordgo.Session, message *discordgo.MessageCrea
 		return fmt.Errorf("It seems I do not have permissions to delete messages!")
 	} else {
 		session.ChannelMessageDelete(message.ChannelID, message.ID)
-		m, err := session.ChannelMessageSend(message.ChannelID, fmt.Sprintf("☑ Successfully purged %d messages", i))
+		m, err := session.ChannelMessageSend(message.ChannelID, fmt.Sprintf("☑ Successfully purged %d messages", len(msgs)))
 		if err == nil {
 			go func() {
 				time.Sleep(time.Second * 10)
@@ -45,7 +45,8 @@ func (bot *Bot) Purge(session *discordgo.Session, message *discordgo.MessageCrea
 	if guild.Modlog.Valid {
 		guild.Modlog.Log <- &modlog.CasePurge{
 			ModeratorID: message.Author.ID,
-			Amount:      i,
+			ChannelID:   message.ChannelID,
+			Amount:      len(msgs),
 		}
 	}
 	return nil

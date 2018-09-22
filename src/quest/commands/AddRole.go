@@ -41,12 +41,3 @@ If you want to, it is better to use q:set Autorole <role>`)
 	session.MessageReactionAdd(message.ChannelID, message.ID, "☑")
 	return nil
 }
-
-func isRoleIn(roles structures.Roles, id string) bool {
-	for _, r := range roles {
-		if r.ID == id {
-			return true
-		}
-	}
-	return false
-}

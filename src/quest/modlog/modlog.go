@@ -58,7 +58,7 @@ func StartLogging(session *discordgo.Session, modlog Modlog, cases *Cases) {
 				})
 			}
 			data, _ := cases.MarshalJSON()
-			fmt.Println(data, fmt.Sprintf("%p", cases))
+			fmt.Println(string(data), fmt.Sprintf("%p", cases))
 			cases.Mutex.Unlock()
 		}
 	}

@@ -56,8 +56,9 @@ func (bot *Bot) Help(session *discordgo.Session, message *discordgo.MessageCreat
 					Value: "```" + cmdInfo.GetUsage(bot.Prefix, name) + "```",
 				},
 				{
-					Name:  "Examples",
-					Value: exampleBuffer.String(),
+					Name:   "Examples",
+					Value:  exampleBuffer.String(),
+					Inline: true,
 				},
 			}
 		} else {
@@ -70,8 +71,9 @@ func (bot *Bot) Help(session *discordgo.Session, message *discordgo.MessageCreat
 		}
 		if len(cmdInfo.Aliases) > 0 {
 			fields = append(fields, &discordgo.MessageEmbedField{
-				Name:  "Aliases",
-				Value: strings.Join(cmdInfo.Aliases, ","),
+				Name:   "Aliases",
+				Value:  strings.Join(cmdInfo.Aliases, ", "),
+				Inline: true,
 			})
 		}
 		session.ChannelMessageSendEmbed(message.ChannelID, bot.Embed(strings.Title(name), cmdInfo.Description, fields))

@@ -93,7 +93,7 @@ Use q:types to view all types.`, args["Type"])
 		field := reflect.ValueOf(guild).Elem().FieldByName(keyName)
 		fieldType := reflect.TypeOf(field.Interface())
 		val := reflect.ValueOf(convertType(guild, message, option.Type, value)).Convert(fieldType)
-		if val.Type() == reflect.TypeOf(&modlog.Modlog{}) {
+		if val.Type() == reflect.TypeOf(modlog.Modlog{}) {
 			if guild.Modlog.Quit != nil {
 				guild.Modlog.Quit <- struct{}{}
 			}

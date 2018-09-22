@@ -1,8 +1,8 @@
 {
-  "ExpReload":     60,
-  "ExpGainUpper":  25,
-  "ExpGainLower":  10,
-  "LotteryChance": 100,
-  "LotteryUpper":  500,
-  "LotteryLower":  250
+  "exp_reload":     60,
+  "exp_gain_upper":  25,
+  "exp_gain_lower":  10,
+  "lottery_chance": 100,
+  "lottery_upper":  500,
+  "lottery_lower":  250
 }

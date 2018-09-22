@@ -8,6 +8,7 @@ import (
 
 type CasePurge struct {
 	ModeratorID string `json:"moderator_id"`
+	ChannelID   string `json:"channel_id"`
 	Amount      int    `json:"amount"`
 }
 
@@ -22,6 +23,11 @@ func (cp *CasePurge) Embed(session *discordgo.Session) *discordgo.MessageEmbed {
 			Name:    moderator.String(),
 		},
 		Fields: []*discordgo.MessageEmbedField{
+			{
+				Name:   "Channel",
+				Value:  "<#" + cp.ChannelID + ">",
+				Inline: true,
+			},
 			{
 				Name:   "Amount",
 				Value:  fmt.Sprint(cp.Amount),
