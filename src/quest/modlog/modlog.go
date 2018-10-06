@@ -47,18 +47,24 @@ func StartLogging(session *discordgo.Session, modlog Modlog, cases *Cases) {
 		case <-modlog.Quit:
 			return
 		case c := <-modlog.Log:
+			fmt.Println(c)
 			cases.Mutex.Lock()
 			emb := c.Embed(session)
 			emb.Title = fmt.Sprintf("Case %d | ", len(cases.Cases)+1) + emb.Title
 			message, err := session.ChannelMessageSendEmbed(modlog.ChannelID, emb)
-			if err == nil {
-				cases.Cases = append(cases.Cases, CaseMessage{
-					Message: message.ID,
-					Case:    c,
-				})
+			cm := CaseMessage{
+				Message: message.ID,
+				Case:    c,
 			}
-			data, _ := cases.MarshalJSON()
-			fmt.Println(string(data), fmt.Sprintf("%p", cases))
+			if err == nil {
+				cases.Cases = append(cases.Cases, &cm)
+			} else {
+				fmt.Println(err)
+			}
+			data, _ := cm.MarshalJSON()
+			fmt.Println(string(data))
+			cm = CaseMessage{}
+			fmt.Println(cm.UnmarshalJSON(data), cm.Case)
 			cases.Mutex.Unlock()
 		}
 	}

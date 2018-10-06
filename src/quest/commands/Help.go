@@ -35,7 +35,13 @@ func (bot *Bot) Help(session *discordgo.Session, message *discordgo.MessageCreat
 				Value: buf.String(),
 			},
 		}
-		session.ChannelMessageSendEmbed(message.ChannelID, bot.Embed("Help", "", fields))
+		ch, _ := session.UserChannelCreate(message.Author.ID)
+		if ch != nil {
+			_, err := session.ChannelMessageSendEmbed(ch.ID, bot.Embed("Help", "", fields))
+			if err != nil {
+				session.ChannelMessageSendEmbed(message.ChannelID, bot.Embed("Help", "", fields))
+			}
+		}
 	} else {
 		cmdInfo, name := getCommand(bot.CommandMap, args["Command"])
 		if cmdInfo == nil {

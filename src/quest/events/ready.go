@@ -48,7 +48,6 @@ func (bot BotEvents) Ready(session *discordgo.Session, _ *discordgo.Ready) {
 				if e, ok := err.Err.(commands.ZeroArgumentsError); ok {
 					bot.Help(session, err.MessageCreate, map[string]string{"Command": e.Command})
 				} else {
-					fmt.Println(bot.ErrorEmbed == nil)
 					session.ChannelMessageSendEmbed(err.ChannelID, bot.ErrorEmbed(err.Err))
 				}
 			}

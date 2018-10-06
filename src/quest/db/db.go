@@ -9,6 +9,7 @@ import (
 	"log"
 	"reflect"
 	"strings"
+	"runtime/debug"
 )
 
 const schema = `CREATE TABLE guild_%s (
@@ -41,7 +42,7 @@ func QueryAllData(db *sqlx.DB) (structures.Guilds, error) {
 	defer tx.Commit()
 	defer func() {
 		if r := recover(); r != nil {
-			log.Println(r)
+			log.Println(string(debug.Stack()), r)
 			tx.Rollback()
 		}
 	}()
@@ -143,7 +144,7 @@ func PostAllData(db *sqlx.DB, guilds structures.Guilds) error {
 	defer tx.Commit()
 	defer func() {
 		if r := recover(); r != nil {
-			log.Println(r)
+			log.Println(string(debug.Stack()), r)
 			tx.Rollback()
 			PostAllData(db, guilds)
 		}

@@ -27,11 +27,15 @@ func (bot *Bot) Leaderboard(session *discordgo.Session, message *discordgo.Messa
 		IDs:     make([]string, len(guild.Members)),
 		Members: guild.Members,
 	}
-	var i int
-	for k := range guild.Members {
-		sorted.IDs[i] = k
-		i += 1
+
+	{
+		var i int
+		for id := range guild.Members {
+			sorted.IDs[i] = id
+			i += 1
+		}
 	}
+
 	sort.Sort(sorted)
 	var board []string
 	if len(sorted.IDs) < 10 {
@@ -52,7 +56,7 @@ func (bot *Bot) Leaderboard(session *discordgo.Session, message *discordgo.Messa
 					index+1, m.User.Username, m.User.Discriminator, mem.Experience))
 			}
 		} else {
-			buffer.WriteString(fmt.Sprintf("%d. User Not Found - %d EXP\n",
+			buffer.WriteString(fmt.Sprintf("%d. *User Not Found* - %d EXP\n",
 				index+1, mem.Experience))
 		}
 	}
@@ -62,12 +66,7 @@ func (bot *Bot) Leaderboard(session *discordgo.Session, message *discordgo.Messa
 		buffer.WriteString(fmt.Sprintf("**%d. %s#%s - %d EXP\n**",
 			specialIndex+1, message.Author.Username, message.Author.Discriminator, mem.Experience))
 	}
-	ch, err := session.UserChannelCreate(message.Author.ID)
-	if err == nil {
-		session.ChannelMessageSendEmbed(ch.ID, bot.Embed("Leaderboard", buffer.String(), nil))
-	} else {
-		session.ChannelMessageSendEmbed(message.ChannelID, bot.Embed("Leaderboard", buffer.String(), nil))
-	}
+	session.ChannelMessageSendEmbed(message.ChannelID, bot.Embed("Leaderboard", buffer.String(), nil))
 	return nil
 }
 
@@ -94,7 +93,6 @@ func getMembers(session *discordgo.Session, guildID string, ids []string) []memb
 	if guild == nil {
 		return nil
 	}
-	fmt.Println(guild.Members)
 	for i, id := range ids {
 		go func(i int, id string) {
 			if found, index := containsMember(guild.Members, id); found {

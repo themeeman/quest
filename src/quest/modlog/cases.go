@@ -7,6 +7,7 @@ import (
 	"sync"
 	"database/sql/driver"
 	"fmt"
+	"github.com/pkg/errors"
 )
 
 type Case interface {
@@ -19,81 +20,128 @@ type CaseMessage struct {
 }
 
 type Cases struct {
-	Cases []CaseMessage
-	*sync.Mutex
+	Cases []*CaseMessage
+	sync.Mutex
 }
 
-func (c Cases) MarshalJSON() ([]byte, error) {
-	result := make([]interface{}, len(c.Cases))
-	for i, v := range c.Cases {
-		t := reflect.TypeOf(v.Case).Elem()
-		fields := []reflect.StructField{
-			{
-				Name: "Message",
-				Type: reflect.TypeOf(""),
-				Tag:  `json:"message"`,
-			},
-			{
-				Name: "Type",
-				Type: reflect.TypeOf(""),
-				Tag:  `json:"type"`,
-			},
-		}
-		for i := 0; i < t.NumField(); i++ {
-			fields = append(fields, t.Field(i))
-		}
-		a := reflect.New(reflect.StructOf(fields))
-		a.Elem().FieldByName("Message").SetString(v.Message)
-		a.Elem().FieldByName("Type").SetString(caseName(v.Case))
-		for i := 2; i < a.Elem().NumField(); i++ {
-			a.Elem().Field(i).Set(reflect.ValueOf(v.Case).Elem().Field(i - 2))
-		}
-		result[i] = a.Interface()
+func (c *CaseMessage) MarshalJSON() ([]byte, error) {
+	t := reflect.TypeOf(c.Case).Elem()
+	fields := []reflect.StructField{
+		{
+			Name: "Message",
+			Type: reflect.TypeOf(""),
+			Tag:  `json:"message"`,
+		},
+		{
+			Name: "Type",
+			Type: reflect.TypeOf(""),
+			Tag:  `json:"type"`,
+		},
 	}
-	return json.Marshal(result)
+	for i := 0; i < t.NumField(); i++ {
+		fields = append(fields, t.Field(i))
+	}
+	a := reflect.New(reflect.StructOf(fields))
+	a.Elem().FieldByName("Message").SetString(c.Message)
+	a.Elem().FieldByName("Type").SetString(caseName(c.Case))
+	for i := 2; i < a.Elem().NumField(); i++ {
+		a.Elem().Field(i).Set(reflect.ValueOf(c.Case).Elem().Field(i - 2))
+	}
+	d, err := json.Marshal(a.Interface())
+	return d, errors.WithStack(err)
 }
 
-func (c *Cases) UnmarshalJSON(data []byte) error {
-	var temp []map[string]interface{}
+func (c *CaseMessage) UnmarshalJSON(data []byte) error {
+	var temp map[string]interface{}
 	err := json.Unmarshal(data, &temp)
 	if err != nil {
-		return err
+		return errors.WithStack(err)
 	}
-	c.Cases = make([]CaseMessage, len(temp))
-	for i, v := range temp {
-		c.Cases[i].Message = v["message"].(string)
-		a := reflect.New(caseType(v["type"].(string)))
-		d, err := json.Marshal(v)
-		if err != nil {
-			return err
-		}
-		err = json.Unmarshal(d, a.Interface())
-		if err != nil {
-			return err
-		}
-		c.Cases[i].Case = a.Elem().Interface().(Case)
+	c.Message = temp["message"].(string)
+	T := caseType(temp["type"].(string))
+	if T == nil {
+		return nil
 	}
+	strucct := reflect.New(T)
+	d, err := json.Marshal(temp)
+	if err != nil {
+		return errors.WithStack(err)
+	}
+	err = json.Unmarshal(d, strucct.Interface())
+	if err != nil {
+		return errors.WithStack(err)
+	}
+	c.Case = strucct.Elem().Interface().(Case)
 	return nil
 }
 
+func (c Cases) MarshalJSON() ([]byte, error) {
+	//	result := make([]interface{}, len(c.Cases))
+	//	for i, v := range c.Cases {
+	//		t := reflect.TypeOf(v.Case).Elem()
+	//		fields := []reflect.StructField{
+	//			{
+	//				Name: "Message",
+	//				Type: reflect.TypeOf(""),
+	//				Tag:  `json:"message"`,
+	//			},
+	//			{
+	//				Name: "Type",
+	//				Type: reflect.TypeOf(""),
+	//				Tag:  `json:"type"`,
+	//			},
+	//		}
+	//		for i := 0; i < t.NumField(); i++ {
+	//			fields = append(fields, t.Field(i))
+	//		}
+	//		a := reflect.New(reflect.StructOf(fields))
+	//		a.Elem().FieldByName("Message").SetString(v.Message)
+	//		a.Elem().FieldByName("Type").SetString(caseName(v.Case))
+	//		for i := 2; i < a.Elem().NumField(); i++ {
+	//			a.Elem().Field(i).Set(reflect.ValueOf(v.Case).Elem().Field(i - 2))
+	//		}
+	//		result[i] = a.Interface()
+	//	}
+	return json.Marshal(c.Cases)
+}
+
+func (c *Cases) UnmarshalJSON(data []byte) error {
+	//	var temp []map[string]interface{}
+	//	err := json.Unmarshal(data, &temp)
+	//	if err != nil {
+	//		return err
+	//	}
+	//	c.Cases = make([]CaseMessage, len(temp))
+	//	for i, v := range temp {
+	//		c.Cases[i].Message = v["message"].(string)
+	//		a := reflect.New(caseType(v["type"].(string)))
+	//		d, err := json.Marshal(v)
+	//		if err != nil {
+	//			return err
+	//		}
+	//		err = json.Unmarshal(d, a.Interface())
+	//		if err != nil {
+	//			return err
+	//		}
+	//		c.Cases[i].Case = a.Elem().Interface().(Case)
+	//	}
+	err := json.Unmarshal(data, &c.Cases)
+	return err
+}
+
 func (c *Cases) Scan(value interface{}) error {
-	if c == nil {
-		return nil
-	}
 	switch v := value.(type) {
 	case []byte:
 		err := json.Unmarshal(v, c)
 		if err != nil {
 			return err
 		}
-		c.Mutex = &sync.Mutex{}
 		return nil
 	case string:
 		err := json.Unmarshal([]byte(v), c)
 		if err != nil {
 			return err
 		}
-		c.Mutex = &sync.Mutex{}
 		return nil
 	default:
 		return fmt.Errorf("unsupported type: %T", v)
@@ -122,6 +170,8 @@ func caseName(i interface{}) string {
 		return "warn"
 	case *CaseSet:
 		return "set"
+	case *CaseAddExp:
+		return "addexp"
 	}
 	return "invalid"
 }
@@ -145,6 +195,8 @@ func caseType(s string) reflect.Type {
 		a = &CaseWarn{}
 	case "set":
 		a = &CaseSet{}
+	case "addexp":
+		a = &CaseAddExp{}
 	default:
 		a = nil
 	}

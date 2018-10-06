@@ -20,7 +20,7 @@ func (c *CaseAddExp) Embed(session *discordgo.Session) *discordgo.MessageEmbed {
 	} else {
 		user := getUser(session, c.UserID)
 		if user != nil {
-			if user.ID == c.UserID {
+			if user.ID == c.AdminID {
 				userName = "Themself"
 			} else {
 				userName = user.String()

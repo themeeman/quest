@@ -20,10 +20,6 @@ func (bot *Bot) AddExp(session *discordgo.Session, message *discordgo.MessageCre
 	} else {
 		return UserNotFoundError{}
 	}
-	_, err := session.GuildMember(commands.MustGetGuildID(session, message), id)
-	if err != nil {
-		return UserNotFoundError{}
-	}
 	member := guild.Members.Get(id)
 	exp, _ := strconv.Atoi(strings.Replace(args["Value"], ",", "", -1))
 	member.Experience += int64(exp)

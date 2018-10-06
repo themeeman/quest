@@ -3,7 +3,6 @@ package structures
 import (
 	"../modlog"
 	"database/sql"
-	"sync"
 )
 
 type Guild struct {
@@ -28,7 +27,7 @@ type Guilds map[string]*Guild
 
 func (guilds *Guilds) Get(id string) *Guild {
 	if guilds == nil {
-		*guilds = Guilds{}
+		return nil
 	}
 	guild, ok := (*guilds)[id]
 	if !ok {
@@ -41,8 +40,10 @@ func (guilds *Guilds) Get(id string) *Guild {
 			LotteryUpper:  500,
 			LotteryLower:  250,
 			Cases: modlog.Cases{
-				Cases: make([]modlog.CaseMessage, 0),
-				Mutex: &sync.Mutex{},
+				Cases: make([]*modlog.CaseMessage, 0, 1000),
+			},
+			Modlog: modlog.Modlog{
+				Log: make(chan modlog.Case),
 			},
 		}
 		(*guilds)[id] = guild

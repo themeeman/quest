@@ -165,7 +165,7 @@
       "q:tryparse UserMention mee1001",
       "q:tryparse Float eight"
     ],
-    "permission": 2
+    "hidden": true
   },
   "massrole": {
     "description": "Grants every member in the server a given role or the autorole",
@@ -333,5 +333,8 @@
     ],
     "examples": ["q:warn @artist#3794 being dumb"],
     "permission": 1
+  },
+  "testlog": {
+    "hidden": true
   }
 }

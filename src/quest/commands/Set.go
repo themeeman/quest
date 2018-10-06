@@ -91,15 +91,17 @@ Use q:types to view all types.`, args["Type"])
 		}
 		guild := bot.Guilds.Get(commands.MustGetGuildID(session, message))
 		field := reflect.ValueOf(guild).Elem().FieldByName(keyName)
-		fieldType := reflect.TypeOf(field.Interface())
-		val := reflect.ValueOf(convertType(guild, message, option.Type, value)).Convert(fieldType)
-		if val.Type() == reflect.TypeOf(modlog.Modlog{}) {
-			if guild.Modlog.Quit != nil {
-				guild.Modlog.Quit <- struct{}{}
-			}
-			go modlog.StartLogging(session, val.Interface().(modlog.Modlog), &guild.Cases)
-		}
+		fieldType := field.Type()
+		val := reflect.ValueOf(convertType(message, option.Type, value)).Convert(fieldType)
+		quit := guild.Modlog.Quit
 		field.Set(val)
+		if val.Type() == reflect.TypeOf(modlog.Modlog{}) {
+			if quit != nil {
+				quit <- struct{}{}
+			}
+			fmt.Println("Started", guild.Modlog, val.Interface().(modlog.Modlog))
+			go modlog.StartLogging(session, guild.Modlog, &guild.Cases)
+		}
 		session.MessageReactionAdd(message.ChannelID, message.ID, "☑")
 		if guild.Modlog.Valid {
 			guild.Modlog.Log <- &modlog.CaseSet{
@@ -139,7 +141,7 @@ func repr(val interface{}, T string) string {
 	return fmt.Sprint(val)
 }
 
-func convertType(guild *structures.Guild, message *discordgo.MessageCreate, T string, value string) interface{} {
+func convertType(message *discordgo.MessageCreate, T string, value string) interface{} {
 	var a interface{}
 	switch T {
 	case "Integer", "SignedInteger":
@@ -187,14 +189,14 @@ func convertType(guild *structures.Guild, message *discordgo.MessageCreate, T st
 			a = modlog.Modlog{
 				ChannelID: value[2:20],
 				Valid:     true,
-				Log:       guild.Modlog.Log,
+				Log:       make(chan modlog.Case),
 				Quit:      make(chan struct{}),
 			}
 		} else {
 			a = modlog.Modlog{
 				ChannelID: value,
 				Valid:     true,
-				Log:       guild.Modlog.Log,
+				Log:       make(chan modlog.Case),
 				Quit:      make(chan struct{}),
 			}
 		}
