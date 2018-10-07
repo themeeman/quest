@@ -43,12 +43,14 @@ func (bot *Bot) Me(session *discordgo.Session, message *discordgo.MessageCreate,
 	title := fmt.Sprintf("User %s#%s", m.User.Username, m.User.Discriminator)
 	fields := []*discordgo.MessageEmbedField{
 		{
-			Name:  "Experience",
-			Value: strconv.Itoa(int(member.Experience)),
+			Name:   "Experience",
+			Value:  strconv.Itoa(int(member.Experience)),
+			Inline: true,
 		},
 		{
-			Name:  "Group",
-			Value: s[rank],
+			Name:   "Group",
+			Value:  s[rank],
+			Inline: true,
 		},
 	}
 	now := time.Now().UTC()
