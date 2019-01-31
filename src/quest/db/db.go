@@ -6,19 +6,18 @@ import (
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
-	"log"
 	"reflect"
 	"strings"
-	"runtime/debug"
+	"github.com/pkg/errors"
 )
 
 const schema = `CREATE TABLE guild_%s (
-user_id VARCHAR(18) NOT NULL,
-mute_expires DATETIME NULL DEFAULT NULL,
-last_daily DATETIME NULL DEFAULT NULL,
-experience BIGINT(20) NOT NULL,
-chests JSON NOT NULL,
-PRIMARY KEY (user_id)
+	user_id VARCHAR(18) NOT NULL,
+	mute_expires DATETIME NULL DEFAULT NULL,
+	last_daily DATETIME NULL DEFAULT NULL,
+	experience BIGINT(20) NOT NULL,
+	chests JSON NOT NULL,
+	PRIMARY KEY (user_id)
 );`
 
 const rolesSchema = `CREATE TABLE roles_%s (
@@ -39,11 +38,26 @@ func QueryAllData(db *sqlx.DB) (structures.Guilds, error) {
 	if err != nil {
 		return nil, err
 	}
+	var panicError error
 	defer tx.Commit()
 	defer func() {
 		if r := recover(); r != nil {
-			log.Println(string(debug.Stack()), r)
-			tx.Rollback()
+			panicError = tx.Rollback()
+			if panicError != nil {
+				return
+			}
+			switch rv := r.(type) {
+			case error:
+				panicError = errors.WithStack(rv)
+			case string:
+				panicError = errors.WithStack(errors.New(rv))
+			case fmt.Stringer:
+				panicError = errors.WithStack(errors.New(rv.String()))
+			case fmt.GoStringer:
+				panicError = errors.WithStack(errors.New(rv.GoString()))
+			default:
+				panicError = errors.WithStack(fmt.Errorf("Unkown cause for panic: %v", rv))
+			}
 		}
 	}()
 	guilds, err := queryGuildData(tx)
@@ -70,6 +84,9 @@ func QueryAllData(db *sqlx.DB) (structures.Guilds, error) {
 			}
 		}
 		g.Roles = roles
+	}
+	if panicError != nil {
+		return nil, panicError
 	}
 	return guilds, nil
 }
@@ -139,19 +156,33 @@ func CreateAllData(tx *sqlx.Tx, guildID string) {
 func PostAllData(db *sqlx.DB, guilds structures.Guilds) error {
 	tx, err := db.Beginx()
 	if err != nil {
-		return err
+		return errors.WithStack(err)
 	}
 	defer tx.Commit()
+	var panicError error
 	defer func() {
 		if r := recover(); r != nil {
-			log.Println(string(debug.Stack()), r)
-			tx.Rollback()
-			PostAllData(db, guilds)
+			panicError = tx.Rollback()
+			if panicError != nil {
+				return
+			}
+			switch rv := r.(type) {
+			case error:
+				panicError = errors.WithStack(rv)
+			case string:
+				panicError = errors.WithStack(errors.New(rv))
+			case fmt.Stringer:
+				panicError = errors.WithStack(errors.New(rv.String()))
+			case fmt.GoStringer:
+				panicError = errors.WithStack(errors.New(rv.GoString()))
+			default:
+				panicError = errors.WithStack(fmt.Errorf("Unkown cause for panic: %v", rv))
+			}
 		}
 	}()
 	err = postGuildData(tx, guilds)
 	if err != nil {
-		return err
+		return errors.WithStack(err)
 	}
 	for id := range guilds {
 	start:
@@ -172,7 +203,7 @@ func PostAllData(db *sqlx.DB, guilds structures.Guilds) error {
 			}
 		}
 	}
-	return nil
+	return panicError
 }
 
 func postGuildData(tx *sqlx.Tx, guilds structures.Guilds) error {

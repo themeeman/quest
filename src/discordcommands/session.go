@@ -79,8 +79,8 @@ func NewSession(bot interface{}, token string) (*discordgo.Session, error) {
 		defer func() {
 			if r := recover(); r != nil {
 				log.Println(string(debug.Stack()))
-				session.ChannelMessageSend(message.ChannelID, "```"+`An unexpected panic occured in the execution of that command.
-`+fmt.Sprint(r)+"\nTry again later, or contact themeeman#8354"+"```")
+				session.ChannelMessageSend(message.ChannelID, "```"+ `An unexpected panic occured in the execution of that command.
+`+ fmt.Sprint(r)+ "\nTry again later, or contact themeeman#8354"+ "```")
 			}
 		}()
 		t := time.Now()

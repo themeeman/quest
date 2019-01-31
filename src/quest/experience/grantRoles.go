@@ -1,11 +1,11 @@
 package experience
 
 import (
-	commands "../../discordcommands"
 	"../structures"
 	"fmt"
 	"github.com/bwmarrin/discordgo"
 	"time"
+	"../utility"
 )
 
 func GrantRoles(session *discordgo.Session, message *discordgo.MessageCreate, guild *structures.Guild, member *structures.Member) error {
@@ -30,7 +30,7 @@ func GrantRoles(session *discordgo.Session, message *discordgo.MessageCreate, gu
 			if role == nil {
 				continue
 			}
-			found, _ := commands.Contains(m.Roles, role.ID)
+			found, _ := utility.Contains(m.Roles, role.ID)
 			if !found {
 				session.GuildMemberRoleAdd(guild.ID, member.ID, r.ID)
 				session.ChannelMessageSendEmbed(message.ChannelID, questEmbedColor(m.User.Username, m.User.Discriminator, role.Name, role.Color))
@@ -45,7 +45,7 @@ func questEmbedColor(username string, discriminator string, rolename string, col
 		Type:        "rich",
 		Title:       fmt.Sprintf("Congratulations %s#%s", username, discriminator),
 		Description: fmt.Sprintf("You received the %s role", rolename),
-		Timestamp:   commands.TimeToTimestamp(time.Now()),
+		Timestamp:   utility.TimeToTimestamp(time.Now()),
 		Color:       color,
 		Footer: &discordgo.MessageEmbedFooter{
 			Text: "Quest Bot",

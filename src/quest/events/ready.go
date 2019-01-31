@@ -5,6 +5,7 @@ import (
 	"../db"
 	"../modlog"
 	"../structures"
+	"../utility"
 	"fmt"
 	"github.com/bwmarrin/discordgo"
 	"log"
@@ -61,34 +62,35 @@ func applyMutes(guilds structures.Guilds, session *discordgo.Session) {
 	for _, guild := range guilds {
 		if guild.MuteRole.Valid {
 			for _, member := range guild.Members {
-				if member.MuteExpires.Valid && member.MuteExpires.Time.After(now) {
-					go func(guild *structures.Guild, member *structures.Member) {
-						member.MuteExpires.Valid = false
-						dur := member.MuteExpires.Time.UTC().UnixNano() - now.UnixNano()
-						time.Sleep(time.Duration(dur))
-						err := session.GuildMemberRoleRemove(guild.ID, member.ID, guild.MuteRole.String)
-						if err == nil && guild.Modlog.Valid {
-							guild.Modlog.Log <- &modlog.CaseUnmute{
-								ModeratorID: "412702549645328397",
-								UserID:      member.ID,
-								Reason:      "Auto",
-							}
-						}
-					}(guild, member)
-				} else if member.MuteExpires.Valid && member.MuteExpires.Time.Before(now) {
-					go func(guild *structures.Guild, member *structures.Member) {
-						member.MuteExpires.Valid = false
-						err := session.GuildMemberRoleRemove(guild.ID, member.ID, guild.MuteRole.String)
-						if err == nil && guild.Modlog.Valid {
-							guild.Modlog.Log <- &modlog.CaseUnmute{
-								ModeratorID: "412702549645328397",
-								UserID:      member.ID,
-								Reason:      "Auto",
-							}
-						}
-					}(guild, member)
+				if member.MuteExpires.Valid {
+					member.MuteExpires.Valid = false
+					duration := member.MuteExpires.Time.UTC().UnixNano() - now.UnixNano()
+					go WaitAndUnmute(session, guild, member, time.Duration(duration))
 				}
 			}
+		}
+	}
+}
+
+func WaitAndUnmute(session *discordgo.Session, guild *structures.Guild, member *structures.Member, duration time.Duration) {
+	time.Sleep(duration)
+	m, err := session.GuildMember(guild.ID, member.ID)
+	if err != nil {
+		return
+	}
+	fmt.Println(m.Roles)
+	if found, _ := utility.Contains(m.Roles, guild.MuteRole.String); found {
+		return
+	}
+	err = session.GuildMemberRoleRemove(guild.ID, member.ID, guild.MuteRole.String)
+	if err != nil {
+		return
+	}
+	if guild.Modlog.Valid {
+		guild.Modlog.Log <- &modlog.CaseUnmute{
+			ModeratorID: "412702549645328397",
+			UserID:      member.ID,
+			Reason:      "Auto",
 		}
 	}
 }

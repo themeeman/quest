@@ -39,7 +39,6 @@ func (bot *Bot) Me(session *discordgo.Session, message *discordgo.MessageCreate,
 	}
 	member := guild.Members.Get(id)
 	rank := bot.UserGroup(session, g, m)
-	s := []string{"Member", "Moderator", "Admin", "Owner"}
 	title := fmt.Sprintf("User %s#%s", m.User.Username, m.User.Discriminator)
 	fields := []*discordgo.MessageEmbedField{
 		{
@@ -49,7 +48,7 @@ func (bot *Bot) Me(session *discordgo.Session, message *discordgo.MessageCreate,
 		},
 		{
 			Name:   "Group",
-			Value:  s[rank],
+			Value:  bot.GroupNames[rank],
 			Inline: true,
 		},
 	}

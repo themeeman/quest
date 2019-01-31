@@ -4,12 +4,7 @@ import (
 	"fmt"
 	"regexp"
 	"strings"
-	"time"
 )
-
-func TimeToTimestamp(t time.Time) string {
-	return t.Format("2006-01-02T15:04:05+00:00")
-}
 
 func parseArgs(regex map[string]string, command *Command, args []string) (newArgs map[string]string, err error) {
 	newArgs = make(map[string]string)

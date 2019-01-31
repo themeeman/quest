@@ -9,7 +9,7 @@ import (
 type CaseMute struct {
 	ModeratorID string `json:"moderator_id"`
 	UserID      string `json:"user_id"`
-	Duration    int    `json:"duration"`
+	Duration    int64  `json:"duration"`
 	Reason      string `json:"reason"`
 }
 

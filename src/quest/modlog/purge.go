@@ -9,7 +9,7 @@ import (
 type CasePurge struct {
 	ModeratorID string `json:"moderator_id"`
 	ChannelID   string `json:"channel_id"`
-	Amount      int    `json:"amount"`
+	Amount      int64  `json:"amount"`
 }
 
 func (cp *CasePurge) Embed(session *discordgo.Session) *discordgo.MessageEmbed {

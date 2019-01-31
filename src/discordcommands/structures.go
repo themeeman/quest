@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/bwmarrin/discordgo"
-	"reflect"
 	"strings"
 )
 
@@ -19,10 +18,10 @@ type Command struct {
 	Description string      `json:"description"`
 	Arguments   []*Argument `json:"arguments"`
 	Cooldown    int         `json:"cooldown"`
-	Group       `json:"permission"`
-	Aliases     []string `json:"aliases"`
-	Examples    []string `json:"examples"`
-	Hidden      bool     `json:"hidden"`
+	Group                   `json:"permission"`
+	Aliases     []string    `json:"aliases"`
+	Examples    []string    `json:"examples"`
+	Hidden      bool        `json:"hidden"`
 }
 
 type Handler func(session *discordgo.Session,
@@ -47,6 +46,7 @@ func GetRole(session *discordgo.Session, guildID string, id string) (*discordgo.
 	}
 	return nil, fmt.Errorf("role not found %s", id)
 }
+
 func (c Command) ForcedArgs() (i int) {
 	for _, v := range c.Arguments {
 		if !v.Optional {
@@ -76,19 +76,6 @@ func MustGetGuildID(session *discordgo.Session, message *discordgo.MessageCreate
 	} else {
 		return MustGetGuildID(session, message)
 	}
-}
-
-func Contains(slice, value interface{}) (bool, int) {
-	s := reflect.ValueOf(slice)
-	if !(s.Kind() == reflect.Slice || s.Kind() == reflect.Array) {
-		panic("Slice must be a slice!")
-	}
-	for i := 0; i < s.Len(); i++ {
-		if reflect.DeepEqual(value, s.Index(i).Interface()) {
-			return true, i
-		}
-	}
-	return false, 0
 }
 
 func HasPrefix(s, prefix string) bool {

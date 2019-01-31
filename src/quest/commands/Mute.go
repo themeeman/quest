@@ -78,7 +78,7 @@ func (bot *Bot) Mute(session *discordgo.Session, message *discordgo.MessageCreat
 		guild.Modlog.Log <- &modlog.CaseMute{
 			ModeratorID: message.Author.ID,
 			UserID:      user.ID,
-			Duration:    dur,
+			Duration:    int64(dur),
 			Reason:      args["Reason"],
 		}
 	}

@@ -7,6 +7,7 @@ import (
 	"./quest/events"
 	"./quest/inventory"
 	"./quest/structures"
+	"./quest/utility"
 	_ "database/sql"
 	"encoding/json"
 	"flag"
@@ -47,7 +48,7 @@ func questEmbed(title string, description string, fields []*discordgo.MessageEmb
 	emb := &discordgo.MessageEmbed{
 		Type:      "rich",
 		Title:     title,
-		Timestamp: commands.TimeToTimestamp(time.Now().UTC()),
+		Timestamp: utility.TimeToTimestamp(time.Now().UTC()),
 		Color:     0x00ffff,
 		Footer: &discordgo.MessageEmbedFooter{
 			Text: "Quest Bot",
@@ -65,7 +66,7 @@ func errorEmbed(e error) *discordgo.MessageEmbed {
 		Type:        "rich",
 		Title:       "An error has occurred",
 		Description: e.Error(),
-		Timestamp:   commands.TimeToTimestamp(time.Now()),
+		Timestamp:   utility.TimeToTimestamp(time.Now()),
 		Color:       0x660000,
 		Footer: &discordgo.MessageEmbedFooter{
 			Text: "Quest Bot",

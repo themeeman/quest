@@ -8,7 +8,7 @@ import (
 
 type CaseAddExp struct {
 	AdminID    string `json:"admin_id"`
-	Experience int    `json:"experience"`
+	Experience int64  `json:"experience"`
 	UserID     string `json:"user_id"`
 }
 

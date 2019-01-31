@@ -46,7 +46,7 @@ func (bot *Bot) Purge(session *discordgo.Session, message *discordgo.MessageCrea
 		guild.Modlog.Log <- &modlog.CasePurge{
 			ModeratorID: message.Author.ID,
 			ChannelID:   message.ChannelID,
-			Amount:      len(msgs),
+			Amount:      int64(len(msgs)),
 		}
 	}
 	return nil

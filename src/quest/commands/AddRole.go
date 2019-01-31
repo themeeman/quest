@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/bwmarrin/discordgo"
 	"strconv"
+	"../utility"
 )
 
 func (bot *Bot) AddRole(session *discordgo.Session, message *discordgo.MessageCreate, args map[string]string) error {
@@ -29,7 +30,7 @@ If you want to, it is better to use q:set Autorole <role>`)
 	for i, v := range guild.Roles {
 		allIDs[i] = v.ID
 	}
-	ok, index := commands.Contains(allIDs, roleID)
+	ok, index := utility.Contains(allIDs, roleID)
 	fmt.Println(ok, index)
 	if ok {
 		guild.Roles[index] = role

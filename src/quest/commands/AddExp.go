@@ -27,7 +27,7 @@ func (bot *Bot) AddExp(session *discordgo.Session, message *discordgo.MessageCre
 	if guild.Modlog.Valid {
 		guild.Modlog.Log <- &modlog.CaseAddExp{
 			AdminID:    message.Author.ID,
-			Experience: exp,
+			Experience: int64(exp),
 			UserID:     id,
 		}
 	}
