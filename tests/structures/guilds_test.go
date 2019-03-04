@@ -1,0 +1,3 @@
+package structures
+
+func Test

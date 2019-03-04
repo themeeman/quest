@@ -3,6 +3,8 @@ package structures
 import (
 	"../modlog"
 	"database/sql"
+	"sync"
+	"time"
 )
 
 type Guild struct {
@@ -23,30 +25,61 @@ type Guild struct {
 	Roles
 }
 
-type Guilds map[string]*Guild
+type Guilds struct {
+	state    map[string]*Guild
+	lastUsed map[string]time.Time
+	*sync.Mutex
+}
+
+func NewGuildCache() Guilds {
+	return Guilds{
+		state:    make(map[string]*Guild),
+		lastUsed: make(map[string]time.Time),
+		Mutex:    new(sync.Mutex),
+	}
+}
+
+func NewGuild(id string) *Guild {
+	return &Guild{
+		ID:            id,
+		ExpReload:     60,
+		ExpGainUpper:  25,
+		ExpGainLower:  10,
+		LotteryChance: 100,
+		LotteryUpper:  500,
+		LotteryLower:  250,
+		Cases: modlog.Cases{
+			Cases: make([]*modlog.CaseMessage, 0, 1000),
+		},
+		Modlog: modlog.Modlog{
+			Log: make(chan modlog.Case),
+		},
+	}
+}
+
+func (guilds Guilds) getOldest() string {
+	var oldestTime time.Time
+	var rv string
+	for id, t := range guilds.lastUsed {
+		if oldestTime.IsZero() || t.Before(oldestTime) {
+			oldestTime = t
+			rv = id
+		}
+	}
+	return rv
+}
+
+func (guilds Guilds) removeOldest() {
+	delete(guilds.state, guilds.getOldest())
+}
 
 func (guilds *Guilds) Get(id string) *Guild {
 	if guilds == nil {
 		return nil
 	}
-	guild, ok := (*guilds)[id]
+	guild, ok := guilds.state[id]
 	if !ok {
-		guild = &Guild{
-			ID:            id,
-			ExpReload:     60,
-			ExpGainUpper:  25,
-			ExpGainLower:  10,
-			LotteryChance: 100,
-			LotteryUpper:  500,
-			LotteryLower:  250,
-			Cases: modlog.Cases{
-				Cases: make([]*modlog.CaseMessage, 0, 1000),
-			},
-			Modlog: modlog.Modlog{
-				Log: make(chan modlog.Case),
-			},
-		}
-		(*guilds)[id] = guild
+		guilds.state[id] = NewGuild(id)
 	}
 	if guild.Members == nil {
 		guild.Members = make(Members)

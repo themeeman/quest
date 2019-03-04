@@ -1,12 +1,13 @@
 package main
 
 import (
-	commands "./discordcommands"
-	quest "./quest/commands"
+	"github.com/tomvanwoow/discordcommands"
+
+	quest "./commands"
 	database "./quest/db"
-	"./quest/events"
-	"./quest/inventory"
-	"./quest/structures"
+	"./events"
+	"./inventory"
+	"./structures"
 	_ "database/sql"
 	"encoding/json"
 	"flag"
