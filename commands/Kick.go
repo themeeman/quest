@@ -1,10 +1,10 @@
 package commands
 
 import (
+	commands "../../discordcommands"
+	"../modlog"
 	"fmt"
 	"github.com/bwmarrin/discordgo"
-	"github.com/tomvanwoow/quest/modlog"
-	"github.com/tomvanwoow/quest/utility"
 )
 
 func (bot *Bot) Kick(session *discordgo.Session, message *discordgo.MessageCreate, args map[string]string) error {
@@ -20,14 +20,14 @@ func (bot *Bot) Kick(session *discordgo.Session, message *discordgo.MessageCreat
 	}
 	var err error
 	if args["Reason"] == "" {
-		err = session.GuildMemberDelete(utility.MustGetGuildID(session, message), id)
+		err = session.GuildMemberDelete(commands.MustGetGuildID(session, message), id)
 	} else {
-		err = session.GuildMemberDeleteWithReason(utility.MustGetGuildID(session, message), id, args["Reason"])
+		err = session.GuildMemberDeleteWithReason(commands.MustGetGuildID(session, message), id, args["Reason"])
 	}
 	if err != nil {
 		return fmt.Errorf("Can't kick that user! Make sure I have the discord kick permission.")
 	}
-	guild := bot.Guilds.Get(utility.MustGetGuildID(session, message))
+	guild := bot.Guilds.Get(commands.MustGetGuildID(session, message))
 	if guild.Modlog.Valid {
 	}
 	session.MessageReactionAdd(message.ChannelID, message.ID, "☑")

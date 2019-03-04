@@ -1,10 +1,10 @@
 package commands
 
 import (
+	commands "../../discordcommands"
+	"../modlog"
 	"fmt"
 	"github.com/bwmarrin/discordgo"
-	"github.com/tomvanwoow/quest/modlog"
-	"github.com/tomvanwoow/quest/utility"
 	"strings"
 )
 
@@ -23,7 +23,7 @@ func (bot *Bot) Unmute(session *discordgo.Session, message *discordgo.MessageCre
 		return UserNotFoundError{}
 	}
 	member, _ := session.State.Member(ch.GuildID, user.ID)
-	guild := bot.Guilds.Get(utility.MustGetGuildID(session, message))
+	guild := bot.Guilds.Get(commands.MustGetGuildID(session, message))
 	var found bool
 	if !guild.MuteRole.Valid {
 		return fmt.Errorf("No mute role has been configured for the server! Use q:set muterole [Value]")

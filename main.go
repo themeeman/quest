@@ -1,18 +1,19 @@
 package main
 
 import (
+	"github.com/tomvanwoow/discordcommands"
+
+	quest "./commands"
+	database "./quest/db"
+	"./events"
+	"./inventory"
+	"./structures"
 	_ "database/sql"
 	"encoding/json"
 	"flag"
 	"fmt"
 	"github.com/bwmarrin/discordgo"
 	"github.com/jmoiron/sqlx"
-	commands "github.com/tomvanwoow/discordcommands"
-	quest "github.com/tomvanwoow/quest/commands"
-	"github.com/tomvanwoow/quest/events"
-	"github.com/tomvanwoow/quest/inventory"
-	"github.com/tomvanwoow/quest/structures"
-	"github.com/tomvanwoow/quest/utility"
 	"log"
 	"math/rand"
 	"os"
@@ -47,7 +48,7 @@ func questEmbed(title string, description string, fields []*discordgo.MessageEmb
 	emb := &discordgo.MessageEmbed{
 		Type:      "rich",
 		Title:     title,
-		Timestamp: utility.TimeToTimestamp(time.Now().UTC()),
+		Timestamp: commands.TimeToTimestamp(time.Now().UTC()),
 		Color:     0x00ffff,
 		Footer: &discordgo.MessageEmbedFooter{
 			Text: "Quest Bot",
@@ -65,7 +66,7 @@ func errorEmbed(e error) *discordgo.MessageEmbed {
 		Type:        "rich",
 		Title:       "An error has occurred",
 		Description: e.Error(),
-		Timestamp:   utility.TimeToTimestamp(time.Now()),
+		Timestamp:   commands.TimeToTimestamp(time.Now()),
 		Color:       0x660000,
 		Footer: &discordgo.MessageEmbedFooter{
 			Text: "Quest Bot",
@@ -121,7 +122,7 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
-	db, err = structures.InitDB(app.User, app.Pass, app.Host, app.Database)
+	db, err = database.InitDB(app.User, app.Pass, app.Host, app.Database)
 	if err != nil {
 		panic(err)
 	}
@@ -130,32 +131,30 @@ func init() {
 func main() {
 	defer db.Close()
 	bot = &quest.Bot{
+		CommandMap: CommandsData,
 		ExpTimes: make(map[struct {
 			Guild  string
 			Member string
 		}]time.Time),
-		Guilds:     structures.NewGuildCache(db),
+		Errors: make(chan struct {
+			Err error
+			*discordgo.MessageCreate
+		}),
+		Types: Types,
+		GroupNames: map[commands.Group]string{
+			quest.PermissionMember:    "Member",
+			quest.PermissionModerator: "Moderator",
+			quest.PermissionAdmin:     "Admin",
+			quest.PermissionOwner:     "Owner",
+		},
+		Prefix:     prefix,
+		Guilds:     structures.Guilds{},
 		DB:         db,
 		Chests:     chests,
 		Embed:      questEmbed,
 		ErrorEmbed: errorEmbed,
-		BotOptions: &commands.BotOptions{
-			Commands: CommandsData,
-			Errors: make(chan struct {
-				Err error
-				*discordgo.MessageCreate
-			}),
-			Types: Types,
-			GroupNames: map[commands.Group]string{
-				quest.PermissionMember:    "Member",
-				quest.PermissionModerator: "Moderator",
-				quest.PermissionAdmin:     "Admin",
-				quest.PermissionOwner:     "Owner",
-			},
-			Prefix: prefix,
-		},
 	}
-	dg, err := commands.NewSession(bot, bot.BotOptions, app.Token)
+	dg, err := commands.NewSession(bot, app.Token)
 	if err != nil {
 		log.Fatalln("Error making discord session", err)
 	}
@@ -176,5 +175,9 @@ func main() {
 	sc := make(chan os.Signal, 1)
 	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, os.Kill)
 	<-sc
-	bot.Guilds.CommitAll()
+	err = database.PostAllData(db, bot.Guilds)
+	if err != nil {
+		fmt.Println(err)
+		err = database.PostAllData(db, bot.Guilds)
+	}
 }

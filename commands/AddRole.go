@@ -1,10 +1,10 @@
 package commands
 
 import (
+	commands "../../discordcommands"
+	"../structures"
 	"fmt"
 	"github.com/bwmarrin/discordgo"
-	"github.com/tomvanwoow/quest/structures"
-	"github.com/tomvanwoow/quest/utility"
 	"strconv"
 )
 
@@ -15,7 +15,7 @@ func (bot *Bot) AddRole(session *discordgo.Session, message *discordgo.MessageCr
 	} else {
 		roleID = args["Role"]
 	}
-	guild := bot.Guilds.Get(utility.MustGetGuildID(session, message))
+	guild := bot.Guilds.Get(commands.MustGetGuildID(session, message))
 	exp, _ := strconv.Atoi(args["Experience"])
 	if exp == 0 {
 		return fmt.Errorf(`I see you are trying to add a role for 0 experience!
@@ -29,7 +29,7 @@ If you want to, it is better to use q:set Autorole <role>`)
 	for i, v := range guild.Roles {
 		allIDs[i] = v.ID
 	}
-	ok, index := utility.Contains(allIDs, roleID)
+	ok, index := commands.Contains(allIDs, roleID)
 	fmt.Println(ok, index)
 	if ok {
 		guild.Roles[index] = role
@@ -38,6 +38,6 @@ If you want to, it is better to use q:set Autorole <role>`)
 	} else {
 		guild.Roles = append(guild.Roles, role)
 	}
-	_ = session.MessageReactionAdd(message.ChannelID, message.ID, "☑")
+	session.MessageReactionAdd(message.ChannelID, message.ID, "☑")
 	return nil
 }

@@ -1,10 +1,10 @@
 package commands
 
 import (
+	commands "../../discordcommands"
+	"../modlog"
 	"fmt"
 	"github.com/bwmarrin/discordgo"
-	"github.com/tomvanwoow/quest/modlog"
-	"github.com/tomvanwoow/quest/utility"
 )
 
 func (bot *Bot) Ban(session *discordgo.Session, message *discordgo.MessageCreate, args map[string]string) error {
@@ -22,14 +22,14 @@ func (bot *Bot) Ban(session *discordgo.Session, message *discordgo.MessageCreate
 	}
 	var err error
 	if args["Reason"] == "" {
-		err = session.GuildBanCreate(utility.MustGetGuildID(session, message), user.ID, 7)
+		err = session.GuildBanCreate(commands.MustGetGuildID(session, message), user.ID, 7)
 	} else {
-		err = session.GuildBanCreateWithReason(utility.MustGetGuildID(session, message), user.ID, args["Reason"], 7)
+		err = session.GuildBanCreateWithReason(commands.MustGetGuildID(session, message), user.ID, args["Reason"], 7)
 	}
 	if err != nil {
 		return fmt.Errorf("Can't ban that user! Make sure I have the discord ban permission.")
 	}
-	guild := bot.Guilds.Get(utility.MustGetGuildID(session, message))
+	guild := bot.Guilds.Get(commands.MustGetGuildID(session, message))
 	if guild.Modlog.Valid {
 		guild.Modlog.Log <- &modlog.CaseBan{
 			ModeratorID: message.Author.ID,

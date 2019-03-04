@@ -1,10 +1,10 @@
 package experience
 
 import (
+	commands "../../discordcommands"
+	quest "../commands"
 	"fmt"
 	"github.com/bwmarrin/discordgo"
-	commands "github.com/tomvanwoow/discordcommands"
-	quest "github.com/tomvanwoow/quest/commands"
 	"time"
 )
 

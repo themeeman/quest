@@ -1,14 +1,14 @@
 package commands
 
 import (
+	commands "../../discordcommands"
+	"../modlog"
 	"fmt"
 	"github.com/bwmarrin/discordgo"
-	"github.com/tomvanwoow/quest/modlog"
-	"github.com/tomvanwoow/quest/utility"
 )
 
 func (bot *Bot) Warn(session *discordgo.Session, message *discordgo.MessageCreate, args map[string]string) error {
-	guild := bot.Guilds.Get(utility.MustGetGuildID(session, message))
+	guild := bot.Guilds.Get(commands.MustGetGuildID(session, message))
 	var user *discordgo.User
 	if len(args["User"]) == 18 {
 		var err error

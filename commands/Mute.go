@@ -1,7 +1,7 @@
 package commands
 
 import (
-	"github.com/tomvanwoow/quest/modlog"
+	"../modlog"
 	"fmt"
 	"github.com/bwmarrin/discordgo"
 	"strconv"

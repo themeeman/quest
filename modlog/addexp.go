@@ -3,25 +3,24 @@ package modlog
 import (
 	"fmt"
 	"github.com/bwmarrin/discordgo"
-	"github.com/tomvanwoow/quest/utility"
 	"time"
 )
 
 type CaseAddExp struct {
-	ModeratorID string `json:"admin_id"`
-	Experience  int    `json:"experience"`
-	UserID      string `json:"user_id"`
+	AdminID    string `json:"admin_id"`
+	Experience int    `json:"experience"`
+	UserID     string `json:"user_id"`
 }
 
 func (c *CaseAddExp) Embed(session *discordgo.Session) *discordgo.MessageEmbed {
-	admin := utility.GetUser(session, c.ModeratorID)
+	admin := getUser(session, c.AdminID)
 	var userName string
 	if c.UserID == "" {
 		userName = "Themself"
 	} else {
-		user := utility.GetUser(session, c.UserID)
+		user := getUser(session, c.UserID)
 		if user != nil {
-			if user.ID == c.ModeratorID {
+			if user.ID == c.AdminID {
 				userName = "Themself"
 			} else {
 				userName = user.String()
@@ -33,7 +32,7 @@ func (c *CaseAddExp) Embed(session *discordgo.Session) *discordgo.MessageEmbed {
 	return &discordgo.MessageEmbed{
 		Title:     "Add Experience",
 		Color:     0x000055,
-		Timestamp: utility.TimeToTimestamp(time.Now().UTC()),
+		Timestamp: timeToTimestamp(time.Now().UTC()),
 		Author: &discordgo.MessageEmbedAuthor{
 			IconURL: admin.AvatarURL(""),
 			Name:    admin.String(),

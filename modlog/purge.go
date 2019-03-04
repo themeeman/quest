@@ -3,7 +3,6 @@ package modlog
 import (
 	"fmt"
 	"github.com/bwmarrin/discordgo"
-	"github.com/tomvanwoow/quest/utility"
 	"time"
 )
 
@@ -14,11 +13,11 @@ type CasePurge struct {
 }
 
 func (cp *CasePurge) Embed(session *discordgo.Session) *discordgo.MessageEmbed {
-	moderator := utility.GetUser(session, cp.ModeratorID)
+	moderator := getUser(session, cp.ModeratorID)
 	return &discordgo.MessageEmbed{
 		Title:     "Purge Messages",
 		Color:     0xffff00,
-		Timestamp: utility.TimeToTimestamp(time.Now().UTC()),
+		Timestamp: timeToTimestamp(time.Now().UTC()),
 		Author: &discordgo.MessageEmbedAuthor{
 			IconURL: moderator.AvatarURL(""),
 			Name:    moderator.String(),

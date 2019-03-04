@@ -1,10 +1,10 @@
 package commands
 
 import (
+	commands "../../discordcommands"
+	"../modlog"
 	"fmt"
 	"github.com/bwmarrin/discordgo"
-	"github.com/tomvanwoow/quest/modlog"
-	"github.com/tomvanwoow/quest/utility"
 	"strconv"
 	"strings"
 	"time"
@@ -41,7 +41,7 @@ func (bot *Bot) Purge(session *discordgo.Session, message *discordgo.MessageCrea
 			}()
 		}
 	}
-	guild := bot.Guilds.Get(utility.MustGetGuildID(session, message))
+	guild := bot.Guilds.Get(commands.MustGetGuildID(session, message))
 	if guild.Modlog.Valid {
 		guild.Modlog.Log <- &modlog.CasePurge{
 			ModeratorID: message.Author.ID,

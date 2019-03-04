@@ -1,17 +1,17 @@
 package commands
 
 import (
+	commands "../../discordcommands"
+	"../structures"
 	"bytes"
 	"fmt"
 	"github.com/bwmarrin/discordgo"
-	"github.com/tomvanwoow/quest/structures"
-	"github.com/tomvanwoow/quest/utility"
 	"sort"
 	"time"
 )
 
 func (bot *Bot) Roles(session *discordgo.Session, message *discordgo.MessageCreate, args map[string]string) error {
-	guild := bot.Guilds.Get(utility.MustGetGuildID(session, message))
+	guild := bot.Guilds.Get(commands.MustGetGuildID(session, message))
 	if len(guild.Roles) == 0 {
 		session.ChannelMessageSend(message.ChannelID, "No reward roles configured\nUse q:addrole to create some")
 		return nil

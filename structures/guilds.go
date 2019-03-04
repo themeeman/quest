@@ -1,15 +1,11 @@
 package structures
 
 import (
+	"../modlog"
 	"database/sql"
-	"github.com/jmoiron/sqlx"
-	"github.com/pkg/errors"
-	"github.com/tomvanwoow/quest/modlog"
 	"sync"
 	"time"
 )
-
-const GuildCacheLimit = 5
 
 type Guild struct {
 	ID            string         `db:"id"`
@@ -25,35 +21,21 @@ type Guild struct {
 	LotteryUpper  uint32         `db:"lottery_upper"  type:"Integer"`
 	LotteryLower  uint32         `db:"lottery_lower"  type:"Integer"`
 	Cases         modlog.Cases   `db:"cases"`
-	Members       Members
+	Members
 	Roles
+}
+
+type Guilds struct {
+	state    map[string]*Guild
+	lastUsed map[string]time.Time
 	*sync.Mutex
 }
 
-type fetchFuncGuild func(*sqlx.DB, string) (*Guild, error)
-type saveFuncGuild func(*sqlx.DB, *Guild) error
-
-type Guilds struct {
-	state map[string]struct {
-		lastUsed time.Time
-		guild    *Guild
-	}
-	db    *sqlx.DB
-	mutex *sync.Mutex
-	fetch fetchFuncGuild
-	save  saveFuncGuild
-}
-
-func NewGuildCache(db *sqlx.DB, fetch fetchFuncGuild, save saveFuncGuild) Guilds {
+func NewGuildCache() Guilds {
 	return Guilds{
-		state: make(map[string]struct {
-			lastUsed time.Time
-			guild    *Guild
-		}),
-		db:    db,
-		mutex: new(sync.Mutex),
-		fetch: fetch,
-		save:  save,
+		state:    make(map[string]*Guild),
+		lastUsed: make(map[string]time.Time),
+		Mutex:    new(sync.Mutex),
 	}
 }
 
@@ -72,105 +54,35 @@ func NewGuild(id string) *Guild {
 		Modlog: modlog.Modlog{
 			Log: make(chan modlog.Case),
 		},
-		Mutex: new(sync.Mutex),
 	}
 }
 
 func (guilds Guilds) getOldest() string {
 	var oldestTime time.Time
 	var rv string
-	for id, g := range guilds.state {
-		if oldestTime.IsZero() || g.lastUsed.Before(oldestTime) {
-			oldestTime = g.lastUsed
+	for id, t := range guilds.lastUsed {
+		if oldestTime.IsZero() || t.Before(oldestTime) {
+			oldestTime = t
 			rv = id
 		}
 	}
 	return rv
 }
 
-func (guilds *Guilds) Lock() {
-	guilds.mutex.Lock()
-}
-
-func (guilds *Guilds) Unlock() {
-	guilds.mutex.Unlock()
-}
-
-func (guilds *Guilds) commitIfLocked(id string) error {
-	g, ok := guilds.state[id]
-	if !ok {
-		return errors.Errorf("guild %s not found", id)
-	}
-	delete(guilds.state, id)
-	err := guilds.save(guilds.db, g.guild)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func (guilds *Guilds) Commit(id string) error {
-	guilds.Lock()
-	defer guilds.Unlock()
-	return guilds.commitIfLocked(id)
-}
-
-func (guilds *Guilds) CommitAll() []error {
-	for id, g := range guilds.state {
-		g.guild.Members.CommitAll()
-		guilds.Commit(id)
-	}
-	return nil
-}
-
-func (guilds *Guilds) addIfLocked(guild *Guild) {
-	if len(guilds.state) >= GuildCacheLimit {
-		guilds.Commit(guilds.getOldest())
-	}
-	guilds.state[guild.ID] = struct {
-		lastUsed time.Time
-		guild    *Guild
-	}{
-		lastUsed: time.Now(),
-		guild:    guild,
-	}
-}
-
-func (guilds *Guilds) Add(guild *Guild) {
-	guilds.Lock()
-	defer guilds.Unlock()
-	guilds.addIfLocked(guild)
+func (guilds Guilds) removeOldest() {
+	delete(guilds.state, guilds.getOldest())
 }
 
 func (guilds *Guilds) Get(id string) *Guild {
-	guilds.Lock()
-	defer guilds.Unlock()
-	if g, ok := guilds.state[id]; ok {
-		g.lastUsed = time.Now()
-		return g.guild
+	if guilds == nil {
+		return nil
 	}
-	guild, err := guilds.fetch(guilds.db, id)
-	if err == nil {
-		guilds.addIfLocked(guild)
-		return guild
+	guild, ok := guilds.state[id]
+	if !ok {
+		guilds.state[id] = NewGuild(id)
 	}
-
-	guild = NewGuild(id)
-	guilds.addIfLocked(guild)
+	if guild.Members == nil {
+		guild.Members = make(Members)
+	}
 	return guild
-}
-
-func (guilds *Guilds) Destroy(id string) {
-	guilds.Lock()
-	defer guilds.Unlock()
-	delete(guilds.state, id)
-}
-
-func (guilds *Guilds) DestroyAll() {
-	guilds.Lock()
-	defer guilds.Unlock()
-	guilds.state = make(map[string]struct {
-		lastUsed time.Time
-		guild    *Guild
-	})
 }

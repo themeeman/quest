@@ -1,8 +1,8 @@
 package experience
 
 import (
-	commands "github.com/tomvanwoow/discordcommands"
-	"github.com/tomvanwoow/quest/structures"
+	commands "../../discordcommands"
+	"../structures"
 	"fmt"
 	"github.com/bwmarrin/discordgo"
 	"time"

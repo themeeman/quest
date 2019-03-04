@@ -1,9 +1,9 @@
 package events
 
 import (
+	"../experience"
 	"fmt"
 	"github.com/bwmarrin/discordgo"
-	"github.com/tomvanwoow/quest/experience"
 	"strings"
 	"time"
 )
