@@ -1,15 +1,15 @@
 package commands
 
 import (
-	commands "../../discordcommands"
-	"../inventory"
 	"fmt"
 	"github.com/bwmarrin/discordgo"
+	commands "github.com/tomvanwoow/discordcommands"
+	"github.com/tomvanwoow/quest/inventory"
 	"time"
 )
 
 func (bot *Bot) Daily(session *discordgo.Session, message *discordgo.MessageCreate, args map[string]string) error {
-	guild := bot.Guilds.Get(commands.MustGetGuildID(session, message))
+	guild := bot.Guilds.Get(utility.MustGetGuildID(session, message))
 	member := guild.Members.Get(message.Author.ID)
 	if !member.LastDaily.Valid || time.Since(member.LastDaily.Time.UTC()) > 23*time.Hour {
 		member.LastDaily.Valid = true

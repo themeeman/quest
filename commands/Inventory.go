@@ -1,14 +1,14 @@
 package commands
 
 import (
-	commands "../../discordcommands"
+	commands "github.com/tomvanwoow/discordcommands"
 	"bytes"
 	"fmt"
 	"github.com/bwmarrin/discordgo"
 )
 
 func (bot *Bot) Inventory(session *discordgo.Session, message *discordgo.MessageCreate, args map[string]string) error {
-	guild := bot.Guilds.Get(commands.MustGetGuildID(session, message))
+	guild := bot.Guilds.Get(utility.MustGetGuildID(session, message))
 	member := guild.Members.Get(message.Author.ID)
 	var inv bytes.Buffer
 	for id, q := range member.Chests {

@@ -1,12 +1,11 @@
 package events
 
 import (
-	commands "../../discordcommands"
-	"../db"
-	"../modlog"
-	"../structures"
 	"fmt"
 	"github.com/bwmarrin/discordgo"
+	commands "github.com/tomvanwoow/discordcommands"
+	"github.com/tomvanwoow/quest/modlog"
+	"github.com/tomvanwoow/quest/structures"
 	"log"
 	"time"
 )

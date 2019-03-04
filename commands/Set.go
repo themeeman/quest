@@ -1,14 +1,15 @@
 package commands
 
 import (
-	commands "../../discordcommands"
-	"../modlog"
-	"../structures"
+	commands "github.com/tomvanwoow/discordcommands"
+	"github.com/tomvanwoow/quest/modlog"
+	"github.com/tomvanwoow/quest/structures"
 	"bytes"
 	"database/sql"
 	"fmt"
 	"github.com/bwmarrin/discordgo"
 	"github.com/fatih/structs"
+	"github.com/tomvanwoow/quest/utility"
 	"math"
 	"reflect"
 	"regexp"
@@ -46,7 +47,7 @@ func (bot *Bot) Set(session *discordgo.Session, message *discordgo.MessageCreate
 			i++
 		}
 		sort.Strings(names)
-		guild := bot.Guilds.Get(commands.MustGetGuildID(session, message))
+		guild := bot.Guilds.Get(utility.MustGetGuildID(session, message))
 		var buf bytes.Buffer
 		for _, name := range names {
 			current := repr(reflect.Indirect(reflect.ValueOf(guild).Elem()).FieldByName(name).Interface(), options[name].Type)
@@ -60,7 +61,7 @@ func (bot *Bot) Set(session *discordgo.Session, message *discordgo.MessageCreate
 		}
 	} else if args["Value"] == "" {
 		return commands.UsageError{
-			Usage: bot.CommandMap["set"].GetUsage(bot.Prefix, "set"),
+			Usage: bot.Commands["set"].GetUsage(bot.Prefix, "set"),
 		}
 	} else {
 		keyName := args["Option"]
@@ -86,10 +87,10 @@ Use q:types to view all types.`, args["Type"])
 		result, _ := regexp.MatchString(pattern, value)
 		if !result {
 			return commands.UsageError{
-				Usage: bot.CommandMap["set"].GetUsage(bot.Prefix, "set"),
+				Usage: bot.Commands["set"].GetUsage(bot.Prefix, "set"),
 			}
 		}
-		guild := bot.Guilds.Get(commands.MustGetGuildID(session, message))
+		guild := bot.Guilds.Get(utility.MustGetGuildID(session, message))
 		field := reflect.ValueOf(guild).Elem().FieldByName(keyName)
 		fieldType := field.Type()
 		val := reflect.ValueOf(convertType(message, option.Type, value)).Convert(fieldType)

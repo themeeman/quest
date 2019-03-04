@@ -1,8 +1,9 @@
 package commands
 
 import (
-	commands "../../discordcommands"
+	commands "github.com/tomvanwoow/discordcommands"
 	"github.com/bwmarrin/discordgo"
+	"github.com/tomvanwoow/quest/utility"
 )
 
 const (
@@ -18,7 +19,7 @@ func (bot *Bot) UserGroup(session *discordgo.Session, guild *discordgo.Guild, me
 		return PermissionOwner
 	}
 	for _, r := range member.Roles {
-		role, err := commands.GetRole(session, guild.ID, r)
+		role, err := utility.GetRole(session, guild.ID, r)
 		if err == nil {
 			if role.Permissions&discordgo.PermissionAdministrator == discordgo.PermissionAdministrator {
 				return PermissionAdmin
