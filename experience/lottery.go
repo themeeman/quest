@@ -1,7 +1,7 @@
 package experience
 
 import (
-	"../structures"
+	"github.com/tomvanwoow/quest/structures"
 	"fmt"
 	"github.com/bwmarrin/discordgo"
 	"math/rand"

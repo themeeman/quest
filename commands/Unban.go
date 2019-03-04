@@ -1,10 +1,10 @@
 package commands
 
 import (
-	commands "../../discordcommands"
-	"../modlog"
 	"fmt"
 	"github.com/bwmarrin/discordgo"
+	"github.com/tomvanwoow/quest/modlog"
+	"github.com/tomvanwoow/quest/utility"
 )
 
 func (bot *Bot) Unban(session *discordgo.Session, message *discordgo.MessageCreate, args map[string]string) error {
@@ -20,11 +20,11 @@ func (bot *Bot) Unban(session *discordgo.Session, message *discordgo.MessageCrea
 	} else {
 		return UserNotFoundError{}
 	}
-	err := session.GuildBanDelete(commands.MustGetGuildID(session, message), user.ID)
+	err := session.GuildBanDelete(utility.MustGetGuildID(session, message), user.ID)
 	if err != nil {
 		return fmt.Errorf("Can't ban that user! Make sure I have the discord ban permission.")
 	}
-	guild := bot.Guilds.Get(commands.MustGetGuildID(session, message))
+	guild := bot.Guilds.Get(utility.MustGetGuildID(session, message))
 	if guild.Modlog.Valid {
 		guild.Modlog.Log <- &modlog.CaseUnban{
 			ModeratorID: message.Author.ID,

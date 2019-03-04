@@ -2,6 +2,7 @@ package modlog
 
 import (
 	"github.com/bwmarrin/discordgo"
+	"github.com/tomvanwoow/quest/utility"
 	"time"
 )
 
@@ -12,8 +13,8 @@ type CaseWarn struct {
 }
 
 func (cm *CaseWarn) Embed(session *discordgo.Session) *discordgo.MessageEmbed {
-	member := getUser(session, cm.UserID)
-	moderator := getUser(session, cm.ModeratorID)
+	member := utility.GetUser(session, cm.UserID)
+	moderator := utility.GetUser(session, cm.ModeratorID)
 	fields := []*discordgo.MessageEmbedField{
 		{
 			Name:   "User",
@@ -30,7 +31,7 @@ func (cm *CaseWarn) Embed(session *discordgo.Session) *discordgo.MessageEmbed {
 	return &discordgo.MessageEmbed{
 		Title:     "Warn",
 		Color:     0xaaaaaa,
-		Timestamp: timeToTimestamp(time.Now().UTC()),
+		Timestamp: utility.TimeToTimestamp(time.Now().UTC()),
 		Author: &discordgo.MessageEmbedAuthor{
 			IconURL: moderator.AvatarURL(""),
 			Name:    moderator.String(),

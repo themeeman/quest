@@ -2,8 +2,8 @@ package commands
 
 import (
 	"github.com/bwmarrin/discordgo"
-	commands "../../discordcommands"
-	"../modlog"
+	"github.com/tomvanwoow/quest/modlog"
+	"github.com/tomvanwoow/quest/utility"
 )
 
 func (bot *Bot) TestLog(session *discordgo.Session, message *discordgo.MessageCreate, args map[string]string) error {
@@ -11,11 +11,11 @@ func (bot *Bot) TestLog(session *discordgo.Session, message *discordgo.MessageCr
 	if message.Author.ID != myID {
 		return nil
 	}
-	guild := bot.Guilds.Get(commands.MustGetGuildID(session, message))
+	guild := bot.Guilds.Get(utility.MustGetGuildID(session, message))
 	guild.Modlog.Log <- &modlog.CaseAddExp{
-		AdminID:    message.Author.ID,
-		Experience: 100000,
-		UserID:     myID,
+		ModeratorID: message.Author.ID,
+		Experience:  100000,
+		UserID:      myID,
 	}
 	guild.Modlog.Log <- &modlog.CaseBan{
 		ModeratorID: message.Author.ID,

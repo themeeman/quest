@@ -5,7 +5,6 @@ import (
 	"database/sql/driver"
 	"fmt"
 	"github.com/bwmarrin/discordgo"
-	"time"
 )
 
 type Modlog struct {
@@ -68,13 +67,4 @@ func StartLogging(session *discordgo.Session, modlog Modlog, cases *Cases) {
 			cases.Mutex.Unlock()
 		}
 	}
-}
-
-func getUser(session *discordgo.Session, id string) *discordgo.User {
-	m, _ := session.User(id)
-	return m
-}
-
-func timeToTimestamp(t time.Time) string {
-	return t.Format("2006-01-02T15:04:05+00:00")
 }

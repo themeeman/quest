@@ -1,9 +1,10 @@
 package commands
 
 import (
-	commands "../../discordcommands"
+	commands "github.com/tomvanwoow/discordcommands"
 	"fmt"
 	"github.com/bwmarrin/discordgo"
+	"github.com/tomvanwoow/quest/utility"
 	"strconv"
 	"time"
 )
@@ -19,9 +20,9 @@ func (bot *Bot) Me(session *discordgo.Session, message *discordgo.MessageCreate,
 	} else {
 		return UserNotFoundError{}
 	}
-	guild := bot.Guilds.Get(commands.MustGetGuildID(session, message))
+	guild := bot.Guilds.Get(utility.MustGetGuildID(session, message))
 	fmt.Println(guild.Cases, fmt.Sprintf("%p", &guild.Cases))
-	g, err := session.State.Guild(commands.MustGetGuildID(session, message))
+	g, err := session.State.Guild(utility.MustGetGuildID(session, message))
 	if err != nil {
 		return nil
 	}

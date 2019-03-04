@@ -1,8 +1,8 @@
 package commands
 
 import (
-	commands "../../discordcommands"
 	"github.com/bwmarrin/discordgo"
+	"github.com/tomvanwoow/quest/utility"
 	"strconv"
 )
 
@@ -19,7 +19,7 @@ func (bot *Bot) Give(session *discordgo.Session, message *discordgo.MessageCreat
 	}
 	item, _ := strconv.Atoi(args["Item"])
 	amount, _ := strconv.Atoi(args["Amount"])
-	member := bot.Guilds.Get(commands.MustGetGuildID(session, message)).Members.Get(id)
+	member := bot.Guilds.Get(utility.MustGetGuildID(session, message)).Members.Get(id)
 	member.Chests[uint(item)] += uint(amount)
 	session.MessageReactionAdd(message.ChannelID, message.ID, "☑")
 	return nil

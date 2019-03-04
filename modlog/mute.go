@@ -3,6 +3,7 @@ package modlog
 import (
 	"fmt"
 	"github.com/bwmarrin/discordgo"
+	"github.com/tomvanwoow/quest/utility"
 	"time"
 )
 
@@ -14,8 +15,8 @@ type CaseMute struct {
 }
 
 func (cm *CaseMute) Embed(session *discordgo.Session) *discordgo.MessageEmbed {
-	member := getUser(session, cm.UserID)
-	moderator := getUser(session, cm.ModeratorID)
+	member := utility.GetUser(session, cm.UserID)
+	moderator := utility.GetUser(session, cm.ModeratorID)
 	fields := []*discordgo.MessageEmbedField{
 		{
 			Name:   "User",
@@ -37,7 +38,7 @@ func (cm *CaseMute) Embed(session *discordgo.Session) *discordgo.MessageEmbed {
 	return &discordgo.MessageEmbed{
 		Title:     "Mute",
 		Color:     0x00ccff,
-		Timestamp: timeToTimestamp(time.Now().UTC()),
+		Timestamp: utility.TimeToTimestamp(time.Now().UTC()),
 		Author: &discordgo.MessageEmbedAuthor{
 			IconURL: moderator.AvatarURL(""),
 			Name:    moderator.String(),

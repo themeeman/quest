@@ -1,10 +1,11 @@
 package commands
 
 import (
-	commands "../../discordcommands"
+	commands "github.com/tomvanwoow/discordcommands"
 	"bytes"
 	"fmt"
 	"github.com/bwmarrin/discordgo"
+	"github.com/tomvanwoow/quest/utility"
 	"sort"
 	"strings"
 )
@@ -12,18 +13,18 @@ import (
 func (bot *Bot) Help(session *discordgo.Session, message *discordgo.MessageCreate, args map[string]string) error {
 	if args["Command"] == "" {
 		var buf bytes.Buffer
-		names := make([]string, len(bot.CommandMap))
+		names := make([]string, len(bot.Commands))
 		i := 0
-		for name := range bot.CommandMap {
+		for name := range bot.Commands {
 			names[i] = name
 			i++
 		}
 		sort.Strings(names)
-		guild, _ := session.Guild(commands.MustGetGuildID(session, message))
+		guild, _ := session.Guild(utility.MustGetGuildID(session, message))
 		author, _ := session.GuildMember(guild.ID, message.Author.ID)
 		level := bot.UserGroup(session, guild, author)
 		for _, name := range names {
-			command := bot.CommandMap[name]
+			command := bot.Commands[name]
 			sufficient := level >= command.Group
 			if !command.Hidden && sufficient {
 				buf.WriteString(fmt.Sprintf("**%s - ** %s\n", name, command.Description))
@@ -43,7 +44,7 @@ func (bot *Bot) Help(session *discordgo.Session, message *discordgo.MessageCreat
 			}
 		}
 	} else {
-		cmdInfo, name := getCommand(bot.CommandMap, args["Command"])
+		cmdInfo, name := getCommand(bot.Commands, args["Command"])
 		if cmdInfo == nil {
 			return UnknownCommandError{
 				Command: name,

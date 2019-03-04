@@ -1,3 +1,2 @@
 package structures
 
-func Test

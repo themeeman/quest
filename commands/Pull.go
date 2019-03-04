@@ -1,7 +1,6 @@
 package commands
 
 import (
-	"../db"
 	"github.com/bwmarrin/discordgo"
 )
 

@@ -201,6 +201,21 @@
     "aliases": ["newrole", "createrole", "setrole"],
     "permission": 2
   },
+  "removerole": {
+    "description": "Removes a reward role",
+    "arguments": [
+      {
+        "name": "Role",
+        "type": "RoleMention"
+      }
+    ],
+    "examples": [
+      "q:removerole @Red",
+      "q:removerole 451829582018301928"
+    ],
+    "aliases": ["remrole", "deleterole"],
+    "permission": 2
+  },
   "roles": {
     "description": "Views all the potential roles to earn for EXP",
     "arguments": [

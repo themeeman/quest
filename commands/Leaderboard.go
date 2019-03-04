@@ -1,11 +1,12 @@
 package commands
 
 import (
-	commands "../../discordcommands"
-	"../structures"
+	commands "github.com/tomvanwoow/discordcommands"
+	"github.com/tomvanwoow/quest/structures"
 	"bytes"
 	"fmt"
 	"github.com/bwmarrin/discordgo"
+	"github.com/tomvanwoow/quest/utility"
 	"sort"
 	"sync"
 )
@@ -22,7 +23,7 @@ func (m membersSorted) Less(i, j int) bool {
 }
 
 func (bot *Bot) Leaderboard(session *discordgo.Session, message *discordgo.MessageCreate, _ map[string]string) error {
-	guild := bot.Guilds.Get(commands.MustGetGuildID(session, message))
+	guild := bot.Guilds.Get(utility.MustGetGuildID(session, message))
 	sorted := membersSorted{
 		IDs:     make([]string, len(guild.Members)),
 		Members: guild.Members,
