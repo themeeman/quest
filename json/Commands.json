@@ -1,0 +1,355 @@
+{
+  "help": {
+    "description": "Displays command information",
+    "arguments": [
+      {
+        "name": "Command",
+        "type": "String",
+        "optional": true
+      }
+    ],
+    "aliases": ["?", "commands"],
+    "examples": [
+      "q:help",
+      "q:help mute"
+    ]
+  },
+  "mute": {
+    "description": "Mutes a guild user",
+    "arguments": [
+      {
+        "name": "User",
+        "type": "UserMention"
+      },
+      {
+        "name": "Minutes",
+        "type": "Integer"
+      },
+      {
+        "name": "Reason",
+        "type": "String",
+        "optional": true,
+        "infinite": true
+      }
+    ],
+    "permission": 1,
+    "examples": [
+      "q:mute @themeeman#8354 10",
+      "q:mute @TrippyPepper#3457 500 Trolling and being rude"
+    ]
+  },
+  "unmute": {
+    "description": "Unmutes a guild user",
+    "arguments": [
+      {
+        "name": "User",
+        "type": "UserMention"
+      },
+      {
+        "name": "Reason",
+        "type": "String",
+        "optional": true,
+        "infinite": true
+      }
+    ],
+    "permission": 1,
+    "examples": [
+      "q:unmute @themeeman#8354",
+      "q:unmute @Lumite#5555 Giving the succ to admins"
+    ]
+  },
+  "purge": {
+    "description": "Deletes a given number of messages",
+    "arguments": [
+      {
+        "name": "Amount",
+        "type": "Integer"
+      },
+      {
+        "name": "User",
+        "type": "UserMention",
+        "optional": true
+      }
+    ],
+    "permission": 1,
+    "aliases": ["prune", "delete"],
+    "examples": [
+      "q:purge 10"
+    ]
+  },
+  "types": {
+    "description": "View all built in types",
+    "permission": 2,
+    "hidden": true
+  },
+  "conv": {
+    "hidden": true,
+    "description": "Converts a float",
+    "arguments": [
+      {
+        "name": "Number",
+        "type": "Float"
+      }
+    ]
+  },
+  "commit": {
+    "hidden": true
+  },
+  "pull": {
+    "hidden": true
+  },
+  "addexp": {
+    "description": "Adds experience to yourself",
+    "arguments": [
+      {
+        "name": "Value",
+        "type": "SignedInteger"
+      },
+      {
+        "name": "User",
+        "type": "UserMention",
+        "optional": true
+      }
+    ],
+    "aliases": ["addxp"],
+    "permission": 2,
+    "examples": [
+      "q:addexp 1000",
+      "q:addexp 500000 @qwasmo#0952"
+    ]
+  },
+  "setmuterole": {
+    "description": "Sets the role given when the mute command is used",
+    "arguments": [
+      {
+        "name": "Role",
+        "type": "RoleMention"
+      }
+    ],
+    "aliases": ["setmutedrole", "muterole", "setmute"],
+    "permission": 3,
+    "examples": [
+      "q:setmuterole @Muted"
+    ]
+  },
+  "me": {
+    "description": "View member information",
+    "arguments": [
+      {
+        "name": "User",
+        "type": "UserMention",
+        "optional": true
+      }
+    ],
+    "examples": [
+      "q:me",
+      "q:me @themeeman#8354"
+    ]
+  },
+  "tryparse": {
+    "description": "Attempts to parse a value as a given type",
+    "arguments": [
+      {
+        "name": "Type",
+        "type": "String"
+      },
+      {
+        "name": "Value",
+        "type": "String",
+        "infinite": true
+      }
+    ],
+    "aliases": ["parse", "match", "try"],
+    "examples": [
+      "q:tryparse Integer 10",
+      "q:tryparse UserMention mee1001",
+      "q:tryparse Float eight"
+    ],
+    "hidden": true
+  },
+  "massrole": {
+    "description": "Grants every member in the server a given role or the autorole",
+    "arguments": [
+      {
+        "name": "Role",
+        "type": "RoleMention",
+        "optional": true
+      }
+    ],
+    "examples": [
+      "q:massrole",
+      "q:massrole @Scrubs"
+    ],
+    "permission": 2
+  },
+  "addrole": {
+    "description": "Adds a new role to gain for EXP",
+    "arguments": [
+      {
+        "name": "Role",
+        "type": "RoleMention"
+      },
+      {
+        "name": "Experience",
+        "type": "Integer"
+      }
+    ],
+    "examples": [
+      "q:addrole @Red 1500",
+      "q:addrole 451829582018301928 100000"
+    ],
+    "aliases": ["newrole", "createrole", "setrole"],
+    "permission": 2
+  },
+  "removerole": {
+    "description": "Removes a reward role",
+    "arguments": [
+      {
+        "name": "Role",
+        "type": "RoleMention"
+      }
+    ],
+    "examples": [
+      "q:removerole @Red",
+      "q:removerole 451829582018301928"
+    ],
+    "aliases": ["remrole", "deleterole"],
+    "permission": 2
+  },
+  "roles": {
+    "description": "Views all the potential roles to earn for EXP",
+    "arguments": [
+      {
+        "name": "Extra",
+        "type": "String",
+        "optional": true,
+        "infinite": true
+      }
+    ],
+    "examples": ["q:roles"],
+    "aliases": ["ranks", "listroles"]
+  },
+  "set": {
+    "description": "Set options for the guild",
+    "arguments": [
+      {
+        "name": "Option",
+        "type": "String",
+        "optional": true
+      },
+      {
+        "name": "Value",
+        "type": "String",
+        "optional": true,
+        "infinite": true
+      }
+    ],
+    "examples": ["q:set MuteRole @Muted", "q:set ExpReload 90"],
+    "aliases": ["flag", "config", "cfg"],
+    "permission": 2
+  },
+  "leaderboard": {
+    "description": "View the leaderboards",
+    "aliases": ["lb", "ld"]
+  },
+  "daily": {
+    "description": "Claims your daily reward",
+    "aliases": ["redeem", "rd", "claim"]
+  },
+  "inventory": {
+    "description": "Checks inventory",
+    "aliases": ["inv"]
+  },
+  "give": {
+    "description": "Grants an item",
+    "arguments": [
+      {
+        "name": "Item",
+        "type": "Integer"
+      },
+      {
+        "name": "Amount",
+        "type": "Integer"
+      },
+      {
+        "name": "User",
+        "type": "UserMention",
+        "optional": true
+      }
+    ],
+    "aliases": ["giveitem"],
+    "examples": ["q:give 5 1", "q:give 6 10 @Lumite#1234"],
+    "permission": 2
+  },
+  "ban": {
+    "description": "Ban a rebellious youth",
+    "arguments": [
+      {
+        "name": "User",
+        "type": "UserMention"
+      },
+      {
+        "name": "Reason",
+        "type": "String",
+        "optional": true,
+        "infinite": true
+      }
+    ],
+    "examples": ["q:ban @Trippy#3457 More trolling"],
+    "permission": 1
+  },
+  "unban": {
+    "description": "Unban a rebellious youth",
+    "arguments": [
+      {
+        "name": "User",
+        "type": "UserMention"
+      },
+      {
+        "name": "Reason",
+        "type": "String",
+        "optional": true,
+        "infinite": true
+      }
+    ],
+    "examples": ["q:unban @Trippy#3457 Repented"],
+    "permission": 1
+  },
+  "kick": {
+    "description": "Kicks a boy",
+    "arguments": [
+      {
+        "name": "User",
+        "type": "UserMention"
+      },
+      {
+        "name": "Reason",
+        "type": "String",
+        "optional": true,
+        "infinite": true
+      }
+    ],
+    "examples": ["q:kick @Superjombombo#9999"],
+    "permission": 1
+  },
+  "warn": {
+    "description": "Issues a warn",
+    "arguments": [
+      {
+        "name": "User",
+        "type": "UserMention"
+      },
+      {
+        "name": "Reason",
+        "type": "String",
+        "optional": true,
+        "infinite": true
+      }
+    ],
+    "examples": ["q:warn @artist#3794 being dumb"],
+    "permission": 1
+  },
+  "testlog": {
+    "hidden": true
+  }
+}
