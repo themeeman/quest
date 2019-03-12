@@ -8,10 +8,10 @@ import (
 )
 
 type CaseMute struct {
-	ModeratorID string `json:"moderator_id"`
-	UserID      string `json:"user_id"`
-	Duration    int    `json:"duration"`
-	Reason      string `json:"reason"`
+	ModeratorID string `db:"moderator_id"`
+	UserID      string `db:"user_id"`
+	Duration    int    `db:"duration"`
+	Reason      string `db:"reason"`
 }
 
 func (cm *CaseMute) Embed(session *discordgo.Session) *discordgo.MessageEmbed {

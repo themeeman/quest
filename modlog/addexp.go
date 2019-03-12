@@ -8,9 +8,9 @@ import (
 )
 
 type CaseAddExp struct {
-	ModeratorID string `json:"admin_id"`
-	Experience  int    `json:"experience"`
-	UserID      string `json:"user_id"`
+	ModeratorID string `db:"admin_id"`
+	Experience  int64  `db:"experience"`
+	UserID      string `db:"user_id"`
 }
 
 func (c *CaseAddExp) Embed(session *discordgo.Session) *discordgo.MessageEmbed {

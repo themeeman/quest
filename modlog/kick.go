@@ -7,9 +7,9 @@ import (
 )
 
 type CaseKick struct {
-	ModeratorID string `json:"moderator_id"`
-	UserID      string `json:"user_id"`
-	Reason      string `json:"reason"`
+	ModeratorID string `db:"moderator_id"`
+	UserID      string `db:"user_id"`
+	Reason      string `db:"reason"`
 }
 
 func (cm *CaseKick) Embed(session *discordgo.Session) *discordgo.MessageEmbed {

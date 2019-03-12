@@ -5,6 +5,9 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
 	"github.com/pkg/errors"
+	"github.com/tomvanwoow/quest/modlog"
+	"reflect"
+	"strings"
 )
 
 const schema = `CREATE TABLE guilds (
@@ -60,6 +63,45 @@ type roleWrapper struct {
 	*Role
 }
 
+func caseType(s string) modlog.Case {
+	var a modlog.Case
+	switch s {
+	case "ban":
+		a = &modlog.CaseBan{}
+	case "kick":
+		a = &modlog.CaseKick{}
+	case "mute":
+		a = &modlog.CaseMute{}
+	case "purge":
+		a = &modlog.CasePurge{}
+	case "unban":
+		a = &modlog.CaseUnban{}
+	case "unmute":
+		a = &modlog.CaseUnmute{}
+	case "warn":
+		a = &modlog.CaseWarn{}
+	case "set":
+		a = &modlog.CaseSet{}
+	case "addexp":
+		a = &modlog.CaseAddExp{}
+	}
+	return a
+}
+
+func CaseQuery(T string) string {
+	structType := reflect.TypeOf(caseType(T)).Elem()
+	if structType == reflect.TypeOf(nil) {
+		return ""
+	}
+	xs := make([]string, 0, structType.NumField())
+	for i := 0; i < structType.NumField(); i++ {
+		if key, ok := structType.Field(i).Tag.Lookup("db"); ok {
+			xs = append(xs, key)
+		}
+	}
+	return fmt.Sprintf("SELECT (%s) FROM cases WHERE guild_id=? AND id=?", strings.Join(xs, ", "))
+}
+
 func InitDB(user string, pass string, host string, database string) (*sqlx.DB, error) {
 	return sqlx.Connect("mysql", fmt.Sprintf("%s:%s@tcp(%s)/%s", user, pass, host, database))
 }
@@ -89,6 +131,20 @@ func FetchRole(db *sqlx.DB, guildID string, id string) (*Role, error) {
 		return nil, err
 	}
 	return &role, nil
+}
+
+func FetchCase(db *sqlx.DB, guildID string, id uint) (modlog.Case, error) {
+	var T string
+	err := db.Get(&T, "SELECT `type` FROM cases WHERE `guild_id`=? AND `id`=?;", guildID, id)
+	if err != nil {
+		return nil, err
+	}
+	c := caseType(T)
+	err = db.Get(&c, CaseQuery(T), guildID, id)
+	if err != nil {
+		return nil, err
+	}
+	return c, nil
 }
 
 func SaveGuild(db *sqlx.DB, guild *Guild) error {
@@ -143,7 +199,7 @@ func SaveMember(db *sqlx.DB, guildID string, member *Member) error {
 
 func SaveRole(db *sqlx.DB, guildID string, role *Role) error {
 	if role == nil {
-		return errors.New("Can't save nil member")
+		return errors.New("Can't save nil role")
 	}
 	tx, err := db.Beginx()
 	if err != nil {

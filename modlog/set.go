@@ -7,9 +7,9 @@ import (
 )
 
 type CaseSet struct {
-	ModeratorID string `json:"moderator_id"`
-	Option      string `json:"option"`
-	Value       string `json:"value"`
+	ModeratorID string `db:"moderator_id"`
+	Option      string `db:"option"`
+	Value       string `db:"value"`
 }
 
 func (cs *CaseSet) Embed(session *discordgo.Session) *discordgo.MessageEmbed {

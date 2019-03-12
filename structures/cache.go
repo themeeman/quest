@@ -7,30 +7,37 @@ import (
 	"time"
 )
 
+// Rewrite this with generics when Go2 is released
+
 type fetchFunc func(*sqlx.DB, string) (interface{}, error)
 type saveFunc func(*sqlx.DB, interface{}) error
+type newValueFunc func(string) interface{}
 
 type Cache struct {
 	state map[string]struct {
 		lastUsed time.Time
 		value    interface{}
 	}
-	db    *sqlx.DB
-	mutex *sync.Mutex
-	fetch fetchFunc
-	save  saveFunc
+	db       *sqlx.DB
+	mutex    *sync.Mutex
+	limit    int
+	fetch    fetchFunc
+	save     saveFunc
+	newValue newValueFunc
 }
 
-func NewCache(db *sqlx.DB, fetch fetchFunc, save saveFunc) Cache {
+func NewCache(db *sqlx.DB, limit int, fetch fetchFunc, save saveFunc, newValue newValueFunc) Cache {
 	return Cache{
 		state: make(map[string]struct {
 			lastUsed time.Time
 			value    interface{}
 		}),
-		db:    db,
-		mutex: new(sync.Mutex),
-		fetch: fetch,
-		save:  save,
+		db:       db,
+		mutex:    new(sync.Mutex),
+		limit:    limit,
+		fetch:    fetch,
+		save:     save,
+		newValue: newValue,
 	}
 }
 
@@ -74,15 +81,18 @@ func (cache *Cache) Commit(id string) error {
 }
 
 func (cache *Cache) CommitAll() []error {
+	cache.Lock()
+	defer cache.Unlock()
+	errs := make([]error, 0, cache.limit)
 	for id := range cache.state {
-		cache.Commit(id)
+		errs = append(errs, cache.commitIfLocked(id))
 	}
-	return nil
+	return errs
 }
 
 func (cache *Cache) addIfLocked(id string, value interface{}) {
-	if len(cache.state) >= GuildCacheLimit {
-		cache.Commit(cache.getOldest())
+	if len(cache.state) >= cache.limit {
+		_=cache.Commit(cache.getOldest())
 	}
 	cache.state[id] = struct {
 		lastUsed time.Time
@@ -112,7 +122,7 @@ func (cache *Cache) Get(id string) interface{} {
 		return value
 	}
 
-	value = NewGuild(id)
+	value = cache.newValue(id)
 	cache.addIfLocked(id, value)
 	return value
 }

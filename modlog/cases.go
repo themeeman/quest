@@ -107,7 +107,7 @@ func (c Cases) Value() (driver.Value, error) {
 	return json.Marshal(c)
 }
 
-func caseName(i interface{}) string {
+func caseName(i Case) string {
 	switch i.(type) {
 	case *CaseBan:
 		return "ban"
@@ -132,7 +132,7 @@ func caseName(i interface{}) string {
 }
 
 func caseType(s string) reflect.Type {
-	var a interface{}
+	var a Case
 	switch s {
 	case "ban":
 		a = &CaseBan{}
@@ -152,8 +152,6 @@ func caseType(s string) reflect.Type {
 		a = &CaseSet{}
 	case "addexp":
 		a = &CaseAddExp{}
-	default:
-		a = nil
 	}
 	return reflect.TypeOf(a)
 }
