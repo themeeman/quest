@@ -63,33 +63,8 @@ type roleWrapper struct {
 	*Role
 }
 
-func caseType(s string) modlog.Case {
-	var a modlog.Case
-	switch s {
-	case "ban":
-		a = &modlog.CaseBan{}
-	case "kick":
-		a = &modlog.CaseKick{}
-	case "mute":
-		a = &modlog.CaseMute{}
-	case "purge":
-		a = &modlog.CasePurge{}
-	case "unban":
-		a = &modlog.CaseUnban{}
-	case "unmute":
-		a = &modlog.CaseUnmute{}
-	case "warn":
-		a = &modlog.CaseWarn{}
-	case "set":
-		a = &modlog.CaseSet{}
-	case "addexp":
-		a = &modlog.CaseAddExp{}
-	}
-	return a
-}
-
-func CaseQuery(T string) string {
-	structType := reflect.TypeOf(caseType(T)).Elem()
+func CaseSelectQuery(T string) string {
+	structType := reflect.TypeOf(modlog.NewCase(T)).Elem()
 	if structType == reflect.TypeOf(nil) {
 		return ""
 	}
@@ -100,6 +75,25 @@ func CaseQuery(T string) string {
 		}
 	}
 	return fmt.Sprintf("SELECT (%s) FROM cases WHERE guild_id=? AND id=?", strings.Join(xs, ", "))
+}
+
+func CaseInsertQuery(T string) string {
+	structType := reflect.TypeOf(modlog.NewCase(T)).Elem()
+	if structType == reflect.TypeOf(nil) {
+		return ""
+	}
+	xs := make([]string, 0, structType.NumField())
+	for i := 0; i < structType.NumField(); i++ {
+		if key, ok := structType.Field(i).Tag.Lookup("db"); ok {
+			xs = append(xs, key)
+		}
+	}
+	commaSep := make([]string, len(xs))
+	copy(commaSep, xs)
+	for i, s := range commaSep {
+		commaSep[i] = ":" + s
+	}
+	return fmt.Sprintf("INSERT INTO cases (guild_id, id, type, %s) VALUES (?, ?, %s, %s)", strings.Join(xs, ", "), T, strings.Join(commaSep, ", "))
 }
 
 func InitDB(user string, pass string, host string, database string) (*sqlx.DB, error) {
@@ -139,8 +133,8 @@ func FetchCase(db *sqlx.DB, guildID string, id uint) (modlog.Case, error) {
 	if err != nil {
 		return nil, err
 	}
-	c := caseType(T)
-	err = db.Get(&c, CaseQuery(T), guildID, id)
+	c := modlog.NewCase(T)
+	err = db.Get(&c, CaseSelectQuery(T), guildID, id)
 	if err != nil {
 		return nil, err
 	}
@@ -220,5 +214,10 @@ func SaveRole(db *sqlx.DB, guildID string, role *Role) error {
 		return err
 	}
 	return nil
+
+}
+
+func SaveCase(db *sqlx.DB, guildID string, c modlog.Case, id uint) {
+	T := modlog.GetType(c)
 
 }

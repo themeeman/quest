@@ -43,7 +43,7 @@ func (c *CaseMessage) MarshalJSON() ([]byte, error) {
 	}
 	a := reflect.New(reflect.StructOf(fields))
 	a.Elem().FieldByName("Message").SetString(c.Message)
-	a.Elem().FieldByName("Type").SetString(caseName(c.Case))
+	a.Elem().FieldByName("Type").SetString(GetType(c.Case))
 	for i := 2; i < a.Elem().NumField(); i++ {
 		a.Elem().Field(i).Set(reflect.ValueOf(c.Case).Elem().Field(i - 2))
 	}
@@ -58,7 +58,7 @@ func (c *CaseMessage) UnmarshalJSON(data []byte) error {
 		return errors.WithStack(err)
 	}
 	c.Message = temp["message"].(string)
-	T := caseType(temp["type"].(string))
+	T := reflect.TypeOf(NewCase(temp["type"].(string)))
 	if T == nil {
 		return nil
 	}
@@ -107,8 +107,8 @@ func (c Cases) Value() (driver.Value, error) {
 	return json.Marshal(c)
 }
 
-func caseName(i Case) string {
-	switch i.(type) {
+func GetType(c Case) string {
+	switch c.(type) {
 	case *CaseBan:
 		return "ban"
 	case *CaseKick:
@@ -131,9 +131,9 @@ func caseName(i Case) string {
 	return "invalid"
 }
 
-func caseType(s string) reflect.Type {
+func NewCase(T string) Case {
 	var a Case
-	switch s {
+	switch T {
 	case "ban":
 		a = &CaseBan{}
 	case "kick":
@@ -153,5 +153,5 @@ func caseType(s string) reflect.Type {
 	case "addexp":
 		a = &CaseAddExp{}
 	}
-	return reflect.TypeOf(a)
+	return a
 }
