@@ -3,7 +3,7 @@ package commands
 import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/jmoiron/sqlx"
-	commands "github.com/tomvanwoow/discordcommands"
+	commands "github.com/tomvanwoow/disgone"
 	"github.com/tomvanwoow/quest/inventory"
 	"github.com/tomvanwoow/quest/structures"
 	"time"

@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"github.com/bwmarrin/discordgo"
 	"github.com/jmoiron/sqlx"
-	commands "github.com/tomvanwoow/discordcommands"
+	commands "github.com/tomvanwoow/disgone"
 	quest "github.com/tomvanwoow/quest/commands"
 	"github.com/tomvanwoow/quest/events"
 	"github.com/tomvanwoow/quest/inventory"
@@ -17,6 +17,7 @@ import (
 	"math/rand"
 	"os"
 	"os/signal"
+	"runtime/debug"
 	"syscall"
 	"time"
 )
@@ -153,6 +154,11 @@ func main() {
 				quest.PermissionOwner:     "Owner",
 			},
 			Prefix: prefix,
+			OnPanic: func(session *discordgo.Session, message *discordgo.MessageCreate, r interface{}) {
+				log.Println(string(debug.Stack()))
+				session.ChannelMessageSend(message.ChannelID, "```"+`An unexpected panic occured in the execution of that command.
+`+fmt.Sprint(r)+"\nTry again later, or contact themeeman#8354"+"```")
+			},
 		},
 	}
 	dg, err := commands.NewSession(bot, bot.BotOptions, app.Token)

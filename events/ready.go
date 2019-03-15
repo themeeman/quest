@@ -3,7 +3,7 @@ package events
 import (
 	"fmt"
 	"github.com/bwmarrin/discordgo"
-	commands "github.com/tomvanwoow/discordcommands"
+	commands "github.com/tomvanwoow/disgone"
 	"github.com/tomvanwoow/quest/modlog"
 	"github.com/tomvanwoow/quest/structures"
 	"log"

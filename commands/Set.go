@@ -1,7 +1,7 @@
 package commands
 
 import (
-	commands "github.com/tomvanwoow/discordcommands"
+	commands "github.com/tomvanwoow/disgone"
 	"github.com/tomvanwoow/quest/modlog"
 	"github.com/tomvanwoow/quest/structures"
 	"bytes"

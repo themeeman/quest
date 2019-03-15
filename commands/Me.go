@@ -1,7 +1,7 @@
 package commands
 
 import (
-	commands "github.com/tomvanwoow/discordcommands"
+	commands "github.com/tomvanwoow/disgone"
 	"fmt"
 	"github.com/bwmarrin/discordgo"
 	"github.com/tomvanwoow/quest/utility"

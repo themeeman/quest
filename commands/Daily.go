@@ -3,7 +3,7 @@ package commands
 import (
 	"fmt"
 	"github.com/bwmarrin/discordgo"
-	commands "github.com/tomvanwoow/discordcommands"
+	commands "github.com/tomvanwoow/disgone"
 	"github.com/tomvanwoow/quest/inventory"
 	"time"
 )
