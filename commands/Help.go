@@ -1,10 +1,10 @@
 package commands
 
 import (
-	commands "github.com/tomvanwoow/disgone"
 	"bytes"
 	"fmt"
 	"github.com/bwmarrin/discordgo"
+	commands "github.com/tomvanwoow/disgone"
 	"github.com/tomvanwoow/quest/utility"
 	"sort"
 	"strings"
@@ -50,31 +50,22 @@ func (bot *Bot) Help(session *discordgo.Session, message *discordgo.MessageCreat
 				Command: name,
 			}
 		}
-		var fields []*discordgo.MessageEmbedField
+		fields := make([]*discordgo.MessageEmbedField, 1, 3)
+		fields[0] = &discordgo.MessageEmbedField{
+			Name:  "Usage",
+			Value: "```" + cmdInfo.GetUsage(bot.Prefix, name) + "```",
+		}
 		if len(cmdInfo.Examples) > 0 {
 			var exampleBuffer bytes.Buffer
 			for _, v := range cmdInfo.Examples {
 				exampleBuffer.WriteString(fmt.Sprintf("`%s`\n", v))
 			}
 
-			fields = []*discordgo.MessageEmbedField{
-				{
-					Name:  "Usage",
-					Value: "```" + cmdInfo.GetUsage(bot.Prefix, name) + "```",
-				},
-				{
-					Name:   "Examples",
-					Value:  exampleBuffer.String(),
-					Inline: true,
-				},
-			}
-		} else {
-			fields = []*discordgo.MessageEmbedField{
-				{
-					Name:  "Usage",
-					Value: "```" + cmdInfo.GetUsage(bot.Prefix, name) + "```",
-				},
-			}
+			fields = append(fields, &discordgo.MessageEmbedField{
+				Name:   "Examples",
+				Value:  exampleBuffer.String(),
+				Inline: true,
+			})
 		}
 		if len(cmdInfo.Aliases) > 0 {
 			fields = append(fields, &discordgo.MessageEmbedField{
@@ -91,14 +82,15 @@ func (bot *Bot) Help(session *discordgo.Session, message *discordgo.MessageCreat
 func getCommand(commands commands.CommandMap, name string) (*commands.Command, string) {
 	name = strings.ToLower(name)
 	command, okc := commands[name]
-	if !okc {
-		for n, cmd := range commands {
-			for _, alias := range cmd.Aliases {
-				if name == alias {
-					return getCommand(commands, n)
-				}
+	if okc {
+		return command, name
+	}
+	for n, cmd := range commands {
+		for _, alias := range cmd.Aliases {
+			if name == alias {
+				return getCommand(commands, n)
 			}
 		}
 	}
-	return command, name
+	return nil, ""
 }

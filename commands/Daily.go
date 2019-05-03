@@ -3,15 +3,21 @@ package commands
 import (
 	"fmt"
 	"github.com/bwmarrin/discordgo"
-	commands "github.com/tomvanwoow/disgone"
 	"github.com/tomvanwoow/quest/inventory"
+	"github.com/tomvanwoow/quest/utility"
 	"time"
 )
 
 func (bot *Bot) Daily(session *discordgo.Session, message *discordgo.MessageCreate, args map[string]string) error {
 	guild := bot.Guilds.Get(utility.MustGetGuildID(session, message))
+	guild.RLock()
 	member := guild.Members.Get(message.Author.ID)
+	guild.RUnlock()
+	member.RLock()
+	defer member.RUnlock()
 	if !member.LastDaily.Valid || time.Since(member.LastDaily.Time.UTC()) > 23*time.Hour {
+		member.Lock()
+		defer member.Unlock()
 		member.LastDaily.Valid = true
 		member.LastDaily.Time = time.Now().UTC()
 		member.Chests[inventory.ChestDaily] += 1

@@ -10,6 +10,8 @@ import (
 
 func (bot *Bot) AddExp(session *discordgo.Session, message *discordgo.MessageCreate, args map[string]string) error {
 	guild := bot.Guilds.Get(utility.MustGetGuildID(session, message))
+	guild.RLock()
+	defer guild.RUnlock()
 	var id string
 	if args["User"] == "" {
 		id = message.Author.ID
@@ -22,12 +24,14 @@ func (bot *Bot) AddExp(session *discordgo.Session, message *discordgo.MessageCre
 	}
 	member := guild.Members.Get(id)
 	exp, _ := strconv.Atoi(strings.Replace(args["Value"], ",", "", -1))
+	member.Lock()
 	member.Experience += int64(exp)
+	member.Unlock()
 	_ = session.MessageReactionAdd(message.ChannelID, message.ID, "☑")
 	if guild.Modlog.Valid {
 		guild.Modlog.Log <- &modlog.CaseAddExp{
 			ModeratorID: message.Author.ID,
-			Experience:  exp,
+			Experience:  int64(exp),
 			UserID:      id,
 		}
 	}

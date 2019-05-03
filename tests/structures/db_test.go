@@ -79,5 +79,6 @@ func TestFetchGuild(t *testing.T) {
 }
 
 func TestCaseQuery(t *testing.T) {
-	fmt.Println(CaseQuery("addexp"))
+	fmt.Println(CaseSelectQuery("addexp"))
+	fmt.Println(CaseInsertQuery("addexp"))
 }

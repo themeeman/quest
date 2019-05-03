@@ -1,10 +1,10 @@
 package commands
 
 import (
-	commands "github.com/tomvanwoow/disgone"
 	"bytes"
 	"fmt"
 	"github.com/bwmarrin/discordgo"
+	"github.com/tomvanwoow/quest/utility"
 )
 
 func (bot *Bot) Inventory(session *discordgo.Session, message *discordgo.MessageCreate, args map[string]string) error {

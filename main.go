@@ -100,31 +100,28 @@ func unmarshalJson(filename string, v interface{}) (err error) {
 func init() {
 	rand.Seed(time.Now().UTC().UnixNano())
 	var err error
-	if err != nil {
-		panic(err)
-	}
 	var src string
 	flag.StringVar(&src, "a", "", "App Location")
 	flag.Parse()
 	err = unmarshalJson(src, &app)
 	if err != nil {
-		panic(err)
+		log.Fatalln(err)
 	}
 	err = unmarshalJson(app.Commands, &CommandsData)
 	if err != nil {
-		panic(err)
+		log.Fatalln(err)
 	}
 	err = unmarshalJson(app.Types, &Types)
 	if err != nil {
-		panic(err)
+		log.Fatalln(err)
 	}
 	err = unmarshalJson("src/json/chests.json", &chests)
 	if err != nil {
-		panic(err)
+		log.Fatalln(err)
 	}
 	db, err = structures.InitDB(app.User, app.Pass, app.Host, app.Database)
 	if err != nil {
-		panic(err)
+		log.Fatalln(err)
 	}
 }
 
@@ -135,7 +132,7 @@ func main() {
 			Guild  string
 			Member string
 		}]time.Time),
-		Guilds:     structures.NewGuildCache(db),
+		Guilds:     structures.NewGuildsCache(db),
 		DB:         db,
 		Chests:     chests,
 		Embed:      questEmbed,
@@ -182,5 +179,5 @@ func main() {
 	sc := make(chan os.Signal, 1)
 	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, os.Kill)
 	<-sc
-	bot.Guilds.CommitAll()
+	structures.CommitAllGuilds(bot.Guilds)
 }

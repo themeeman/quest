@@ -1,14 +1,14 @@
 package commands
 
 import (
-	commands "github.com/tomvanwoow/disgone"
-	"github.com/tomvanwoow/quest/modlog"
-	"github.com/tomvanwoow/quest/structures"
 	"bytes"
 	"database/sql"
 	"fmt"
 	"github.com/bwmarrin/discordgo"
 	"github.com/fatih/structs"
+	commands "github.com/tomvanwoow/disgone"
+	"github.com/tomvanwoow/quest/modlog"
+	"github.com/tomvanwoow/quest/structures"
 	"github.com/tomvanwoow/quest/utility"
 	"math"
 	"reflect"
@@ -53,12 +53,9 @@ func (bot *Bot) Set(session *discordgo.Session, message *discordgo.MessageCreate
 			current := repr(reflect.Indirect(reflect.ValueOf(guild).Elem()).FieldByName(name).Interface(), options[name].Type)
 			buf.WriteString(fmt.Sprintf("**%s** - %s\n", name, current))
 		}
-		_, err := session.ChannelMessageSendEmbed(message.ChannelID, &discordgo.MessageEmbed{
+		_, _ = session.ChannelMessageSendEmbed(message.ChannelID, &discordgo.MessageEmbed{
 			Description: buf.String(),
 		})
-		if err != nil {
-			fmt.Println(err)
-		}
 	} else if args["Value"] == "" {
 		return commands.UsageError{
 			Usage: bot.Commands["set"].GetUsage(bot.Prefix, "set"),
@@ -136,8 +133,6 @@ func repr(val interface{}, T string) string {
 		} else {
 			return "None"
 		}
-	default:
-		return fmt.Sprint(val)
 	}
 	return fmt.Sprint(val)
 }

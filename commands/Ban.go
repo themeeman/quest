@@ -30,6 +30,8 @@ func (bot *Bot) Ban(session *discordgo.Session, message *discordgo.MessageCreate
 		return fmt.Errorf("Can't ban that user! Make sure I have the discord ban permission.")
 	}
 	guild := bot.Guilds.Get(utility.MustGetGuildID(session, message))
+	guild.RLock()
+	defer guild.RUnlock()
 	if guild.Modlog.Valid {
 		guild.Modlog.Log <- &modlog.CaseBan{
 			ModeratorID: message.Author.ID,

@@ -20,7 +20,9 @@ func (bot *Bot) Give(session *discordgo.Session, message *discordgo.MessageCreat
 	item, _ := strconv.Atoi(args["Item"])
 	amount, _ := strconv.Atoi(args["Amount"])
 	member := bot.Guilds.Get(utility.MustGetGuildID(session, message)).Members.Get(id)
+	member.Lock()
 	member.Chests[uint(item)] += uint(amount)
+	member.Unlock()
 	session.MessageReactionAdd(message.ChannelID, message.ID, "☑")
 	return nil
 }

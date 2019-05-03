@@ -28,9 +28,8 @@ func (bot *Bot) Kick(session *discordgo.Session, message *discordgo.MessageCreat
 		return fmt.Errorf("Can't kick that user! Make sure I have the discord kick permission.")
 	}
 	guild := bot.Guilds.Get(utility.MustGetGuildID(session, message))
-	if guild.Modlog.Valid {
-	}
 	session.MessageReactionAdd(message.ChannelID, message.ID, "☑")
+	guild.RLock()
 	if guild.Modlog.Valid {
 		guild.Modlog.Log <- &modlog.CaseKick{
 			ModeratorID: message.Author.ID,
@@ -38,5 +37,6 @@ func (bot *Bot) Kick(session *discordgo.Session, message *discordgo.MessageCreat
 			Reason:      args["Reason"],
 		}
 	}
+	guild.RUnlock()
 	return nil
 }

@@ -23,7 +23,6 @@ const schema = `CREATE TABLE guilds (
 	lottery_chance TINYINT(3) UNSIGNED NOT NULL DEFAULT '0',
 	lottery_upper INT(10) UNSIGNED NOT NULL DEFAULT '0',
 	lottery_lower INT(10) UNSIGNED NOT NULL DEFAULT '0',
-	cases JSON NOT NULL,
 	PRIMARY KEY (id),
 	INDEX id (id)
 );`
@@ -217,7 +216,18 @@ func SaveRole(db *sqlx.DB, guildID string, role *Role) error {
 
 }
 
-func SaveCase(db *sqlx.DB, guildID string, c modlog.Case, id uint) {
+func SaveCase(db *sqlx.DB, guildID string, c modlog.Case, id uint) error {
 	T := modlog.GetType(c)
-
+	tx, err := db.Beginx()
+	if err != nil {
+		return err
+	}
+	defer tx.Commit()
+	_, _ = tx.Exec("DELETE FROM cases WHERE guild_id=? AND id=?", guildID, id)
+	_, err = tx.Exec(CaseInsertQuery(T), guildID, id)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	return nil
 }

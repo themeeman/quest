@@ -10,7 +10,7 @@ func (bot *Bot) Commit(session *discordgo.Session, message *discordgo.MessageCre
 	if message.Author.ID != "164759167561629696" {
 		return nil
 	}
-	err := structures.PostAllData(bot.DB, bot.Guilds)
+	err := structures.CommitAllGuilds(bot.Guilds)
 	if err != nil {
 		fmt.Println(err)
 		return nil

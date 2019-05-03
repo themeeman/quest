@@ -15,37 +15,39 @@ type newValueFunc func(string) interface{}
 
 type Cache struct {
 	state map[string]struct {
-		lastUsed time.Time
+		lastUsed int64
 		value    interface{}
 	}
-	db       *sqlx.DB
-	mutex    *sync.Mutex
-	limit    int
-	fetch    fetchFunc
-	save     saveFunc
-	newValue newValueFunc
+	db                 *sqlx.DB
+	mutex              *sync.Mutex
+	capacity           int
+	fetch              fetchFunc
+	save               saveFunc
+	newValue           newValueFunc
+	commitErrorMessage func(id string) string
 }
 
-func NewCache(db *sqlx.DB, limit int, fetch fetchFunc, save saveFunc, newValue newValueFunc) Cache {
+func NewCache(db *sqlx.DB, capacity int, fetch fetchFunc, save saveFunc, newValue newValueFunc, commitError func(id string) string) Cache {
 	return Cache{
 		state: make(map[string]struct {
-			lastUsed time.Time
+			lastUsed int64
 			value    interface{}
-		}),
-		db:       db,
-		mutex:    new(sync.Mutex),
-		limit:    limit,
-		fetch:    fetch,
-		save:     save,
-		newValue: newValue,
+		}, capacity),
+		db:                 db,
+		mutex:              new(sync.Mutex),
+		capacity:           capacity,
+		fetch:              fetch,
+		save:               save,
+		newValue:           newValue,
+		commitErrorMessage: commitError,
 	}
 }
 
 func (cache Cache) getOldest() string {
-	var oldestTime time.Time
+	var oldestTime int64
 	var rv string
 	for id, g := range cache.state {
-		if oldestTime.IsZero() || g.lastUsed.Before(oldestTime) {
+		if oldestTime == 0 || g.lastUsed < oldestTime {
 			oldestTime = g.lastUsed
 			rv = id
 		}
@@ -53,11 +55,11 @@ func (cache Cache) getOldest() string {
 	return rv
 }
 
-func (cache *Cache) Lock() {
+func (cache *Cache) lock() {
 	cache.mutex.Lock()
 }
 
-func (cache *Cache) Unlock() {
+func (cache *Cache) unlock() {
 	cache.mutex.Unlock()
 }
 
@@ -75,45 +77,48 @@ func (cache *Cache) commitIfLocked(id string) error {
 }
 
 func (cache *Cache) Commit(id string) error {
-	cache.Lock()
-	defer cache.Unlock()
+	cache.lock()
+	defer cache.unlock()
 	return cache.commitIfLocked(id)
 }
 
 func (cache *Cache) CommitAll() []error {
-	cache.Lock()
-	defer cache.Unlock()
-	errs := make([]error, 0, cache.limit)
+	cache.lock()
+	defer cache.unlock()
+	errs := make([]error, 0, cache.capacity)
 	for id := range cache.state {
-		errs = append(errs, cache.commitIfLocked(id))
+		err := cache.commitIfLocked(id)
+		if err != nil {
+			errs = append(errs, errors.Wrapf(err, "error commiting member %s:", id))
+		}
 	}
 	return errs
 }
 
 func (cache *Cache) addIfLocked(id string, value interface{}) {
-	if len(cache.state) >= cache.limit {
-		_=cache.Commit(cache.getOldest())
+	if len(cache.state) >= cache.capacity {
+		_ = cache.Commit(cache.getOldest())
 	}
 	cache.state[id] = struct {
-		lastUsed time.Time
+		lastUsed int64
 		value    interface{}
 	}{
-		lastUsed: time.Now(),
+		lastUsed: time.Now().Unix(),
 		value:    value,
 	}
 }
 
 func (cache *Cache) Add(id string, value interface{}) {
-	cache.Lock()
-	defer cache.Unlock()
+	cache.lock()
+	defer cache.unlock()
 	cache.addIfLocked(id, value)
 }
 
 func (cache *Cache) Get(id string) interface{} {
-	cache.Lock()
-	defer cache.Unlock()
+	cache.lock()
+	defer cache.unlock()
 	if g, ok := cache.state[id]; ok {
-		g.lastUsed = time.Now()
+		g.lastUsed = time.Now().Unix()
 		return g.value
 	}
 	value, err := cache.fetch(cache.db, id)
@@ -128,16 +133,16 @@ func (cache *Cache) Get(id string) interface{} {
 }
 
 func (cache *Cache) Destroy(id string) {
-	cache.Lock()
-	defer cache.Unlock()
+	cache.lock()
+	defer cache.unlock()
 	delete(cache.state, id)
 }
 
 func (cache *Cache) DestroyAll() {
-	cache.Lock()
-	defer cache.Unlock()
+	cache.lock()
+	defer cache.unlock()
 	cache.state = make(map[string]struct {
-		lastUsed time.Time
+		lastUsed int64
 		value    interface{}
 	})
 }

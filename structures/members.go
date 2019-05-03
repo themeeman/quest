@@ -1,6 +1,7 @@
 package structures
 
 import (
+	"fmt"
 	"github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
 	"github.com/tomvanwoow/quest/inventory"
@@ -15,7 +16,7 @@ type Member struct {
 	LastDaily   mysql.NullTime            `db:"last_daily"`
 	Experience  int64                     `db:"experience"`
 	Chests      inventory.ChestsInventory `db:"chests"`
-	*sync.Mutex
+	*sync.RWMutex
 }
 
 type Members struct {
@@ -36,28 +37,27 @@ func NewMemberCache(db *sqlx.DB, guildID string) Members {
 			func(id string) interface{} {
 				return NewMember(id)
 			},
+			func(id string) string {
+				return fmt.Sprintf("error committing member %s in guild %s: ", id, guildID)
+			},
 		),
 	}
 }
 
 func NewMember(id string) *Member {
 	return &Member{
-		ID:     id,
-		Chests: make(inventory.ChestsInventory),
-		Mutex:  new(sync.Mutex),
+		ID:      id,
+		Chests:  make(inventory.ChestsInventory),
+		RWMutex: new(sync.RWMutex),
 	}
-}
-
-func (members Members) Lock() {
-	members.cache.mutex.Lock()
-}
-
-func (members Members) Unlock() {
-	members.cache.mutex.Unlock()
 }
 
 func (members Members) Commit(id string) error {
 	return members.cache.Commit(id)
+}
+
+func (members Members) CommitAll() []error {
+	return members.cache.CommitAll()
 }
 
 func (members Members) Add(member *Member) {

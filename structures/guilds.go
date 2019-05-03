@@ -2,6 +2,7 @@ package structures
 
 import (
 	"database/sql"
+	"fmt"
 	"github.com/jmoiron/sqlx"
 	"github.com/tomvanwoow/quest/modlog"
 	"sync"
@@ -25,7 +26,7 @@ type Guild struct {
 	Cases         modlog.Cases   `db:"cases"`
 	Members       Members
 	Roles
-	*sync.Mutex
+	*sync.RWMutex
 }
 
 func NewGuild(id string) *Guild {
@@ -43,7 +44,7 @@ func NewGuild(id string) *Guild {
 		Modlog: modlog.Modlog{
 			Log: make(chan modlog.Case),
 		},
-		Mutex: new(sync.Mutex),
+		RWMutex: new(sync.RWMutex),
 	}
 }
 
@@ -65,16 +66,11 @@ func NewGuildsCache(db *sqlx.DB) Guilds {
 			func(id string) interface{} {
 				return NewGuild(id)
 			},
+			func(id string) string {
+				return fmt.Sprintf("error committing guild %s: ", id)
+			},
 		),
 	}
-}
-
-func (guilds Guilds) Lock() {
-	guilds.cache.mutex.Lock()
-}
-
-func (guilds Guilds) Unlock() {
-	guilds.cache.mutex.Unlock()
 }
 
 func (guilds Guilds) Commit(id string) error {
@@ -99,4 +95,13 @@ func (guilds Guilds) Destroy(id string) {
 
 func (guilds Guilds) DestroyAll() {
 	guilds.cache.DestroyAll()
+}
+
+func CommitAllGuilds(guilds Guilds) []error {
+	errs := make([]error, 0, GuildCacheLimit * (MemberCacheLimit + 1))
+	for id := range guilds.cache.state {
+		errs = append(errs, guilds.Get(id).Members.CommitAll()...)
+	}
+	errs = append(errs, guilds.CommitAll()...)
+	return errs
 }
