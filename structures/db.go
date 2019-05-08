@@ -231,3 +231,12 @@ func SaveCase(db *sqlx.DB, guildID string, c modlog.Case, id uint) error {
 	}
 	return nil
 }
+
+func GetTopMembers(db *sqlx.DB, guildID string, num uint) ([]struct{ID string; Experience int}, error) {
+	rv := make([]struct{ID string; Experience int}, num)
+	err := db.Select(&rv, "SELECT id, experience FROM members WHERE guild_id=? ORDER BY experience DESC LIMIT ?", guildID, num)
+	if err != nil {
+		return nil, err
+	}
+	return rv, nil
+}

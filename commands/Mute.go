@@ -25,6 +25,8 @@ func (bot *Bot) Mute(session *discordgo.Session, message *discordgo.MessageCreat
 	}
 	member, _ := session.State.Member(ch.GuildID, user.ID)
 	guild := bot.Guilds.Get(ch.GuildID)
+	guild.RLock()
+	defer guild.RUnlock()
 	g, _ := session.Guild(ch.GuildID)
 	if bot.UserGroup(session, g, member) >= PermissionAdmin {
 		return fmt.Errorf("That user is a admin, I can't mute them!")

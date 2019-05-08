@@ -1,7 +1,6 @@
 package commands
 
 import (
-	commands "github.com/tomvanwoow/disgone"
 	"github.com/tomvanwoow/quest/structures"
 	"bytes"
 	"fmt"

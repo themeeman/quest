@@ -82,3 +82,14 @@ func TestCaseQuery(t *testing.T) {
 	fmt.Println(CaseSelectQuery("addexp"))
 	fmt.Println(CaseInsertQuery("addexp"))
 }
+
+func TestGetTopMembers(t *testing.T) {
+	ms, err := GetTopMembers(db, "308583576054530051", 10)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	for _, m := range ms {
+		fmt.Println(m.ID, m.Experience)
+	}
+}
