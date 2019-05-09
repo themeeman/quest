@@ -1,12 +1,13 @@
 package commands
 
 import (
-	"github.com/tomvanwoow/quest/modlog"
 	"fmt"
-	"github.com/bwmarrin/discordgo"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/bwmarrin/discordgo"
+	"github.com/tomvanwoow/quest/modlog"
 )
 
 func (bot *Bot) Mute(session *discordgo.Session, message *discordgo.MessageCreate, args map[string]string) error {

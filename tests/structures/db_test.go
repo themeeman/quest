@@ -4,12 +4,13 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"github.com/jmoiron/sqlx"
-	"github.com/pkg/errors"
-	. "github.com/tomvanwoow/quest/structures"
 	"log"
 	"os"
 	"testing"
+
+	"github.com/jmoiron/sqlx"
+	"github.com/pkg/errors"
+	. "github.com/tomvanwoow/quest/structures"
 )
 
 func unmarshalJson(filename string, v interface{}) (err error) {

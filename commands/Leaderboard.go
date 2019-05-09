@@ -1,52 +1,33 @@
 package commands
 
 import (
-	"github.com/tomvanwoow/quest/structures"
 	"bytes"
 	"fmt"
-	"github.com/bwmarrin/discordgo"
-	"github.com/tomvanwoow/quest/utility"
-	"sort"
 	"sync"
+
+	"github.com/bwmarrin/discordgo"
+	"github.com/tomvanwoow/quest/structures"
+	"github.com/tomvanwoow/quest/utility"
 )
 
-type membersSorted struct {
-	IDs []string
-	structures.Members
-}
-
-func (m membersSorted) Len() int      { return len(m.IDs) }
-func (m membersSorted) Swap(i, j int) { m.IDs[i], m.IDs[j] = m.IDs[j], m.IDs[i] }
-func (m membersSorted) Less(i, j int) bool {
-	return m.Members[m.IDs[i]].Experience > m.Members[m.IDs[j]].Experience
-}
-
 func (bot *Bot) Leaderboard(session *discordgo.Session, message *discordgo.MessageCreate, _ map[string]string) error {
-	guild := bot.Guilds.Get(utility.MustGetGuildID(session, message))
-	sorted := membersSorted{
-		IDs:     make([]string, len(guild.Members)),
-		Members: guild.Members,
+	guildID := utility.MustGetGuildID(session, message)
+	leaderBoard, err := structures.GetTopMembers(bot.DB, guildID, 10)
+	if err != nil {
+		session.ChannelMessageSend(message.ChannelID, "```Internal server error - try again later```")
+		return nil
 	}
-
-	{
-		var i int
-		for id := range guild.Members {
-			sorted.IDs[i] = id
-			i += 1
-		}
+	ids := make([]string, len(leaderBoard))
+	for i, m := range leaderBoard {
+		ids[i] = m.ID
 	}
-
-	sort.Sort(sorted)
-	var board []string
-	if len(sorted.IDs) < 10 {
-		board = sorted.IDs[:]
-	} else {
-		board = sorted.IDs[:10]
-	}
-	members := getMembers(session, guild.ID, board)
+	members := getMembers(session, guildID, ids)
 	var buffer bytes.Buffer
+	guild := bot.Guilds.Get(guildID)
 	for index, m := range members {
+		guild.RLock()
 		mem := guild.Members.Get(m.ID)
+		guild.RUnlock()
 		if m.Member != nil {
 			if m.User.ID == message.Author.ID {
 				buffer.WriteString(fmt.Sprintf("**%d. %s#%s - %d EXP**\n",
@@ -62,21 +43,14 @@ func (bot *Bot) Leaderboard(session *discordgo.Session, message *discordgo.Messa
 	}
 	specialIndex, _ := findIndex(sorted.IDs, message.Author.ID)
 	if specialIndex > 9 {
+		guild.RLock()
 		mem := guild.Members.Get(sorted.IDs[specialIndex])
+		guild.RUnlock()
 		buffer.WriteString(fmt.Sprintf("**%d. %s#%s - %d EXP\n**",
 			specialIndex+1, message.Author.Username, message.Author.Discriminator, mem.Experience))
 	}
 	session.ChannelMessageSendEmbed(message.ChannelID, bot.Embed("Leaderboard", buffer.String(), nil))
 	return nil
-}
-
-func findIndex(ss []string, s string) (int, bool) {
-	for i, v := range ss {
-		if v == s {
-			return i, true
-		}
-	}
-	return len(ss) - 1, false
 }
 
 type memberData struct {

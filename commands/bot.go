@@ -1,12 +1,13 @@
 package commands
 
 import (
+	"time"
+
 	"github.com/bwmarrin/discordgo"
 	"github.com/jmoiron/sqlx"
 	commands "github.com/tomvanwoow/disgone"
 	"github.com/tomvanwoow/quest/inventory"
 	"github.com/tomvanwoow/quest/structures"
-	"time"
 )
 
 type Bot struct {
