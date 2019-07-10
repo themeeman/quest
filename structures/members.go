@@ -1,9 +1,9 @@
 package structures
 
 import (
-	"fmt"
 	"github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
+	"github.com/pkg/errors"
 	"github.com/tomvanwoow/quest/inventory"
 	"sync"
 )
@@ -26,19 +26,18 @@ type Members struct {
 func NewMemberCache(db *sqlx.DB, guildID string) Members {
 	return Members{
 		cache: NewCache(
-			db,
 			MemberCacheLimit,
-			func(db *sqlx.DB, id string) (interface{}, error) {
+			func(id string) (sync.Locker, error) {
 				return FetchMember(db, guildID, id)
 			},
-			func(db *sqlx.DB, value interface{}) error {
+			func(value sync.Locker) error {
 				return SaveMember(db, guildID, value.(*Member))
 			},
-			func(id string) interface{} {
+			func(id string) sync.Locker {
 				return NewMember(id)
 			},
-			func(id string) string {
-				return fmt.Sprintf("error committing member %s in guild %s: ", id, guildID)
+			func(id string) error {
+				return errors.Errorf("error committing member %s in guild %s: ", id, guildID)
 			},
 		),
 	}
@@ -74,4 +73,10 @@ func (members Members) Destroy(id string) {
 
 func (members Members) DestroyAll() {
 	members.cache.DestroyAll()
+}
+
+func (members Members) Apply(id string, f func(*Member)) {
+	members.cache.Apply(id, func(value sync.Locker) {
+		f(value.(*Member))
+	})
 }

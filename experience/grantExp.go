@@ -3,8 +3,8 @@ package experience
 import (
 	"fmt"
 	"github.com/bwmarrin/discordgo"
-	commands "github.com/tomvanwoow/disgone"
 	quest "github.com/tomvanwoow/quest/commands"
+	"github.com/tomvanwoow/quest/utility"
 	"time"
 )
 
@@ -13,7 +13,7 @@ func GrantExp(bot *quest.Bot, session *discordgo.Session, message *discordgo.Mes
 		Guild  string
 		Member string
 	}{
-		Guild:  commands.MustGetGuildID(session, message),
+		Guild:  utility.MustGetGuildID(session, message),
 		Member: message.Author.ID,
 	}
 	if s.Guild == "" {
@@ -26,9 +26,9 @@ func GrantExp(bot *quest.Bot, session *discordgo.Session, message *discordgo.Mes
 		bot.ExpTimes[s] = time.Now()
 		var r int64
 		if guild.ExpGainLower > guild.ExpGainUpper {
-			r = int64(RandInt(int(guild.ExpGainUpper), int(guild.ExpGainLower)))
+			r = int64(utility.RandInt(int(guild.ExpGainUpper), int(guild.ExpGainLower)))
 		} else {
-			r = int64(RandInt(int(guild.ExpGainLower), int(guild.ExpGainUpper)))
+			r = int64(utility.RandInt(int(guild.ExpGainLower), int(guild.ExpGainUpper)))
 		}
 		member.Experience += r
 		fmt.Println(s.Member, r)

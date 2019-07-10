@@ -7,6 +7,7 @@ import (
 	"github.com/jmoiron/sqlx"
 	commands "github.com/tomvanwoow/disgone"
 	"github.com/tomvanwoow/quest/inventory"
+	"github.com/tomvanwoow/quest/modlog"
 	"github.com/tomvanwoow/quest/structures"
 )
 
@@ -19,6 +20,7 @@ type Bot struct {
 	structures.Guilds
 	DB *sqlx.DB
 	inventory.Chests
+	Modlogs    map[string]modlog.Modlog
 	ErrorEmbed func(e error) *discordgo.MessageEmbed
 	Embed      func(title string,
 		description string,

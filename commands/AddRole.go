@@ -23,26 +23,25 @@ func (bot *Bot) AddRole(session *discordgo.Session, message *discordgo.MessageCr
 		return fmt.Errorf(`I see you are trying to add a role for 0 experience!
 If you want to, it is better to use q:set Autorole <role>`)
 	}
-	role := &structures.Role{
-		Experience: int64(exp),
-		ID:         roleID,
-	}
 	allIDs := make([]string, len(guild.Roles))
 	for i, v := range guild.Roles {
 		allIDs[i] = v.ID
 	}
-	ok, index := utility.Contains(allIDs, roleID)
-	fmt.Println(ok, index)
-	guild.Lock()
-	if ok {
-		guild.Roles[index] = role
-	} else if len(guild.Roles) >= 64 {
-		guild.Unlock()
+	found, index := utility.Contains(allIDs, roleID)
+	if !found && len(guild.Roles) >= 64 {
 		return fmt.Errorf("Invalid action - 64 roles is the absolute limit\nTry removing a role")
-	} else {
-		guild.Roles = append(guild.Roles, role)
 	}
-	guild.Unlock()
+	role := &structures.Role{
+		Experience: int64(exp),
+		ID:         roleID,
+	}
+	bot.Guilds.Apply(guild.ID, func (guild *structures.Guild) {
+		if found {
+			guild.Roles[index] = role
+		} else {
+			guild.Roles = append(guild.Roles, role)
+		}
+	})
 	_ = session.MessageReactionAdd(message.ChannelID, message.ID, "☑")
 	return nil
 }

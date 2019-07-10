@@ -1,7 +1,6 @@
 package commands
 
 import (
-	commands "github.com/tomvanwoow/disgone"
 	"fmt"
 	"github.com/bwmarrin/discordgo"
 	"github.com/tomvanwoow/quest/utility"
@@ -18,10 +17,8 @@ func (bot *Bot) Me(session *discordgo.Session, message *discordgo.MessageCreate,
 	} else if len(message.Mentions) > 0 {
 		id = message.Mentions[0].ID
 	} else {
-		return UserNotFoundError{}
+		return UserNotFoundError
 	}
-	guild := bot.Guilds.Get(utility.MustGetGuildID(session, message))
-	fmt.Println(guild.Cases, fmt.Sprintf("%p", &guild.Cases))
 	g, err := session.State.Guild(utility.MustGetGuildID(session, message))
 	if err != nil {
 		return nil
@@ -30,18 +27,21 @@ func (bot *Bot) Me(session *discordgo.Session, message *discordgo.MessageCreate,
 	if found, index := containsMember(g.Members, id); found {
 		m = g.Members[index]
 	} else {
-		m, err = session.GuildMember(guild.ID, id)
+		m, err = session.GuildMember(g.ID, id)
 		if err != nil {
-			return UserNotFoundError{}
+			return UserNotFoundError
 		}
 	}
 	if m.User.Bot {
 		return fmt.Errorf("Cannot use `me` command on a bot!")
 	}
-	member := guild.Members.Get(id)
+	guild := bot.Guilds.Get(g.ID)
 	rank := bot.UserGroup(session, g, m)
 	s := []string{"Member", "Moderator", "Admin", "Owner"}
 	title := fmt.Sprintf("User %s#%s", m.User.Username, m.User.Discriminator)
+	member := guild.Members.Get(id)
+	member.RLock()
+	defer member.RUnlock()
 	fields := []*discordgo.MessageEmbedField{
 		{
 			Name:   "Experience",

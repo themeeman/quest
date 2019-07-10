@@ -1,45 +1,41 @@
 package structures
 
 import (
-	"github.com/jmoiron/sqlx"
-	"github.com/pkg/errors"
 	"sync"
 	"time"
 )
 
 // Rewrite this with generics when Go2 is released
 
-type fetchFunc func(*sqlx.DB, string) (interface{}, error)
-type saveFunc func(*sqlx.DB, interface{}) error
-type newValueFunc func(string) interface{}
+type fetchFunc func(string) (sync.Locker, error)
+type saveFunc func(sync.Locker) error
+type newValueFunc func(string) sync.Locker
 
 type Cache struct {
 	state map[string]struct {
 		lastUsed int64
-		value    interface{}
+		value    sync.Locker
 	}
-	db                 *sqlx.DB
-	mutex              *sync.Mutex
-	capacity           int
-	fetch              fetchFunc
-	save               saveFunc
-	newValue           newValueFunc
-	commitErrorMessage func(id string) string
+	mutex       *sync.Mutex
+	capacity    int
+	fetch       fetchFunc
+	save        saveFunc
+	newValue    newValueFunc
+	commitError func(id string) error
 }
 
-func NewCache(db *sqlx.DB, capacity int, fetch fetchFunc, save saveFunc, newValue newValueFunc, commitError func(id string) string) Cache {
+func NewCache(capacity int, fetch fetchFunc, save saveFunc, newValue newValueFunc, commitError func(id string) error) Cache {
 	return Cache{
 		state: make(map[string]struct {
 			lastUsed int64
-			value    interface{}
+			value    sync.Locker
 		}, capacity),
-		db:                 db,
-		mutex:              new(sync.Mutex),
-		capacity:           capacity,
-		fetch:              fetch,
-		save:               save,
-		newValue:           newValue,
-		commitErrorMessage: commitError,
+		mutex:       new(sync.Mutex),
+		capacity:    capacity,
+		fetch:       fetch,
+		save:        save,
+		newValue:    newValue,
+		commitError: commitError,
 	}
 }
 
@@ -66,10 +62,10 @@ func (cache *Cache) unlock() {
 func (cache *Cache) commitIfLocked(id string) error {
 	g, ok := cache.state[id]
 	if !ok {
-		return errors.Errorf("value %s not found", id)
+		return cache.commitError(id)
 	}
 	delete(cache.state, id)
-	err := cache.save(cache.db, g.value)
+	err := cache.save(g.value)
 	if err != nil {
 		return err
 	}
@@ -89,39 +85,39 @@ func (cache *Cache) CommitAll() []error {
 	for id := range cache.state {
 		err := cache.commitIfLocked(id)
 		if err != nil {
-			errs = append(errs, errors.Wrapf(err, "error commiting member %s:", id))
+			errs = append(errs, cache.commitError(id))
 		}
 	}
 	return errs
 }
 
-func (cache *Cache) addIfLocked(id string, value interface{}) {
+func (cache *Cache) addIfLocked(id string, value sync.Locker) {
 	if len(cache.state) >= cache.capacity {
 		_ = cache.Commit(cache.getOldest())
 	}
 	cache.state[id] = struct {
 		lastUsed int64
-		value    interface{}
+		value    sync.Locker
 	}{
 		lastUsed: time.Now().Unix(),
 		value:    value,
 	}
 }
 
-func (cache *Cache) Add(id string, value interface{}) {
+func (cache *Cache) Add(id string, value sync.Locker) {
 	cache.lock()
 	defer cache.unlock()
 	cache.addIfLocked(id, value)
 }
 
-func (cache *Cache) Get(id string) interface{} {
+func (cache *Cache) Get(id string) sync.Locker {
 	cache.lock()
 	defer cache.unlock()
 	if g, ok := cache.state[id]; ok {
 		g.lastUsed = time.Now().Unix()
 		return g.value
 	}
-	value, err := cache.fetch(cache.db, id)
+	value, err := cache.fetch(id)
 	if err == nil {
 		cache.addIfLocked(id, value)
 		return value
@@ -143,6 +139,13 @@ func (cache *Cache) DestroyAll() {
 	defer cache.unlock()
 	cache.state = make(map[string]struct {
 		lastUsed int64
-		value    interface{}
+		value    sync.Locker
 	})
+}
+
+func (cache *Cache) Apply(id string, f func(sync.Locker)) {
+	value := cache.Get(id)
+	value.Lock()
+	defer value.Unlock()
+	f(value)
 }

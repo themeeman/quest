@@ -2,6 +2,7 @@ package commands
 
 import (
 	"github.com/bwmarrin/discordgo"
+	"github.com/tomvanwoow/quest/structures"
 	"github.com/tomvanwoow/quest/utility"
 )
 
@@ -14,15 +15,20 @@ func (bot *Bot) RemoveRole(session *discordgo.Session, message *discordgo.Messag
 	}
 	index := -1
 	guild := bot.Guilds.Get(utility.MustGetGuildID(session, message))
+	guild.RLock()
 	for i, r := range guild.Roles {
 		if r.ID == roleID {
 			index = i
+			break
 		}
 	}
 	if index == -1 {
 		return RoleError{roleID}
 	}
-	guild.Roles = append(guild.Roles[:index], guild.Roles[index+1:]...)
+	bot.Guilds.Apply(guild.ID, func(guild *structures.Guild) {
+		guild.Roles = append(guild.Roles[:index], guild.Roles[index+1:]...)
+	})
+	guild.RUnlock()
 	_ = session.MessageReactionAdd(message.ChannelID, message.ID, "☑")
 	return nil
 }

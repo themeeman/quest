@@ -8,19 +8,21 @@ import (
 )
 
 func (bot *Bot) Warn(session *discordgo.Session, message *discordgo.MessageCreate, args map[string]string) error {
-	guild := bot.Guilds.Get(utility.MustGetGuildID(session, message))
 	var user *discordgo.User
 	if len(args["User"]) == 18 {
 		var err error
 		user, err = session.User(args["User"])
 		if err != nil {
-			return UserNotFoundError{}
+			return UserNotFoundError
 		}
 	} else if len(message.Mentions) > 0 {
 		user = message.Mentions[0]
 	} else {
-		return UserNotFoundError{}
+		return UserNotFoundError
 	}
+	guild := bot.Guilds.Get(utility.MustGetGuildID(session, message))
+	guild.RLock()
+	id := guild.ID
 	if guild.Modlog.Valid {
 		guild.Modlog.Log <- &modlog.CaseWarn{
 			ModeratorID: message.Author.ID,
@@ -28,7 +30,8 @@ func (bot *Bot) Warn(session *discordgo.Session, message *discordgo.MessageCreat
 			Reason:      args["Reason"],
 		}
 	}
-	g, err := session.Guild(guild.ID)
+	guild.RUnlock()
+	g, err := session.Guild(id)
 	if err != nil {
 		return nil
 	}

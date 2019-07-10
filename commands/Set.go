@@ -19,10 +19,9 @@ import (
 )
 
 func getOptions() map[string]*structures.Option {
-	g := new(structures.Guild)
-	t := reflect.TypeOf(*g)
+	t := reflect.TypeOf(structures.Guild{})
 	options := make(map[string]*structures.Option)
-	for _, s := range structs.Names(*g) {
+	for _, s := range structs.Names(structures.Guild{}) {
 		field, _ := t.FieldByName(s)
 		t, ok := field.Tag.Lookup("type")
 		if ok {
@@ -48,11 +47,13 @@ func (bot *Bot) Set(session *discordgo.Session, message *discordgo.MessageCreate
 		}
 		sort.Strings(names)
 		guild := bot.Guilds.Get(utility.MustGetGuildID(session, message))
+		guild.RLock()
 		var buf bytes.Buffer
 		for _, name := range names {
 			current := repr(reflect.Indirect(reflect.ValueOf(guild).Elem()).FieldByName(name).Interface(), options[name].Type)
 			buf.WriteString(fmt.Sprintf("**%s** - %s\n", name, current))
 		}
+		guild.RUnlock()
 		_, _ = session.ChannelMessageSendEmbed(message.ChannelID, &discordgo.MessageEmbed{
 			Description: buf.String(),
 		})
@@ -88,19 +89,16 @@ Use q:types to view all types.`, args["Type"])
 			}
 		}
 		guild := bot.Guilds.Get(utility.MustGetGuildID(session, message))
+		guild.RLock()
+		defer guild.RUnlock()
 		field := reflect.ValueOf(guild).Elem().FieldByName(keyName)
-		fieldType := field.Type()
-		val := reflect.ValueOf(convertType(message, option.Type, value)).Convert(fieldType)
-		quit := guild.Modlog.Quit
-		field.Set(val)
+		val := reflect.ValueOf(convertType(message, option.Type, value)).Convert(field.Type())
+		bot.Guilds.Apply(guild.ID, func(guild *structures.Guild) {
+			field.Set(val)
+		})
 		if val.Type() == reflect.TypeOf(modlog.Modlog{}) {
-			if quit != nil {
-				quit <- struct{}{}
-			}
-			fmt.Println("Started", guild.Modlog, val.Interface().(modlog.Modlog))
-			go modlog.StartLogging(session, guild.Modlog, &guild.Cases)
+			go guild.Modlog.StartLogging(session, &guild.Cases)
 		}
-		session.MessageReactionAdd(message.ChannelID, message.ID, "☑")
 		if guild.Modlog.Valid {
 			guild.Modlog.Log <- &modlog.CaseSet{
 				ModeratorID: message.Author.ID,
@@ -108,6 +106,7 @@ Use q:types to view all types.`, args["Type"])
 				Value:       repr(val.Interface(), option.Type),
 			}
 		}
+		_ = session.MessageReactionAdd(message.ChannelID, message.ID, "☑")
 	}
 	return nil
 }

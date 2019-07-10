@@ -42,6 +42,8 @@ func (bot *Bot) Purge(session *discordgo.Session, message *discordgo.MessageCrea
 		}
 	}
 	guild := bot.Guilds.Get(utility.MustGetGuildID(session, message))
+	guild.RLock()
+	defer guild.RUnlock()
 	if guild.Modlog.Valid {
 		guild.Modlog.Log <- &modlog.CasePurge{
 			ModeratorID: message.Author.ID,

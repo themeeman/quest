@@ -62,10 +62,10 @@ type roleWrapper struct {
 	*Role
 }
 
-func CaseSelectQuery(T string) string {
+func getCaseFields(T string) []string {
 	structType := reflect.TypeOf(modlog.NewCase(T)).Elem()
 	if structType == reflect.TypeOf(nil) {
-		return ""
+		return nil
 	}
 	xs := make([]string, 0, structType.NumField())
 	for i := 0; i < structType.NumField(); i++ {
@@ -73,20 +73,16 @@ func CaseSelectQuery(T string) string {
 			xs = append(xs, key)
 		}
 	}
+	return xs
+}
+
+func CaseSelectQuery(T string) string {
+	xs := getCaseFields(T)
 	return fmt.Sprintf("SELECT (%s) FROM cases WHERE guild_id=? AND id=?", strings.Join(xs, ", "))
 }
 
 func CaseInsertQuery(T string) string {
-	structType := reflect.TypeOf(modlog.NewCase(T)).Elem()
-	if structType == reflect.TypeOf(nil) {
-		return ""
-	}
-	xs := make([]string, 0, structType.NumField())
-	for i := 0; i < structType.NumField(); i++ {
-		if key, ok := structType.Field(i).Tag.Lookup("db"); ok {
-			xs = append(xs, key)
-		}
-	}
+	xs := getCaseFields(T)
 	commaSep := make([]string, len(xs))
 	copy(commaSep, xs)
 	for i, s := range commaSep {
@@ -95,7 +91,7 @@ func CaseInsertQuery(T string) string {
 	return fmt.Sprintf("INSERT INTO cases (guild_id, id, type, %s) VALUES (?, ?, %s, %s)", strings.Join(xs, ", "), T, strings.Join(commaSep, ", "))
 }
 
-func InitDB(user string, pass string, host string, database string) (*sqlx.DB, error) {
+func InitDB(user, pass, host, database string) (*sqlx.DB, error) {
 	return sqlx.Connect("mysql", fmt.Sprintf("%s:%s@tcp(%s)/%s", user, pass, host, database))
 }
 

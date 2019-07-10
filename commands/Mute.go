@@ -2,6 +2,7 @@ package commands
 
 import (
 	"fmt"
+	"github.com/tomvanwoow/quest/structures"
 	"strconv"
 	"strings"
 	"time"
@@ -17,12 +18,12 @@ func (bot *Bot) Mute(session *discordgo.Session, message *discordgo.MessageCreat
 		var err error
 		user, err = session.User(args["User"])
 		if err != nil {
-			return UserNotFoundError{}
+			return UserNotFoundError
 		}
 	} else if len(message.Mentions) > 0 {
 		user = message.Mentions[0]
 	} else {
-		return UserNotFoundError{}
+		return UserNotFoundError
 	}
 	member, _ := session.State.Member(ch.GuildID, user.ID)
 	guild := bot.Guilds.Get(ch.GuildID)
@@ -53,13 +54,14 @@ func (bot *Bot) Mute(session *discordgo.Session, message *discordgo.MessageCreat
 		} else if strings.HasPrefix(err.Error(), "HTTP 400 Bad Request") {
 			return RoleError{ID: guild.MuteRole.String}
 		} else {
-			return UserNotFoundError{}
+			return UserNotFoundError
 		}
 	}
 	dur, _ := strconv.Atoi(strings.Replace(args["Minutes"], ",", "", -1))
-	m := guild.Members.Get(user.ID)
-	m.MuteExpires.Time = time.Now().UTC().Add(time.Minute * time.Duration(dur))
-	m.MuteExpires.Valid = true
+	guild.Members.Apply(user.ID, func(member *structures.Member) {
+		member.MuteExpires.Time = time.Now().UTC().Add(time.Minute * time.Duration(dur))
+		member.MuteExpires.Valid = true
+	})
 	go func() {
 		time.Sleep(time.Minute * time.Duration(dur))
 		session.GuildMemberRoleRemove(ch.GuildID, user.ID, guild.MuteRole.String)

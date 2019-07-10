@@ -2,8 +2,8 @@ package structures
 
 import (
 	"database/sql"
-	"fmt"
 	"github.com/jmoiron/sqlx"
+	"github.com/pkg/errors"
 	"github.com/tomvanwoow/quest/modlog"
 	"sync"
 )
@@ -55,19 +55,18 @@ type Guilds struct {
 func NewGuildsCache(db *sqlx.DB) Guilds {
 	return Guilds{
 		cache: NewCache(
-			db,
 			GuildCacheLimit,
-			func(db *sqlx.DB, id string) (interface{}, error) {
+			func(id string) (sync.Locker, error) {
 				return FetchGuild(db, id)
 			},
-			func(db *sqlx.DB, value interface{}) error {
+			func(value sync.Locker) error {
 				return SaveGuild(db, value.(*Guild))
 			},
-			func(id string) interface{} {
+			func(id string) sync.Locker {
 				return NewGuild(id)
 			},
-			func(id string) string {
-				return fmt.Sprintf("error committing guild %s: ", id)
+			func(id string) error {
+				return errors.Errorf("error committing guild %s: ", id)
 			},
 		),
 	}
@@ -95,6 +94,12 @@ func (guilds Guilds) Destroy(id string) {
 
 func (guilds Guilds) DestroyAll() {
 	guilds.cache.DestroyAll()
+}
+
+func (guilds Guilds) Apply(id string, f func(*Guild)) {
+	guilds.cache.Apply(id, func(value sync.Locker) {
+		f(value.(*Guild))
+	})
 }
 
 func CommitAllGuilds(guilds Guilds) []error {

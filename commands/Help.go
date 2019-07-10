@@ -25,8 +25,7 @@ func (bot *Bot) Help(session *discordgo.Session, message *discordgo.MessageCreat
 		level := bot.UserGroup(session, guild, author)
 		for _, name := range names {
 			command := bot.Commands[name]
-			sufficient := level >= command.Group
-			if !command.Hidden && sufficient {
+			if !command.Hidden && level >= command.Group {
 				buf.WriteString(fmt.Sprintf("**%s - ** %s\n", name, command.Description))
 			}
 		}

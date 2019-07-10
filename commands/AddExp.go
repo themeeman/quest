@@ -4,14 +4,13 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/tomvanwoow/quest/modlog"
 	"github.com/tomvanwoow/quest/utility"
+	"github.com/tomvanwoow/quest/structures"
 	"strconv"
 	"strings"
 )
 
 func (bot *Bot) AddExp(session *discordgo.Session, message *discordgo.MessageCreate, args map[string]string) error {
 	guild := bot.Guilds.Get(utility.MustGetGuildID(session, message))
-	guild.RLock()
-	defer guild.RUnlock()
 	var id string
 	if args["User"] == "" {
 		id = message.Author.ID
@@ -20,13 +19,14 @@ func (bot *Bot) AddExp(session *discordgo.Session, message *discordgo.MessageCre
 	} else if len(message.Mentions) > 0 {
 		id = message.Mentions[0].ID
 	} else {
-		return UserNotFoundError{}
+		return UserNotFoundError
 	}
-	member := guild.Members.Get(id)
 	exp, _ := strconv.Atoi(strings.Replace(args["Value"], ",", "", -1))
-	member.Lock()
-	member.Experience += int64(exp)
-	member.Unlock()
+	guild.Members.Apply(id, func(member *structures.Member) {
+		member.Experience += int64(exp)
+	})
+	guild.RLock()
+	defer guild.RUnlock()
 	_ = session.MessageReactionAdd(message.ChannelID, message.ID, "☑")
 	if guild.Modlog.Valid {
 		guild.Modlog.Log <- &modlog.CaseAddExp{

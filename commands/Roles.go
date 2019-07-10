@@ -7,7 +7,6 @@ import (
 	"github.com/tomvanwoow/quest/structures"
 	"github.com/tomvanwoow/quest/utility"
 	"sort"
-	"time"
 )
 
 func (bot *Bot) Roles(session *discordgo.Session, message *discordgo.MessageCreate, args map[string]string) error {
@@ -39,9 +38,7 @@ func (bot *Bot) Roles(session *discordgo.Session, message *discordgo.MessageCrea
 		}
 	}
 	buffer.WriteString("```")
-	t := time.Now()
 	session.ChannelMessageSend(message.ChannelID, buffer.String())
-	fmt.Println(time.Since(t))
 	return nil
 }
 

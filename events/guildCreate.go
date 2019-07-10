@@ -1,8 +1,8 @@
 package events
 
 import (
-	"github.com/tomvanwoow/quest/modlog"
 	"github.com/bwmarrin/discordgo"
+	"github.com/tomvanwoow/quest/modlog"
 	"time"
 )
 

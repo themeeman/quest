@@ -13,18 +13,19 @@ func (bot *Bot) Unban(session *discordgo.Session, message *discordgo.MessageCrea
 		var err error
 		user, err = session.User(args["User"])
 		if err != nil {
-			return UserNotFoundError{}
+			return UserNotFoundError
 		}
 	} else if len(message.Mentions) > 0 {
 		user = message.Mentions[0]
 	} else {
-		return UserNotFoundError{}
+		return UserNotFoundError
 	}
 	err := session.GuildBanDelete(utility.MustGetGuildID(session, message), user.ID)
 	if err != nil {
 		return fmt.Errorf("Can't ban that user! Make sure I have the discord ban permission.")
 	}
 	guild := bot.Guilds.Get(utility.MustGetGuildID(session, message))
+	guild.RLock()
 	if guild.Modlog.Valid {
 		guild.Modlog.Log <- &modlog.CaseUnban{
 			ModeratorID: message.Author.ID,
@@ -32,6 +33,7 @@ func (bot *Bot) Unban(session *discordgo.Session, message *discordgo.MessageCrea
 			Reason:      args["Reason"],
 		}
 	}
+	guild.RUnlock()
 	session.MessageReactionAdd(message.ChannelID, message.ID, "☑")
 	return nil
 }

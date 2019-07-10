@@ -1,13 +1,12 @@
 package commands
 
-import "fmt"
+import (
+	"fmt"
+	"github.com/pkg/errors"
+)
 
-type UserNotFoundError struct{}
-
-func (e UserNotFoundError) Error() string {
-	return fmt.Sprintf(`Could not find user in the server
+var UserNotFoundError = errors.New(`Could not find user in the server
 Maybe they left because its so trash?`)
-}
 
 type UnknownCommandError struct {
 	Command string

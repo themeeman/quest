@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/bwmarrin/discordgo"
 	"github.com/tomvanwoow/quest/modlog"
+	"github.com/tomvanwoow/quest/structures"
 	"github.com/tomvanwoow/quest/utility"
 	"strings"
 )
@@ -15,24 +16,21 @@ func (bot *Bot) Unmute(session *discordgo.Session, message *discordgo.MessageCre
 		var err error
 		user, err = session.User(args["User"])
 		if err != nil {
-			return UserNotFoundError{}
+			return UserNotFoundError
 		}
 	} else if len(message.Mentions) > 0 {
 		user = message.Mentions[0]
 	} else {
-		return UserNotFoundError{}
+		return UserNotFoundError
 	}
 	member, _ := session.State.Member(ch.GuildID, user.ID)
 	guild := bot.Guilds.Get(utility.MustGetGuildID(session, message))
-	var found bool
+	guild.RLock()
+	defer guild.RUnlock()
 	if !guild.MuteRole.Valid {
 		return fmt.Errorf("No mute role has been configured for the server! Use q:set muterole [Value]")
 	}
-	for _, r := range member.Roles {
-		if r == guild.MuteRole.String {
-			found = true
-		}
-	}
+	found, _ := utility.Contains(member.Roles, guild.MuteRole.String)
 	if !found {
 		return UnmutedError{
 			Username:      user.Username,
@@ -44,11 +42,12 @@ func (bot *Bot) Unmute(session *discordgo.Session, message *discordgo.MessageCre
 		if strings.Contains(err.Error(), "HTTP 403 Forbidden") {
 			return fmt.Errorf("Make sure the bot has Manage Roles Permission in Discord!")
 		} else {
-			return UserNotFoundError{}
+			return UserNotFoundError
 		}
 	}
-	m := guild.Get(user.ID)
-	m.MuteExpires.Valid = false
+	guild.Members.Apply(user.ID, func(member *structures.Member) {
+		member.MuteExpires.Valid = false
+	})
 	if args["Reason"] == "" {
 		session.ChannelMessageSendEmbed(message.ChannelID, bot.Embed("Success!", fmt.Sprintf("Successfully unmuted %s#%s!", user.Username, user.Discriminator), nil))
 	} else {

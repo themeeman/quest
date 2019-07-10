@@ -12,6 +12,7 @@ func (bot *Bot) TestLog(session *discordgo.Session, message *discordgo.MessageCr
 		return nil
 	}
 	guild := bot.Guilds.Get(utility.MustGetGuildID(session, message))
+	guild.RLock()
 	guild.Modlog.Log <- &modlog.CaseAddExp{
 		ModeratorID: message.Author.ID,
 		Experience:  100000,
@@ -58,6 +59,7 @@ func (bot *Bot) TestLog(session *discordgo.Session, message *discordgo.MessageCr
 		UserID:      myID,
 		Reason:      "test",
 	}
+	guild.RUnlock()
 	session.MessageReactionAdd(message.ChannelID, message.ID, "☑")
 	return nil
 }

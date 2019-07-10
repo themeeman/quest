@@ -9,13 +9,16 @@ import (
 
 type Modlog struct {
 	ChannelID string
-	Valid     bool
-	Log       chan Case
-	Quit      chan struct{}
+	isLogging bool
+	log       chan Case
 }
 
-func (m *Modlog) Scan(value interface{}) error {
-	if m == nil {
+func (modlog Modlog) IsLogging() bool {
+	return modlog.isLogging
+}
+
+func (modlog *Modlog) Scan(value interface{}) error {
+	if modlog == nil {
 		return nil
 	}
 	null := sql.NullString{}
@@ -23,48 +26,44 @@ func (m *Modlog) Scan(value interface{}) error {
 	if err != nil {
 		return err
 	}
-	m.ChannelID = null.String
-	m.Valid = null.Valid
-	if m.Valid {
-		m.Log = make(chan Case)
-		m.Quit = make(chan struct{})
+	modlog.ChannelID = null.String
+	modlog.isLogging = null.Valid
+	if modlog.isLogging {
+		modlog.log = make(chan Case)
 	}
 	return nil
 }
 
-func (m Modlog) Value() (driver.Value, error) {
+func (modlog Modlog) Value() (driver.Value, error) {
 	null := sql.NullString{
-		String: m.ChannelID,
-		Valid:  m.Valid,
+		String: modlog.ChannelID,
+		Valid:  modlog.isLogging,
 	}
 	return null.Value()
 }
 
-func StartLogging(session *discordgo.Session, modlog Modlog, cases *Cases) {
+func (modlog *Modlog) StartLogging(session *discordgo.Session, cases *Cases) {
+	modlog.isLogging = true
 	for {
-		select {
-		case <-modlog.Quit:
-			return
-		case c := <-modlog.Log:
-			fmt.Println(c)
-			cases.Mutex.Lock()
-			emb := c.Embed(session)
-			emb.Title = fmt.Sprintf("Case %d | ", len(cases.Cases)+1) + emb.Title
-			message, err := session.ChannelMessageSendEmbed(modlog.ChannelID, emb)
-			cm := CaseMessage{
+		c := <-modlog.log
+		cases.Mutex.Lock()
+		emb := c.Embed(session)
+		emb.Title = fmt.Sprintf("Case %d | ", len(cases.Cases)+1) + emb.Title
+		message, err := session.ChannelMessageSendEmbed(modlog.ChannelID, emb)
+		if err == nil {
+			cases.Cases = append(cases.Cases, &CaseMessage{
 				Message: message.ID,
 				Case:    c,
-			}
-			if err == nil {
-				cases.Cases = append(cases.Cases, &cm)
-			} else {
-				fmt.Println(err)
-			}
-			data, _ := cm.MarshalJSON()
-			fmt.Println(string(data))
-			cm = CaseMessage{}
-			fmt.Println(cm.UnmarshalJSON(data), cm.Case)
-			cases.Mutex.Unlock()
+			})
+		} else {
+			fmt.Println(err)
 		}
+		cases.Mutex.Unlock()
+	}
+}
+
+func (modlog Modlog) Log(c Case) {
+	if modlog.isLogging {
+		modlog.log <- c
 	}
 }

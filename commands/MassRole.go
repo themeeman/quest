@@ -7,14 +7,16 @@ import (
 
 func (bot *Bot) MassRole(session *discordgo.Session, message *discordgo.MessageCreate, args map[string]string) error {
 	c, _ := session.Channel(message.ChannelID)
-	guild := bot.Guilds.Get(c.GuildID)
 	var role string
 	if args["Role"] == "" {
+		guild := bot.Guilds.Get(c.GuildID)
+		guild.RLock()
 		if !guild.Autorole.Valid {
 			return fmt.Errorf("An Autorole is not configured for the server. Use q:set Autorole to configure one.")
 		} else {
 			role = guild.Autorole.String
 		}
+		guild.RUnlock()
 	} else if len(args["Role"]) > 18 {
 		role = message.MentionRoles[0]
 	} else {

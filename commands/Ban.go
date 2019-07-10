@@ -13,12 +13,12 @@ func (bot *Bot) Ban(session *discordgo.Session, message *discordgo.MessageCreate
 		var err error
 		user, err = session.User(args["User"])
 		if err != nil {
-			return UserNotFoundError{}
+			return UserNotFoundError
 		}
 	} else if len(message.Mentions) > 0 {
 		user = message.Mentions[0]
 	} else {
-		return UserNotFoundError{}
+		return UserNotFoundError
 	}
 	var err error
 	if args["Reason"] == "" {

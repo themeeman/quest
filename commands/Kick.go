@@ -16,7 +16,7 @@ func (bot *Bot) Kick(session *discordgo.Session, message *discordgo.MessageCreat
 	} else if len(message.Mentions) > 0 {
 		id = message.Mentions[0].ID
 	} else {
-		return UserNotFoundError{}
+		return UserNotFoundError
 	}
 	var err error
 	if args["Reason"] == "" {
