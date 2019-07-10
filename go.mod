@@ -6,6 +6,7 @@ require (
 	github.com/go-sql-driver/mysql v1.4.0
 	github.com/jmoiron/sqlx v1.2.0
 	github.com/pkg/errors v0.8.1
+	github.com/stretchr/testify v1.3.0 // indirect
 	github.com/tomvanwoow/disgone v1.0.0
 	golang.org/x/tools v0.0.0-20190220180646-550322b34f0c // indirect
 )
